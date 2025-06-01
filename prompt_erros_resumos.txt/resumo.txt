@@ -1,0 +1,37 @@
+# Resumo das Implementações e Próximos Passos
+
+## ✅ Implementações Realizadas
+
+- **Multi-tenant (Isolamento por Cliente):**
+  - Adição do campo `tenant_id` nas principais tabelas do banco (obras, fornecedores, despesas, notas fiscais) via migração Supabase MCP.
+  - Políticas de RLS (Row Level Security) configuradas para garantir que cada cliente só veja seus próprios dados.
+  - Atualização dos serviços do backend para filtrar e preencher o `tenant_id` em todas as operações.
+  - Contexto de autenticação atualizado para expor o `tenant_id` globalmente.
+
+- **Frontend Multi-tenant:**
+  - Criação do hook `useObras` para gerenciamento de obras do tenant logado (listar, criar, editar, deletar).
+  - Páginas de obras:
+    - Listagem (`admin/obras/index.tsx`)
+    - Cadastro (`admin/obras/new.tsx`)
+    - Edição (`admin/obras/[id]/edit.tsx`)
+  - Criação do hook `useFornecedoresPJ` para fornecedores PJ do tenant logado.
+
+## 🛣️ Próximos Passos
+
+1. **Fornecedores PJ:**
+   - Criar páginas de listagem, cadastro e edição para fornecedores PJ.
+2. **Fornecedores PF:**
+   - Criar hook customizado e páginas de listagem, cadastro e edição.
+3. **Despesas:**
+   - Criar hook customizado e páginas de listagem, cadastro e edição.
+4. **Notas Fiscais:**
+   - Criar hook customizado e páginas de listagem, cadastro e edição.
+5. **Aprimorar feedbacks de UI e tratamento de erros em todas as páginas.**
+6. **Garantir proteção de rotas e permissões conforme regras do projeto.**
+7. **Testar todo o fluxo multi-tenant e ajustar conforme necessário.**
+
+---
+
+**Obs:**
+- Todo o código segue as regras de segurança, escalabilidade e boas práticas do projeto.
+- O próximo chat pode continuar a partir deste resumo para manter o contexto evolutivo do sistema. 

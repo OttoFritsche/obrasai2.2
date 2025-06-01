@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode colors - mais suaves e modernas */
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+
+    --primary: 220.9 39.3% 11%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 71.4% 4.1%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar light mode - cores suaves */
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 224 71.4% 4.1%;
+    --sidebar-primary: 220.9 39.3% 11%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 220 14.3% 95.9%;
+    --sidebar-accent-foreground: 220.9 39.3% 11%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 224 71.4% 4.1%;
+
+    /* Cores especiais light mode */
+    --gradient-start: 220 100% 97%;
+    --gradient-end: 220 95% 92%;
+    --card-hover: 220 20% 97%;
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+  }
+
+  .dark {
+    /* Dark mode colors - mais suaves e elegantes */
+    --background: 224 71% 4%;
+    --foreground: 210 20% 98%;
+
+    --card: 224 71% 4%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 210 20% 98%;
+    --primary-foreground: 220.9 39.3% 11%;
+
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 216 12.2% 83.9%;
+
+    /* Sidebar dark mode - cores suaves */
+    --sidebar-background: 224 71% 4%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 210 20% 98%;
+    --sidebar-primary-foreground: 220.9 39.3% 11%;
+    --sidebar-accent: 215 27.9% 16.9%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 215 27.9% 16.9%;
+    --sidebar-ring: 216 12.2% 83.9%;
+
+    /* Cores especiais dark mode */
+    --gradient-start: 224 71% 6%;
+    --gradient-end: 224 71% 10%;
+    --card-hover: 224 71% 8%;
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Nunito Sans', system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/30;
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 hover:bg-muted-foreground/50;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+  }
+
+  /* Animações suaves */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Gradientes e efeitos */
+  .gradient-bg {
+    background: linear-gradient(135deg, hsl(var(--gradient-start)) 0%, hsl(var(--gradient-end)) 100%);
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-md bg-background/50 border border-border/50;
+  }
+
+  .card-hover-effect {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  /* Estilos para métricas */
+  .metric-card {
+    @apply rounded-xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-[hsl(var(--card-hover))];
+  }
+
+  .metric-icon {
+    @apply h-12 w-12 rounded-lg bg-primary/10 p-2.5 text-primary;
+  }
+
+  /* Efeitos de luz */
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(var(--primary), 0.1);
+  }
+
+  .dark .glow-effect {
+    box-shadow: 0 0 30px rgba(var(--primary), 0.2);
+  }
+}
