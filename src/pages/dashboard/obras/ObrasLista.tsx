@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
-import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign } from "lucide-react";
+import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign, Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ import {
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { obrasApi } from "@/services/api";
 import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { useObras } from "@/hooks/useObras";
 
 type Obra = {
   id: string;
@@ -47,17 +48,13 @@ const ObrasLista = () => {
   const navigate = useNavigate();
   const [obraToDelete, setObraToDelete] = useState<string | null>(null);
 
-  const { data: obras, isLoading, isError, refetch } = useQuery({
-    queryKey: ["obras"],
-    queryFn: obrasApi.getAll,
-  });
+  const { obras, isLoading, error: isError, refetch, deleteObra } = useObras();
 
   const handleDelete = async () => {
     if (!obraToDelete) return;
 
     try {
-      await obrasApi.delete(obraToDelete);
-      refetch();
+      await deleteObra.mutateAsync(obraToDelete);
       setObraToDelete(null);
     } catch (error) {
       console.error("Error deleting obra:", error);
@@ -105,12 +102,12 @@ const ObrasLista = () => {
       accessorKey: "orcamento",
       header: () => (
         <div className="flex items-center gap-1">
-          <DollarSign className="h-4 w-4" />
+          <DollarSign className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
           {t("obras.budget")}
         </div>
       ),
       cell: ({ row }) => (
-        <div className="font-medium text-green-600 dark:text-green-500">
+        <div className="font-medium text-emerald-600 dark:text-emerald-400">
           {formatCurrencyBR(row.original.orcamento)}
         </div>
       ),
@@ -119,14 +116,14 @@ const ObrasLista = () => {
       accessorKey: "data_inicio",
       header: () => (
         <div className="flex items-center gap-1">
-          <Calendar className="h-4 w-4" />
+          <Calendar className="h-4 w-4 text-blue-500 dark:text-blue-400" />
           Período
         </div>
       ),
       cell: ({ row }) => (
         <div className="text-sm">
-          <div>Início: {formatDateBR(row.original.data_inicio)}</div>
-          <div className="text-muted-foreground">Fim: {formatDateBR(row.original.data_prevista_termino)}</div>
+          <div className="text-slate-700 dark:text-slate-300">Início: {formatDateBR(row.original.data_inicio)}</div>
+          <div className="text-slate-500 dark:text-slate-400">Fim: {formatDateBR(row.original.data_prevista_termino)}</div>
         </div>
       ),
     },
@@ -135,8 +132,14 @@ const ObrasLista = () => {
       header: "Status",
       cell: ({ row }) => {
         const status = getObraStatus(row.original);
+        const statusColors = {
+          "Não iniciada": "bg-slate-100 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600",
+          "Planejada": "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-600",
+          "Em andamento": "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-600",
+          "Atrasada": "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-600"
+        };
         return (
-          <Badge variant={status.color as any}>
+          <Badge className={`${statusColors[status.label as keyof typeof statusColors] || statusColors["Não iniciada"]}`}>
             {status.label}
           </Badge>
         );
@@ -154,7 +157,7 @@ const ObrasLista = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => navigate(`/dashboard/obras/${row.original.id}`)}
-                  className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500 transition-colors"
+                  className="h-8 w-8 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
                 >
                   <Eye className="h-4 w-4" />
                 </Button>
@@ -172,7 +175,7 @@ const ObrasLista = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => navigate(`/dashboard/obras/${row.original.id}/editar`)}
-                  className="h-8 w-8 hover:bg-yellow-500/10 hover:text-yellow-500 transition-colors"
+                  className="h-8 w-8 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -189,8 +192,26 @@ const ObrasLista = () => {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => navigate(`/dashboard/orcamentos/novo?obra_id=${row.original.id}&return=/dashboard/obras`)}
+                  className="h-8 w-8 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                >
+                  <Calculator className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Criar Orçamento IA</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setObraToDelete(row.original.id)}
-                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                  className="h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -266,7 +287,17 @@ const ObrasLista = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex items-center gap-3"
           >
+            <Button 
+              onClick={() => navigate('/dashboard/orcamentos/novo')}
+              variant="outline"
+              className="border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+            >
+              <Calculator className="h-4 w-4 mr-2" />
+              Orçamento IA
+            </Button>
+            
             <Button asChild className={cn(
               "bg-gradient-to-r from-purple-500 to-purple-600",
               "hover:from-purple-600 hover:to-purple-700",
@@ -288,63 +319,63 @@ const ObrasLista = () => {
           transition={{ delay: 0.3 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-4"
         >
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Total de Obras
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{obras?.length || 0}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-2xl font-bold text-slate-700 dark:text-slate-200">{obras?.length || 0}</div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 Cadastradas no sistema
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">
                 Em Andamento
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-500">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {obras?.filter(o => getObraStatus(o).label === "Em andamento").length || 0}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 Obras ativas
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
                 Orçamento Total
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-500">
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCurrencyBR(obras?.reduce((sum, o) => sum + o.orcamento, 0) || 0)}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
                 Valor investido
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/20 dark:to-rose-800/20 border-rose-200 dark:border-rose-700 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-sm font-medium text-rose-700 dark:text-rose-300">
                 Obras Atrasadas
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-500">
+              <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">
                 {obras?.filter(o => getObraStatus(o).label === "Atrasada").length || 0}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-rose-600 dark:text-rose-400 mt-1">
                 Requerem atenção
               </p>
             </CardContent>
@@ -357,7 +388,7 @@ const ObrasLista = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+          <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
             <CardContent className="p-6">
               <DataTable
                 columns={columns}

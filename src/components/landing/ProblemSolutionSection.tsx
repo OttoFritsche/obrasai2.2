@@ -24,33 +24,31 @@ const ProblemCard = ({ title, description, icon: Icon, stat, index, color }: Pro
       onMouseLeave={() => setIsHovered(false)}
       className="relative h-full"
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500`} />
-      
-      <div className="relative h-full bg-slate-800/50 backdrop-blur-sm border border-red-500/30 rounded-2xl p-8 hover:border-red-500/50 transition-all duration-300 group">
+      <div className="relative h-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 hover:shadow-lg transition-all duration-300 group">
         {/* Icon container */}
         <motion.div
-          animate={{ scale: isHovered ? 1.1 : 1 }}
+          animate={{ scale: isHovered ? 1.05 : 1 }}
           transition={{ duration: 0.3 }}
-          className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${color} mb-6`}
+          className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${color} mb-6`}
         >
-          <Icon className="w-8 h-8 text-white" />
+          <Icon className="w-8 h-8 text-red-600 dark:text-red-400" />
         </motion.div>
         
         {/* Badge */}
         <div className="mb-4">
-          <span className="text-sm font-semibold px-3 py-1 bg-red-500/20 text-red-300 rounded-full border border-red-500/30">
+          <span className="text-sm font-semibold px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full border border-red-200 dark:border-red-800">
             {stat}
           </span>
         </div>
         
         {/* Content */}
-        <h3 className="text-2xl font-bold text-white mb-4">{title}</h3>
-        <p className="text-gray-400 leading-relaxed">{description}</p>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">{title}</h3>
+        <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{description}</p>
         
         {/* Hover indicator */}
         <motion.div
           animate={{ x: isHovered ? 5 : 0 }}
-          className="absolute bottom-8 right-8 text-red-400"
+          className="absolute bottom-8 right-8 text-red-500 dark:text-red-400"
         >
           <AlertTriangle className="w-5 h-5" />
         </motion.div>
@@ -81,33 +79,31 @@ const SolutionCard = ({ title, description, icon: Icon, stat, index, color }: So
       onMouseLeave={() => setIsHovered(false)}
       className="relative h-full"
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500`} />
-      
-      <div className="relative h-full bg-slate-800/50 backdrop-blur-sm border border-construction-accent/30 rounded-2xl p-8 hover:border-construction-accent/50 transition-all duration-300 group">
+      <div className="relative h-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 hover:shadow-lg transition-all duration-300 group">
         {/* Icon container */}
         <motion.div
-          animate={{ scale: isHovered ? 1.1 : 1 }}
+          animate={{ scale: isHovered ? 1.05 : 1 }}
           transition={{ duration: 0.3 }}
-          className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${color} mb-6`}
+          className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${color} mb-6`}
         >
-          <Icon className="w-8 h-8 text-white" />
+          <Icon className="w-8 h-8 text-green-600 dark:text-green-400" />
         </motion.div>
         
         {/* Badge */}
         <div className="mb-4">
-          <span className="text-sm font-semibold px-3 py-1 bg-construction-accent/20 text-construction-accent rounded-full border border-construction-accent/30">
+          <span className="text-sm font-semibold px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full border border-green-200 dark:border-green-800">
             {stat}
           </span>
         </div>
         
         {/* Content */}
-        <h3 className="text-2xl font-bold text-white mb-4">{title}</h3>
-        <p className="text-gray-400 leading-relaxed">{description}</p>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">{title}</h3>
+        <p className="text-slate-600 dark:text-slate-300 leading-relaxed">{description}</p>
         
         {/* Hover indicator */}
         <motion.div
           animate={{ x: isHovered ? 5 : 0 }}
-          className="absolute bottom-8 right-8 text-construction-accent"
+          className="absolute bottom-8 right-8 text-green-600 dark:text-green-400"
         >
           <CheckCircle className="w-5 h-5" />
         </motion.div>
@@ -122,56 +118,55 @@ export const ProblemSolutionSection = () => {
       title: "Estouros de Orçamento",
       description: "Projetos que ultrapassam o orçamento previsto, gerando prejuízos e comprometendo a viabilidade financeira dos empreendimentos.",
       icon: DollarSign,
-      stat: "+35% em média",
-      color: "from-red-500 to-red-600"
+      stat: "Problema comum",
+      color: "from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30"
     },
     {
       title: "Atrasos no Cronograma", 
       description: "Entregas que não cumprem os prazos estabelecidos, levando a multas contratuais e insatisfação dos clientes.",
       icon: Clock,
-      stat: "60% dos projetos",
-      color: "from-orange-500 to-red-500"
+      stat: "Desafio recorrente",
+      color: "from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30"
     },
     {
       title: "Falhas de Planejamento",
       description: "Falta de visibilidade sobre riscos potenciais, levando a decisões reativas ao invés de preventivas.",
       icon: AlertTriangle,
-      stat: "3x mais custos",
-      color: "from-yellow-500 to-orange-500"
+      stat: "Custos elevados",
+      color: "from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30"
     }
   ];
 
   const solutions = [
     {
       title: "Previsão Assistida por IA",
-      description: "Algoritmos de Machine Learning que aprendem com dados históricos de milhares de obras para prever custos com precisão cirúrgica.",
+      description: "Algoritmos de Machine Learning que analisam dados de obras para prever custos com base em normas técnicas e experiência do setor.",
       icon: TrendingUp,
-      stat: "Até 98% de precisão",
-      color: "from-construction-accent to-yellow-500"
+      stat: "IA Integrada",
+      color: "from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30"
     },
     {
       title: "Otimização de Recursos",
       description: "Recomendações inteligentes para alocação eficiente de mão de obra e materiais, evitando gargalos e desperdícios.",
       icon: Lightbulb,
-      stat: "Redução de 40% custos",
-      color: "from-blue-500 to-cyan-500"
+      stat: "Otimização projetada",
+      color: "from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30"
     },
     {
       title: "Análise Preditiva de Riscos",
-      description: "Identificação precoce de fatores de risco baseada em padrões complexos detectados pela nossa IA avançada.",
+      description: "Identificação precoce de fatores de risco baseada em padrões detectados pela nossa IA e conhecimento técnico.",
       icon: Shield,
-      stat: "Antecipa 85% dos riscos",
-      color: "from-green-500 to-emerald-500"
+      stat: "Prevenção ativa",
+      color: "from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30"
     }
   ];
 
   return (
-    <section className="py-24 bg-gradient-to-b from-slate-900 to-slate-800 relative overflow-hidden">
-      {/* Background effects */}
+    <section className="py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 relative overflow-hidden">
+      {/* Background sutil igual à hero */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-red-500/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-construction-accent/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-5" />
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-[0.02] dark:opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-orange-50/20 dark:from-blue-950/20 dark:via-transparent dark:to-orange-950/10" />
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
@@ -189,124 +184,26 @@ export const ProblemSolutionSection = () => {
               whileInView={{ scale: 1 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 bg-red-500/20 text-red-400 px-4 py-2 rounded-full mb-4"
+              className="inline-flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-2 rounded-full mb-4 border border-red-200 dark:border-red-800"
             >
               <AlertTriangle className="w-5 h-5" />
               <span className="font-semibold">Desafios Reais do Mercado</span>
             </motion.div>
             
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Os Problemas que <span className="text-red-400">Custam Milhões</span>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+              Os Problemas que <span className="bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">Custam Caro</span>
             </h2>
             
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Construtores e gerentes de projeto enfrentam diariamente desafios que podem 
-              comprometer completamente o sucesso de seus empreendimentos
+            <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+              A construção civil enfrenta desafios complexos que podem comprometer projetos. 
+              Identificamos os principais problemas e desenvolvemos soluções baseadas em tecnologia.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+          <div className="grid lg:grid-cols-3 gap-8 mb-20">
             {problems.map((problem, index) => (
               <ProblemCard key={index} {...problem} index={index} />
             ))}
-          </div>
-        </motion.div>
-
-        {/* Transformation Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="max-w-5xl mx-auto">
-            <div className="relative bg-slate-800/30 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-gray-700/50">
-              {/* Header badge */}
-              <motion.div
-                initial={{ y: -20, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                viewport={{ once: true }}
-                className="absolute -top-6 left-1/2 transform -translate-x-1/2"
-              >
-                <div className="bg-gradient-to-r from-construction-accent to-orange-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-xl">
-                  Transformação Comprovada
-                </div>
-              </motion.div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8">
-                {/* Before */}
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
-                  viewport={{ once: true }}
-                >
-                  <div className="flex items-center gap-3 mb-6">
-                    <X className="w-8 h-8 text-red-500" />
-                    <h3 className="text-2xl font-bold text-red-400">Gestão Tradicional</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {[
-                      "Projetos com 35% de estouro em média",
-                      "60% dos projetos com atrasos significativos", 
-                      "Riscos identificados quando já é tarde demais",
-                      "Decisões baseadas em intuição e experiência",
-                      "Controle manual e planilhas desatualizadas"
-                    ].map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + idx * 0.1, duration: 0.5 }}
-                        viewport={{ once: true }}
-                        className="flex items-start gap-3"
-                      >
-                        <X className="w-5 h-5 text-red-500 mt-1 flex-shrink-0" />
-                        <span className="text-gray-300">{item}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* After */}
-                <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
-                  viewport={{ once: true }}
-                >
-                  <div className="flex items-center gap-3 mb-6">
-                    <CheckCircle className="w-8 h-8 text-construction-accent" />
-                    <h3 className="text-2xl font-bold text-construction-accent">Com ObrasAI</h3>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {[
-                      "Redução de 40% nos custos operacionais",
-                      "94% das obras entregues no prazo",
-                      "85% dos riscos antecipados e mitigados",
-                      "Decisões baseadas em dados e IA",
-                      "Controle em tempo real e automático"
-                    ].map((item, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + idx * 0.1, duration: 0.5 }}
-                        viewport={{ once: true }}
-                        className="flex items-start gap-3"
-                      >
-                        <CheckCircle className="w-5 h-5 text-construction-accent mt-1 flex-shrink-0" />
-                        <span className="text-gray-300">{item}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
-            </div>
           </div>
         </motion.div>
 
@@ -314,56 +211,36 @@ export const ProblemSolutionSection = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
           <div className="text-center mb-16">
             <motion.div
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 bg-construction-accent/20 text-construction-accent px-4 py-2 rounded-full mb-4"
+              className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-4 py-2 rounded-full mb-4 border border-green-200 dark:border-green-800"
             >
-              <Lightbulb className="w-5 h-5" />
+              <CheckCircle className="w-5 h-5" />
               <span className="font-semibold">Soluções Inteligentes</span>
             </motion.div>
             
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              A <span className="bg-gradient-to-r from-construction-accent to-orange-400 bg-clip-text text-transparent">
-                Revolução da IA
-              </span> na Construção
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+              Nossa <span className="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">Abordagem</span> Tecnológica
             </h2>
             
-            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Nossa plataforma utiliza algoritmos avançados de inteligência artificial para 
-              transformar completamente a forma como você gerencia seus projetos
+            <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+              Desenvolvemos ferramentas específicas para resolver cada problema identificado, 
+              usando inteligência artificial e conhecimento técnico especializado.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+          <div className="grid lg:grid-cols-3 gap-8">
             {solutions.map((solution, index) => (
               <SolutionCard key={index} {...solution} index={index} />
             ))}
           </div>
-          
-          {/* Bottom CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mt-16"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-construction-accent to-orange-500 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-construction-accent/50 transition-all duration-300 group"
-            >
-              Ver Como Funciona na Prática
-              <ArrowRight className="inline-block ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </motion.button>
-          </motion.div>
         </motion.div>
       </div>
     </section>

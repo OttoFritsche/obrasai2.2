@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export type ChatMessage = {
@@ -14,7 +13,15 @@ export type AIInsight = {
   id: string;
   obra_id: string;
   insight_type: string;
-  insight_data: any;
+  insight_data: {
+    detalhe?: string;
+    recomendacao?: string;
+    valor_estimado?: number;
+    probabilidade?: number;
+    impacto?: string;
+    prioridade?: 'alta' | 'media' | 'baixa';
+    [key: string]: unknown;
+  };
   summary_ptbr: string | null;
   generated_at: string;
   created_at: string;
@@ -36,7 +43,10 @@ export const aiApi = {
 
     const { data, error } = await query;
     
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
+    
     return data as ChatMessage[];
   },
 
@@ -45,18 +55,36 @@ export const aiApi = {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) throw new Error("User not authenticated");
     
-    const { data, error } = await supabase
-      .from("chat_messages")
-      .insert({
-        usuario_id: userData.user.id,
-        mensagem: message,
-        obra_id: obraId || null
-      })
-      .select("*")
-      .single();
+    // Obter o token de sessão
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("No session found");
     
-    if (error) throw error;
-    return data as ChatMessage;
+    // Gerar um token CSRF simples (em produção, use algo mais robusto)
+    const csrfToken = btoa(Math.random().toString()).substring(0, 16);
+    
+    // Chamar a Edge Function
+    const { data, error } = await supabase.functions.invoke('ai-chat-handler', {
+      body: {
+        message,
+        obra_id: obraId || null,
+        user_id: userData.user.id
+      },
+      headers: {
+        'x-csrf-token': csrfToken
+      }
+    });
+    
+    if (error) {
+      console.error('Erro ao chamar Edge Function:', error);
+      throw new Error(error.message || 'Erro ao processar mensagem com IA');
+    }
+    
+    // A Edge Function retorna o objeto completo da mensagem salva
+    if (data?.result) {
+      return data.result as ChatMessage;
+    } else {
+      throw new Error('Resposta inválida da IA');
+    }
   },
 
   // AI Insights
@@ -71,7 +99,7 @@ export const aiApi = {
     return data as AIInsight[];
   },
 
-  generateInsight: async (obraId: string, insightType: string, data: any = {}) => {
+  generateInsight: async (obraId: string, insightType: string, data: Record<string, unknown> = {}) => {
     // TODO: Na implementação real, este método chamaria uma Edge Function
     // que faria o processamento AI e depois salvaria os resultados
     console.log(`Generating ${insightType} insight for obra ${obraId}`);
@@ -93,5 +121,62 @@ export const aiApi = {
     
     if (error) throw error;
     return insertedData;
+  },
+
+  // Embeddings
+  generateEmbeddings: async (obraId: string, tipoConteudo: 'obra' | 'despesas' | 'fornecedores' | 'todos' = 'todos') => {
+    const { data, error } = await supabase.functions.invoke('gerar-embeddings-obra', {
+      body: {
+        obra_id: obraId,
+        tipo_conteudo: tipoConteudo
+      }
+    });
+    
+    if (error) {
+      console.error('Erro ao gerar embeddings:', error);
+      throw new Error(error.message || 'Erro ao gerar embeddings');
+    }
+    
+    return data;
+  },
+
+  // Buscar conhecimento semântico
+  searchKnowledge: async (obraId: string, query: string) => {
+    // Este método seria usado internamente pela Edge Function de chat
+    // mas pode ser útil para outras funcionalidades futuras
+    const { data, error } = await supabase
+      .rpc('buscar_conhecimento_semantico', {
+        p_obra_id: obraId,
+        p_query_embedding: query, // Seria o embedding da query
+        p_limite: 10,
+        p_threshold: 0.7
+      });
+    
+    if (error) throw error;
+    return data;
+  },
+
+  clearMessages: async (obraId?: string | null): Promise<void> => {
+    let query = supabase
+      .from("chat_messages")
+      .delete();
+
+    if (obraId) {
+      query = query.eq("obra_id", obraId);
+    } else {
+      query = query.is("obra_id", null);
+    }
+
+    // Adicionar filtro por usuário para segurança
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) throw new Error("User not authenticated");
+    
+    query = query.eq("usuario_id", userData.user.id);
+
+    const { error } = await query;
+    
+    if (error) {
+      throw error;
+    }
   }
 };

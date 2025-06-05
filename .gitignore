@@ -22,4 +22,55 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ✅ Environment and Security Files
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+.env.*
+
+# ✅ Security and Sensitive Files
+*.key
+*.pem
+*.p12
+*.crt
+*.csr
+*.cer
+*.pfx
+credentials.json
+secrets.json
+config/secrets.*
+
+# ✅ Backup and Temporary Files
+*.backup
+*.bak
+*.tmp
+*.temp
+.cache/
+.temp/
+
+# ✅ Security Audit Files
+audit.log
+security-audit.*
+*.audit
+
+# ✅ Database Files (if any)
+*.sqlite
+*.db
+*.sql
+
+# ✅ OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ✅ IDE and Editor Settings
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.sublime-*
+.brackets.json

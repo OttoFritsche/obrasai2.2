@@ -1,4 +1,3 @@
-
 import { AlertCircle, AlertTriangle, TrendingUp, CheckCircle2, Info, Lightbulb, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { formatDateBR } from "@/lib/i18n";
 
 type InsightData = {
-  [key: string]: any;
+  detalhe?: string;
+  recomendacao?: string;
+  valor_estimado?: number;
+  probabilidade?: number;
+  impacto?: string;
+  prioridade?: 'alta' | 'media' | 'baixa';
+  [key: string]: unknown;
 };
 
 type WidgetAnaliseAIProps = {
@@ -45,7 +50,7 @@ const WidgetAnaliseAI = ({
   };
 
   // Determinar a cor do badge baseado no tipo de insight
-  const getBadgeVariant = () => {
+  const getBadgeVariant = (): "default" | "destructive" | "outline" | "secondary" | "warning" | "success" => {
     switch (tipo_insight) {
       case 'RISK_PREDICTION':
         return "warning";
@@ -92,7 +97,7 @@ const WidgetAnaliseAI = ({
             {getIcon()}
             <CardTitle>{titulo}</CardTitle>
           </div>
-          <Badge variant={getBadgeVariant() as any}>
+          <Badge variant={getBadgeVariant()}>
             {getInsightTypeLabel()}
           </Badge>
         </div>

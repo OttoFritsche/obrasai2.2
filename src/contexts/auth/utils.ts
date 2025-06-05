@@ -1,84 +1,117 @@
 import { supabase } from "@/integrations/supabase/client";
 import { UserWithProfile } from "./types";
 
-// Cache simples para dados de perfil
-const profileCache = new Map<string, any>();
+// Cache simples para dados de perfil - usando unknown ao invés de any
+const profileCache = new Map<string, unknown>();
+
+// Função para limpar cache quando necessário
+export const clearProfileCache = (userId?: string) => {
+  if (userId) {
+    profileCache.delete(userId);
+  } else {
+    profileCache.clear();
+  }
+};
 
 // Fetch user profile data with RLS recursion handling
 export const fetchUserProfile = async (userId: string, currentUser: UserWithProfile | null) => {
   // Verificar cache primeiro
   if (profileCache.has(userId)) {
-    return { ...currentUser, profile: profileCache.get(userId) };
+    const cachedProfile = profileCache.get(userId);
+    return { ...currentUser, profile: cachedProfile };
   }
 
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (error) {
-      if (error.code === '42P17') {
-        console.error("RLS recursion detected, using fallback profile data");
-        const fallbackProfile = { id: userId };
-        profileCache.set(userId, fallbackProfile);
-        return currentUser ? { ...currentUser, profile: fallbackProfile } : null;
-      }
-      console.error("Error fetching profile:", error);
-      return currentUser;
-    }
-    
-    if (data) {
-      // Garante que tenant_id está presente no profile
-      const profileWithTenant = { ...data, tenant_id: data.tenant_id };
-      profileCache.set(userId, profileWithTenant); // Atualizar cache
-      if (currentUser) {
-        return { ...currentUser, profile: profileWithTenant };
-      }
-    }
-    
-    return currentUser;
-  } catch (error) {
-    console.error("Error in fetchUserProfile:", error);
-    return currentUser;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    throw error;
   }
+
+  if (data) {
+    // ✅ Garantir que tenant_id seja sempre uma string válida ou null
+    const cleanProfile = {
+      ...data,
+      tenant_id: validateTenantId(data.tenant_id)
+    };
+
+    // Cache do perfil limpo
+    profileCache.set(userId, cleanProfile);
+    
+    return { 
+      ...currentUser, 
+      profile: cleanProfile 
+    };
+  }
+
+  return currentUser;
 };
 
-// Check subscription status with error handling
+// Função auxiliar para validar tenant_id - usando unknown ao invés de any
+export const validateTenantId = (tenantId: unknown): string | null => {
+  // Se for null ou undefined, retorna null
+  if (!tenantId) return null;
+  
+  // Se for string válida, retorna limpa
+  if (typeof tenantId === 'string' && tenantId.trim().length > 0) {
+    return tenantId.trim();
+  }
+  
+  // Se for objeto, tenta converter para string se tiver propriedades válidas
+  if (typeof tenantId === 'object' && tenantId !== null) {
+    // Se for um objeto com id, usa o id
+    if (tenantId.id && typeof tenantId.id === 'string') {
+      return tenantId.id.trim();
+    }
+    
+    // Se for um objeto que pode ser serializado para UUID
+    const str = tenantId.toString();
+    if (str !== '[object Object]' && str.length > 0) {
+      return str.trim();
+    }
+  }
+  
+  // Se for qualquer outro tipo, tenta converter para string
+  if (tenantId.toString && typeof tenantId.toString === 'function') {
+    const str = tenantId.toString();
+    if (str !== '[object Object]' && str.length > 0) {
+      return str.trim();
+    }
+  }
+  
+  // Se nada funcionar, retorna null
+  console.warn('❌ tenant_id inválido:', tenantId);
+  return null;
+};
+
+// Fetch user subscription data
 export const fetchUserSubscription = async (userId: string) => {
   try {
-    if (!userId) return null;
-    
     const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-    
+      .eq('status', 'active')
+      .limit(1);
+
     if (error) {
-      if (error.code === '42P17') {
-        console.error("RLS recursion in subscriptions, returning null");
+      // Se a tabela não existir ou não tiver políticas RLS configuradas
+      if (error.code === 'PGRST301' || error.code === '42P01') {
         return null;
       }
-      console.error("Error checking subscription:", error);
-      return null;
+      
+      throw error;
     }
+
+    // Retornar o primeiro item se existir
+    const subscription = data?.[0] || null;
     
-    if (data && data.length > 0) {
-      const latestSubscription = data[0];
-      return {
-        id: latestSubscription.id,
-        status: latestSubscription.status || 'inactive',
-        product_id: latestSubscription.stripe_product_id,
-        price_id: latestSubscription.stripe_price_id,
-        current_period_end: latestSubscription.current_period_end ? new Date(latestSubscription.current_period_end) : undefined
-      };
-    }
-    
-    return null;
+    return subscription;
   } catch (error) {
-    console.error("Error in fetchUserSubscription:", error);
     return null;
   }
 };
+

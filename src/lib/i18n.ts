@@ -251,7 +251,7 @@ export const ptBR = {
     invalidFormat: "Formato inválido",
     minimumLength: "Mínimo de {0} caracteres",
     maximumLength: "Máximo de {0} caracteres",
-    passwordTooShort: "A senha deve ter pelo menos 6 caracteres",
+    passwordTooShort: "A senha deve ter pelo menos 8 caracteres",
     generalError: "Ocorreu um erro. Por favor, tente novamente.",
     sessionExpired: "Sua sessão expirou. Por favor, faça login novamente.",
     unauthorized: "Não autorizado",
@@ -265,11 +265,11 @@ export const ptBR = {
 // Function to get translation
 export const t = (key: string): string => {
   const keys = key.split('.');
-  let value: any = ptBR;
+  let value: typeof ptBR | string = ptBR;
   
   for (const k of keys) {
-    if (value[k] === undefined) return key;
-    value = value[k];
+    if (typeof value === 'string' || value[k as keyof typeof value] === undefined) return key;
+    value = value[k as keyof typeof value];
   }
   
   return typeof value === 'string' ? value : key;

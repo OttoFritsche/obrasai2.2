@@ -10,7 +10,8 @@ import {
   DollarSign,
   Save,
   Info,
-  Loader2
+  Loader2,
+  Search
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -41,9 +42,12 @@ import {
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { toast } from "sonner";
+import { useCEP } from "@/hooks/useCEP";
+import { useEffect } from "react";
 
 const NovaObra = () => {
   const navigate = useNavigate();
+  const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   
   const form = useForm<ObraFormValues>({
     resolver: zodResolver(obraSchema),
@@ -73,6 +77,30 @@ const NovaObra = () => {
 
   const onSubmit = (values: ObraFormValues) => {
     mutate(values);
+  };
+
+  // Função para buscar endereço automaticamente quando CEP for preenchido
+  const handleCEPChange = async (cep: string) => {
+    // Formatar CEP enquanto digita
+    const cepFormatado = formatarCEP(cep);
+    form.setValue('cep', cepFormatado);
+
+    // Buscar endereço quando CEP estiver completo (8 dígitos)
+    const cepLimpo = cep.replace(/\D/g, '');
+    if (cepLimpo.length === 8) {
+      const dadosCEP = await buscarCEP(cep);
+      
+      if (dadosCEP) {
+        // Preencher automaticamente os campos de endereço
+        form.setValue('endereco', dadosCEP.logradouro || '');
+        form.setValue('cidade', dadosCEP.localidade || '');
+        form.setValue('estado', dadosCEP.uf || '');
+        
+        toast.success("Endereço preenchido automaticamente!");
+      } else if (cepError) {
+        toast.error(cepError);
+      }
+    }
   };
 
   return (
@@ -127,7 +155,7 @@ const NovaObra = () => {
           <Alert className="border-info/50 bg-info/10">
             <Info className="h-4 w-4 text-info" />
             <AlertDescription className="text-sm">
-              Preencha todas as informações da obra com atenção. 
+              <strong>Dica:</strong> Comece preenchendo o CEP para que o endereço seja preenchido automaticamente. 
               Você poderá editar esses dados posteriormente se necessário.
             </AlertDescription>
           </Alert>
@@ -149,42 +177,45 @@ const NovaObra = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Seção: Identificação */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      <div className="h-px flex-1 bg-border" />
-                      Identificação
-                      <div className="h-px flex-1 bg-border" />
-                    </h3>
-                    
-                    <FormField
-                      control={form.control}
-                      name="nome"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome da Obra</FormLabel>
-                          <FormControl>
-                            <Input 
-                              placeholder="Ex: Edifício Residencial Aurora"
-                              {...field}
-                              className="bg-background/50 focus:bg-background transition-colors"
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Nome que identificará a obra no sistema
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Seção: Localização */}
+                  {/* Seção: Localização (CEP primeiro) */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       Localização
                     </h3>
+                    
+                    {/* CEP como primeiro campo */}
+                    <FormField
+                      control={form.control}
+                      name="cep"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            CEP
+                            {isLoadingCEP && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                          </FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input 
+                                placeholder="00000-000"
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  handleCEPChange(e.target.value);
+                                }}
+                                className="bg-background/50 focus:bg-background transition-colors pr-10"
+                                maxLength={9}
+                              />
+                              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Digite o CEP para preenchimento automático do endereço
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
@@ -250,25 +281,37 @@ const NovaObra = () => {
                           </FormItem>
                         )}
                       />
-
-                      <FormField
-                        control={form.control}
-                        name="cep"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>CEP</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="00000-000"
-                                {...field}
-                                className="bg-background/50 focus:bg-background transition-colors"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
                     </div>
+                  </div>
+
+                  {/* Seção: Identificação */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <div className="h-px flex-1 bg-border" />
+                      Identificação
+                      <div className="h-px flex-1 bg-border" />
+                    </h3>
+                    
+                    <FormField
+                      control={form.control}
+                      name="nome"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome da Obra</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Ex: Edifício Residencial Aurora"
+                              {...field}
+                              className="bg-background/50 focus:bg-background transition-colors"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Nome que identificará a obra no sistema
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   {/* Seção: Financeiro e Prazos */}
@@ -293,7 +336,11 @@ const NovaObra = () => {
                                   placeholder="0,00"
                                   step="0.01"
                                   {...field}
-                                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                  onChange={(e) => {
+                                    const value = parseFloat(e.target.value);
+                                    // ✅ Evitar NaN: se for NaN, usar 0
+                                    field.onChange(isNaN(value) ? 0 : value);
+                                  }}
                                   className="pl-9 bg-background/50 focus:bg-background transition-colors"
                                 />
                               </div>

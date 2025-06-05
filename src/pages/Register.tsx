@@ -3,35 +3,29 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { t } from "@/lib/i18n";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { motion } from "framer-motion";
-import { UserPlus } from "lucide-react";
+import Logo from "@/components/ui/Logo";
+import registerBg from "@/assets/images/4d142594-a29e-4e94-bd77-48cf91ebcfac.png";
 
 const Register = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Elementos decorativos de fundo */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-purple-500/10 blur-3xl" />
-      </div>
-
-      {/* Theme Toggle */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 right-6"
-      >
-        <ThemeToggle />
-      </motion.div>
-
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      {/* Imagem de fundo com overlay */}
+      <img
+        src={registerBg}
+        alt="Background ObrasAI"
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{ filter: "blur(0px) brightness(0.6)" }}
+      />
+      <div className="absolute inset-0 bg-black/70 z-10" />
+      
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-20 w-full max-w-md"
       >
-        <Card className="border-border/50 backdrop-blur-md bg-card/95 shadow-2xl">
+        <Card className="border-gray-200 backdrop-blur-md bg-white shadow-2xl">
           <CardHeader className="space-y-1 text-center pb-8">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -39,8 +33,8 @@ const Register = () => {
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-4"
             >
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                <UserPlus className="h-9 w-9 text-white" />
+              <div className="h-16 w-full flex items-center justify-center">
+                <Logo variant="horizontal" width={240} height={64} alt="Logo Obras.AI" />
               </div>
             </motion.div>
             <motion.div
@@ -48,11 +42,8 @@ const Register = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <CardTitle className="text-3xl font-bold">
-                Crie sua conta no{" "}
-                <span className="bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
-                  ObrasAI
-                </span>
+              <CardTitle className="text-3xl font-bold text-gray-800 text-center">
+                Crie sua conta
               </CardTitle>
             </motion.div>
             <motion.div
@@ -60,7 +51,7 @@ const Register = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <CardDescription className="text-muted-foreground">
+              <CardDescription className="text-gray-600">
                 Comece sua jornada de gestão inteligente de obras
               </CardDescription>
             </motion.div>
@@ -82,10 +73,10 @@ const Register = () => {
               className="relative"
             >
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
+                <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
+                <span className="bg-white px-2 text-gray-500">
                   ou registre-se com e-mail
                 </span>
               </div>
@@ -105,12 +96,12 @@ const Register = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
-              className="text-sm text-center text-muted-foreground w-full"
+              className="text-sm text-center text-gray-600 w-full"
             >
               Já tem uma conta?{" "}
               <Link
                 to="/login"
-                className="text-primary hover:text-primary/80 transition-colors font-medium underline-offset-4 hover:underline"
+                className="text-blue-600 hover:text-blue-700 transition-colors font-medium underline-offset-4 hover:underline"
               >
                 Fazer login
               </Link>

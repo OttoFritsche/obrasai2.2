@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, DragEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { 
   FileText, 
@@ -25,8 +25,11 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+import { Constants } from "@/integrations/supabase/types";
 import { notaFiscalSchema, NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
-import { notasFiscaisApi, obrasApi, despesasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
+import { obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
+import { useNotasFiscais } from "@/hooks/useNotasFiscais";
+import { useDespesas } from "@/hooks/useDespesas";
 import { t } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
@@ -52,12 +55,23 @@ import {
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth";
 
 const EnviarNota = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+
+  const tenantId = user?.profile?.tenant_id;
+  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
+
+  // Hook para gerenciar notas fiscais
+  const { createNotaFiscal } = useNotasFiscais();
+
+  // ✅ Hook para gerenciar despesas com validação robusta de tenantId
+  const { despesas } = useDespesas();
 
   const form = useForm<NotaFiscalFormValues>({
     resolver: zodResolver(notaFiscalSchema),
@@ -76,52 +90,60 @@ const EnviarNota = () => {
 
   const selectedObraId = form.watch("obra_id");
 
-  const { data: despesas, isLoading: isLoadingDespesas } = useQuery({
-    queryKey: ["despesas", selectedObraId],
-    queryFn: despesasApi.getAll,
-    enabled: !!selectedObraId,
-  });
+  // ✅ Filtrar despesas por obra selecionada ao invés de fazer nova query
+  const despesasFiltradas = despesas?.filter(despesa => despesa.obra_id === selectedObraId) || [];
 
   const { data: fornecedoresPJ, isLoading: isLoadingPJ } = useQuery({
-    queryKey: ["fornecedores_pj"],
-    queryFn: fornecedoresPJApi.getAll,
+    queryKey: ["fornecedores_pj", validTenantId],
+    queryFn: () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado ou inválido');
+      }
+      return fornecedoresPJApi.getAll(validTenantId);
+    },
+    enabled: !!validTenantId,
   });
 
   const { data: fornecedoresPF, isLoading: isLoadingPF } = useQuery({
-    queryKey: ["fornecedores_pf"],
-    queryFn: fornecedoresPFApi.getAll,
-  });
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: (values: NotaFiscalFormValues) => {
-      const file = values.arquivo as unknown as File;
-      if (!file) {
-        return Promise.reject(new Error("Arquivo não selecionado"));
+    queryKey: ["fornecedores_pf", validTenantId],
+    queryFn: () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado ou inválido');
       }
-      return notasFiscaisApi.create(values, file);
+      return fornecedoresPFApi.getAll(validTenantId);
     },
-    onSuccess: () => {
-      toast.success("Nota fiscal enviada com sucesso!");
-      navigate("/dashboard/notas");
-    },
-    onError: (error) => {
-      toast.error("Erro ao enviar nota fiscal. Tente novamente.");
-      console.error("Error creating nota fiscal:", error);
-    },
+    enabled: !!validTenantId,
   });
 
   const onSubmit = (values: NotaFiscalFormValues) => {
-    mutate(values);
+    if (!selectedFile) {
+      toast.error("Por favor, selecione um arquivo para a nota fiscal.");
+      return;
+    }
+
+    createNotaFiscal.mutate(
+      { notaFiscal: values, file: selectedFile },
+      {
+        onSuccess: () => {
+          toast.success("Nota fiscal enviada com sucesso!");
+          navigate("/dashboard/notas");
+        },
+        onError: (error) => {
+          toast.error("Erro ao enviar nota fiscal. Tente novamente.");
+          console.error("Error creating nota fiscal:", error);
+        },
+      }
+    );
   };
 
-  const isLoading = isLoadingObras || isLoadingDespesas || isLoadingPJ || isLoadingPF;
+  const isLoading = isLoadingObras || isLoadingPJ || isLoadingPF;
 
   const handleFileChange = useCallback((file: File | null) => {
       if (file) {
-          form.setValue("arquivo", file as any, { shouldValidate: true }); 
+          form.setValue("arquivo", file, { shouldValidate: true }); 
           setSelectedFile(file);
       } else {
-          form.setValue("arquivo", null as any, { shouldValidate: true });
+          form.setValue("arquivo", null, { shouldValidate: true });
           setSelectedFile(null);
           if (fileInputRef.current) {
               fileInputRef.current.value = "";
@@ -413,21 +435,19 @@ const EnviarNota = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ""}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === "none" ? null : value)}
                                 disabled={!selectedObraId}
                               >
                                 <SelectTrigger className="bg-background/50 focus:bg-background transition-colors">
                                   <SelectValue placeholder="Selecione a despesa" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="__NONE__">Nenhuma despesa</SelectItem>
-                                  {despesas
-                                    ?.filter(despesa => despesa.obra_id === selectedObraId)
-                                    .map((despesa) => (
-                                      <SelectItem key={despesa.id} value={despesa.id}>
-                                        {despesa.descricao}
-                                      </SelectItem>
-                                    ))}
+                                  <SelectItem value="none">Nenhuma despesa</SelectItem>
+                                  {despesasFiltradas.map((despesa) => (
+                                    <SelectItem key={despesa.id} value={despesa.id}>
+                                      {despesa.descricao}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                             </FormControl>
@@ -456,8 +476,8 @@ const EnviarNota = () => {
                               <Select
                                 value={field.value || ""}
                                 onValueChange={(value) => {
-                                  field.onChange(value === '__NONE__' ? null : value);
-                                  if (value && value !== '__NONE__') {
+                                  field.onChange(value === 'none' ? null : value);
+                                  if (value && value !== 'none') {
                                     form.setValue("fornecedor_pf_id", null);
                                   }
                                 }}
@@ -466,7 +486,7 @@ const EnviarNota = () => {
                                   <SelectValue placeholder="Selecione fornecedor PJ" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="__NONE__">Nenhum</SelectItem>
+                                  <SelectItem value="none">Nenhum</SelectItem>
                                   {fornecedoresPJ?.map((fornecedor) => (
                                     <SelectItem key={fornecedor.id} value={fornecedor.id}>
                                       {fornecedor.razao_social}
@@ -490,8 +510,8 @@ const EnviarNota = () => {
                               <Select
                                 value={field.value || ""}
                                 onValueChange={(value) => {
-                                  field.onChange(value === '__NONE__' ? null : value);
-                                  if (value && value !== '__NONE__') {
+                                  field.onChange(value === 'none' ? null : value);
+                                  if (value && value !== 'none') {
                                     form.setValue("fornecedor_pj_id", null);
                                   }
                                 }}
@@ -500,7 +520,7 @@ const EnviarNota = () => {
                                   <SelectValue placeholder="Selecione fornecedor PF" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="__NONE__">Nenhum</SelectItem>
+                                  <SelectItem value="none">Nenhum</SelectItem>
                                   {fornecedoresPF?.map((fornecedor) => (
                                     <SelectItem key={fornecedor.id} value={fornecedor.id}>
                                       {fornecedor.nome}
@@ -680,13 +700,13 @@ const EnviarNota = () => {
                       type="button"
                       variant="outline"
                       onClick={() => navigate("/dashboard/notas")}
-                      disabled={isPending}
+                      disabled={isLoading}
                     >
                       Cancelar
                     </Button>
                     <Button 
                       type="submit" 
-                      disabled={isPending || !selectedFile}
+                      disabled={isLoading || !selectedFile}
                       className={cn(
                         "min-w-[140px]",
                         "bg-gradient-to-r from-orange-500 to-orange-600",
@@ -695,7 +715,7 @@ const EnviarNota = () => {
                         "transition-all duration-300"
                       )}
                     >
-                      {isPending ? (
+                      {isLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Enviando...

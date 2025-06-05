@@ -1,222 +1,242 @@
-import { motion } from "framer-motion";
+import React from 'react';
+import { motion } from 'framer-motion';
 import { 
-  TrendingDown, 
+  TrendingUp, 
   Clock, 
-  Brain, 
+  DollarSign, 
   Shield, 
-  Users, 
-  BarChart,
-  CheckCircle,
-  ArrowRight
-} from "lucide-react";
-import { useState } from "react";
+  CheckCircle, 
+  Target,
+  Zap,
+  Users,
+  BarChart3
+} from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-interface BenefitCardProps {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  stats: { label: string; value: string }[];
-  color: string;
-  index: number;
-}
-
-const BenefitCard = ({ icon: Icon, title, description, stats, color, index }: BenefitCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      viewport={{ once: true }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative h-full"
-    >
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 blur-xl transition-opacity duration-500`} />
-      
-      <div className="relative h-full bg-slate-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 hover:border-gray-600/50 transition-all duration-300 group">
-        {/* Icon container */}
-        <motion.div
-          animate={{ scale: isHovered ? 1.1 : 1 }}
-          transition={{ duration: 0.3 }}
-          className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${color} mb-6`}
-        >
-          <Icon className="w-8 h-8 text-white" />
-        </motion.div>
-        
-        {/* Content */}
-        <h3 className="text-2xl font-bold text-white mb-3">{title}</h3>
-        <p className="text-gray-400 mb-6 leading-relaxed">{description}</p>
-        
-        {/* Stats */}
-        <div className="space-y-3">
-          {stats.map((stat, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ width: 0 }}
-              whileInView={{ width: "100%" }}
-              transition={{ delay: 0.5 + idx * 0.1, duration: 0.8 }}
-              viewport={{ once: true }}
-              className="flex items-center justify-between py-2 border-b border-gray-700/50"
-            >
-              <span className="text-sm text-gray-500">{stat.label}</span>
-              <span className="text-lg font-bold text-construction-accent">{stat.value}</span>
-            </motion.div>
-          ))}
-        </div>
-        
-        {/* Hover indicator */}
-        <motion.div
-          animate={{ x: isHovered ? 5 : 0 }}
-          className="absolute bottom-8 right-8 text-construction-accent"
-        >
-          <ArrowRight className="w-5 h-5" />
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-};
-
-export const BenefitsSection = () => {
+const BenefitsSection = () => {
   const benefits = [
     {
-      icon: TrendingDown,
-      title: "Redução de Custos",
-      description: "IA analisa padrões e identifica oportunidades de economia em tempo real, otimizando recursos e eliminando desperdícios.",
-      stats: [
-        { label: "Economia média", value: "40%" },
-        { label: "ROI", value: "3 meses" },
-        { label: "Redução desperdícios", value: "65%" }
-      ],
-      color: "from-green-500 to-emerald-600"
+      icon: DollarSign,
+      title: 'Redução de Custos',
+      description: 'Controle preciso de gastos com orçamentos paramétricos baseados na tabela SINAPI oficial.',
+      metric: 'Até 30%',
+      detail: 'Economia projetada',
+      color: 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30'
     },
     {
       icon: Clock,
-      title: "Entregas no Prazo",
-      description: "Previsões precisas de IA antecipam riscos e gargalos, garantindo que suas obras sejam entregues dentro do cronograma.",
-      stats: [
-        { label: "Obras no prazo", value: "94%" },
-        { label: "Antecipação riscos", value: "15 dias" },
-        { label: "Produtividade", value: "+45%" }
-      ],
-      color: "from-blue-500 to-cyan-600"
+      title: 'Otimização de Tempo',
+      description: 'Automatização de processos manuais e relatórios instantâneos para decisões ágeis.',
+      metric: '70%',
+      detail: 'Menos tempo manual',
+      color: 'from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30'
     },
     {
-      icon: Brain,
-      title: "Decisões Inteligentes",
-      description: "Insights baseados em dados reais de milhares de obras, ajudando você a tomar as melhores decisões estratégicas.",
-      stats: [
-        { label: "Precisão previsões", value: "98%" },
-        { label: "Dados analisados", value: "15TB" },
-        { label: "Insights/dia", value: "200+" }
-      ],
-      color: "from-purple-500 to-pink-600"
+      icon: BarChart3,
+      title: 'Visibilidade Total',
+      description: 'Dashboards em tempo real com métricas consolidadas de todas as obras.',
+      metric: '100%',
+      detail: 'Transparência',
+      color: 'from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30'
     },
     {
       icon: Shield,
-      title: "Segurança Total",
-      description: "Proteção de dados com criptografia de ponta, conformidade LGPD e certificações ISO para sua tranquilidade.",
-      stats: [
-        { label: "Uptime", value: "99.9%" },
-        { label: "Certificações", value: "ISO 27001" },
-        { label: "Backup", value: "Tempo real" }
-      ],
-      color: "from-orange-500 to-red-600"
+      title: 'Segurança de Dados',
+      description: 'Isolamento completo entre empresas com Row Level Security nativo do Supabase.',
+      metric: 'RLS',
+      detail: 'Nível enterprise',
+      color: 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30'
     },
     {
-      icon: Users,
-      title: "Gestão de Equipes",
-      description: "Centralize a comunicação, acompanhe a produtividade e gerencie suas equipes com eficiência nunca vista.",
-      stats: [
-        { label: "Comunicação", value: "+85%" },
-        { label: "Conflitos", value: "-70%" },
-        { label: "Satisfação", value: "4.8/5" }
-      ],
-      color: "from-indigo-500 to-blue-600"
+      icon: Target,
+      title: 'Gestão Precisa',
+      description: 'Controle detalhado por 21 etapas de obra e 150+ insumos especializados.',
+      metric: '21',
+      detail: 'Etapas controladas',
+      color: 'from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30'
     },
     {
-      icon: BarChart,
-      title: "Relatórios Avançados",
-      description: "Dashboards customizáveis e relatórios detalhados que transformam dados complexos em insights acionáveis.",
-      stats: [
-        { label: "Tipos relatórios", value: "50+" },
-        { label: "Tempo geração", value: "2 seg" },
-        { label: "Personalização", value: "100%" }
-      ],
-      color: "from-teal-500 to-green-600"
+      icon: Zap,
+      title: 'Implementação Rápida',
+      description: 'Sistema pronto para uso em 24 horas com suporte completo de onboarding.',
+      metric: '24h',
+      detail: 'Para começar',
+      color: 'from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-800/30'
     }
   ];
-  
+
+  const stats = [
+    {
+      icon: Users,
+      number: 'Multi-tenant',
+      label: 'Arquitetura',
+      description: 'Isolamento total de dados'
+    },
+    {
+      icon: Shield,
+      number: 'ISO 27001',
+      label: 'Segurança',
+      description: 'Padrão internacional'
+    },
+    {
+      icon: Clock,
+      number: '99.9%',
+      label: 'Uptime',
+      description: 'Disponibilidade garantida'
+    },
+    {
+      icon: CheckCircle,
+      number: 'SINAPI',
+      label: 'Base oficial',
+      description: 'Preços atualizados'
+    }
+  ];
+
   return (
-    <section className="py-24 bg-gradient-to-b from-slate-800 to-slate-900 relative overflow-hidden">
-      {/* Animated background elements */}
+    <section className="relative py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Background sutil igual à hero */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-construction-accent/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-[0.02] dark:opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-orange-50/20 dark:from-blue-950/20 dark:via-transparent dark:to-orange-950/10" />
       </div>
-      
+
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section header */}
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 bg-construction-accent/20 text-construction-accent px-4 py-2 rounded-full mb-4"
-          >
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-semibold">Benefícios Comprovados</span>
-          </motion.div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Por que as construtoras escolhem o{" "}
-            <span className="bg-gradient-to-r from-construction-accent to-orange-400 bg-clip-text text-transparent">
-              ObrasAI
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 mb-6">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Benefícios
+          </Badge>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <span className="text-slate-900 dark:text-white">Resultados </span>
+            <span className="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+              Mensuráveis
             </span>
+            <span className="text-slate-900 dark:text-white"> para sua Empresa</span>
           </h2>
-          
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Não é apenas um software. É uma revolução na forma como você gerencia suas obras, 
-            com resultados comprovados desde o primeiro mês.
+
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            Nossa plataforma foi desenvolvida para gerar resultados concretos e mensuráveis 
+            na gestão das suas obras e controle de custos.
           </p>
         </motion.div>
-        
-        {/* Benefits grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {benefits.map((benefit, index) => (
-            <BenefitCard key={index} {...benefit} index={index} />
-          ))}
-        </div>
-        
-        {/* Bottom CTA */}
+
+        {/* Benefits Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          viewport={{ once: true }}
+          className="grid lg:grid-cols-3 gap-8 mb-16"
+        >
+          {benefits.map((benefit, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -5 }}
+              className="group"
+            >
+              <Card className="h-full p-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300">
+                {/* Icon */}
+                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${benefit.color} mb-6`}>
+                  <benefit.icon className="h-8 w-8 text-slate-600 dark:text-slate-300" />
+                </div>
+
+                {/* Metric highlight */}
+                <div className="mb-4">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                    {benefit.metric}
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400">{benefit.detail}</div>
+                </div>
+
+                {/* Content */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    {benefit.description}
+                  </p>
+                </div>
+
+                {/* Status implementado */}
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Disponível</span>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+        >
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <Card className="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <stat.icon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-2">
+                  {stat.number}
+                </div>
+                <div className="text-slate-900 dark:text-white font-semibold mb-1">{stat.label}</div>
+                <div className="text-slate-600 dark:text-slate-400 text-sm">{stat.description}</div>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
           viewport={{ once: true }}
           className="text-center mt-16"
         >
-          <p className="text-gray-400 mb-6">
-            Junte-se a mais de 300 construtoras que já transformaram sua gestão
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-construction-accent to-orange-500 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-construction-accent/50 transition-all duration-300"
-          >
-            Ver Casos de Sucesso
-            <ArrowRight className="inline-block ml-2 w-5 h-5" />
-          </motion.button>
+          <Card className="inline-block p-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+              Pronto para transformar sua gestão de obras?
+            </h3>
+            <p className="text-slate-600 dark:text-slate-300 mb-6 max-w-md">
+              Converse com nossa IA e descubra como podemos otimizar 
+              seus processos de construção civil.
+            </p>
+            <div className="inline-flex items-center gap-2 text-orange-600 dark:text-orange-400 text-sm font-medium">
+              <CheckCircle className="h-4 w-4" />
+              <span>Sistema em operação • Resultados comprovados</span>
+            </div>
+          </Card>
         </motion.div>
       </div>
     </section>
   );
-}; 
+};
+
+export { BenefitsSection }; 

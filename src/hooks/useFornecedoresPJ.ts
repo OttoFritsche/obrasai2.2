@@ -12,6 +12,9 @@ export const useFornecedoresPJ = () => {
   const tenantId = user?.profile?.tenant_id;
   const queryClient = useQueryClient();
 
+  // Validação do tenantId para evitar [object Object]
+  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
+
   // Busca todos os fornecedores PJ do tenant
   const {
     data: fornecedoresPJ,
@@ -19,27 +22,46 @@ export const useFornecedoresPJ = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['fornecedoresPJ', tenantId],
-    queryFn: () => fornecedoresPJApi.getAll(tenantId!),
-    enabled: !!tenantId,
+    queryKey: ['fornecedores-pj', validTenantId],
+    queryFn: () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado ou inválido');
+      }
+      return fornecedoresPJApi.getAll(validTenantId);
+    },
+    enabled: !!validTenantId,
+    retry: (failureCount, error) => {
+      return failureCount < 1; // Máximo 1 tentativa
+    },
   });
 
   // Criação de fornecedor PJ
   const createFornecedorPJ = useMutation({
-    mutationFn: (fornecedor: FornecedorPJFormValues) => fornecedoresPJApi.create(fornecedor, tenantId!),
-    onSuccess: () => queryClient.invalidateQueries(['fornecedoresPJ', tenantId]),
+    mutationFn: (fornecedor: FornecedorPJFormValues) => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPJApi.create(fornecedor, validTenantId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['fornecedores-pj', validTenantId]);
+    },
   });
 
   // Edição de fornecedor PJ
   const updateFornecedorPJ = useMutation({
     mutationFn: ({ id, fornecedor }: { id: string; fornecedor: Partial<FornecedorPJFormValues> }) => fornecedoresPJApi.update(id, fornecedor),
-    onSuccess: () => queryClient.invalidateQueries(['fornecedoresPJ', tenantId]),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['fornecedores-pj', validTenantId]);
+    },
   });
 
   // Deleção de fornecedor PJ
   const deleteFornecedorPJ = useMutation({
     mutationFn: (id: string) => fornecedoresPJApi.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['fornecedoresPJ', tenantId]),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['fornecedores-pj', validTenantId]);
+    },
   });
 
   return {
@@ -50,5 +72,8 @@ export const useFornecedoresPJ = () => {
     createFornecedorPJ,
     updateFornecedorPJ,
     deleteFornecedorPJ,
+    // Informações úteis para debug
+    tenantId: validTenantId,
+    hasValidTenant: !!validTenantId,
   };
 }; 

@@ -1,4 +1,5 @@
-import * as React from "react"
+import { createContext, useContext, useEffect, useState } from "react"
+import { encryptData, decryptData } from "@/lib/secure-storage"
 
 // Tipo para os temas disponíveis
 type Theme = "dark" | "light" | "system"
@@ -23,7 +24,7 @@ const initialState: ThemeProviderState = {
 }
 
 // Criar o contexto
-const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState)
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 // Provider do tema
 export function ThemeProvider({
@@ -33,12 +34,30 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   // Estado do tema
-  const [theme, setTheme] = React.useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  const [theme, setTheme] = useState<Theme>(
+    // ✅ Usando descriptografia segura para recuperar tema
+    () => {
+      try {
+        const storedTheme = localStorage.getItem(storageKey);
+        if (storedTheme) {
+          // Verificar se é um valor criptografado
+          if (storedTheme.startsWith('encrypted:')) {
+            const decrypted = decryptData(storedTheme.substring(10));
+            return (decrypted as Theme) || defaultTheme;
+          }
+          // Valor legado não criptografado
+          return (storedTheme as Theme) || defaultTheme;
+        }
+        return defaultTheme;
+      } catch (error) {
+        console.warn('Failed to decrypt theme preference, using default');
+        return defaultTheme;
+      }
+    }
   )
 
   // Efeito para aplicar o tema
-  React.useEffect(() => {
+  useEffect(() => {
     const root = window.document.documentElement
 
     // Remover classes existentes
@@ -63,7 +82,14 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
+      // ✅ Usando criptografia segura para armazenar tema
+      try {
+        const encrypted = 'encrypted:' + encryptData(theme);
+        localStorage.setItem(storageKey, encrypted);
+      } catch (error) {
+        console.warn('Failed to encrypt theme preference, storing as plain text');
+        localStorage.setItem(storageKey, theme);
+      }
       setTheme(theme)
     },
   }
@@ -77,7 +103,7 @@ export function ThemeProvider({
 
 // Hook para usar o tema
 export const useTheme = () => {
-  const context = React.useContext(ThemeProviderContext)
+  const context = useContext(ThemeProviderContext)
 
   if (context === undefined)
     throw new Error("useTheme must be used within a ThemeProvider")

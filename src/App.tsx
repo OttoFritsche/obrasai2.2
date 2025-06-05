@@ -21,15 +21,26 @@ import ObraDetalhe from "@/pages/dashboard/obras/ObraDetalhe";
 // Despesas
 import DespesasLista from "@/pages/dashboard/despesas/DespesasLista";
 import NovaDespesa from "@/pages/dashboard/despesas/NovaDespesa";
+import EditarDespesa from "@/pages/dashboard/despesas/EditarDespesa";
 
 // Fornecedores
 import FornecedoresPJLista from "@/pages/dashboard/fornecedores/FornecedoresPJLista";
 import FornecedoresPFLista from "@/pages/dashboard/fornecedores/FornecedoresPFLista";
 import NovoFornecedor from "@/pages/dashboard/fornecedores/NovoFornecedor";
+import EditarFornecedor from "@/pages/dashboard/fornecedores/EditarFornecedor";
 
 // Notas Fiscais
 import NotasLista from "@/pages/dashboard/notas/NotasLista";
 import EnviarNota from "@/pages/dashboard/notas/EnviarNota";
+import EditarNota from "@/pages/dashboard/notas/EditarNota";
+
+// Orçamento Paramétrico
+import { NovoOrcamento } from "@/pages/dashboard/orcamento/NovoOrcamento";
+import OrcamentosLista from "@/pages/dashboard/orcamento/OrcamentosLista";
+import OrcamentoDetalhe from "@/pages/dashboard/orcamento/OrcamentoDetalhe";
+
+// SINAPI
+import ConsultaSinapi from "@/pages/admin/sinapi/ConsultaSinapi";
 
 // IA
 import ChatAIPage from "@/pages/dashboard/ai/Chat";
@@ -90,6 +101,11 @@ const App = () => {
               <NovaDespesa />
             </ProtectedRoute>
           } />
+          <Route path="dashboard/despesas/:id/editar" element={
+            <ProtectedRoute>
+              <EditarDespesa />
+            </ProtectedRoute>
+          } />
           
           <Route path="dashboard/fornecedores/pj" element={
             <ProtectedRoute>
@@ -107,6 +123,18 @@ const App = () => {
             </ProtectedRoute>
           } />
           
+          {/* Rotas de edição de fornecedores */}
+          <Route path="dashboard/fornecedores/pj/:id/editar" element={
+            <ProtectedRoute>
+              <EditarFornecedor />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/fornecedores/pf/:id/editar" element={
+            <ProtectedRoute>
+              <EditarFornecedor />
+            </ProtectedRoute>
+          } />
+          
           <Route path="dashboard/notas" element={
             <ProtectedRoute>
               <NotasLista />
@@ -117,11 +145,40 @@ const App = () => {
               <EnviarNota />
             </ProtectedRoute>
           } />
+          <Route path="dashboard/notas/editar/:id" element={
+            <ProtectedRoute>
+              <EditarNota />
+            </ProtectedRoute>
+          } />
 
           {/* Novas rotas de IA */}
           <Route path="dashboard/chat" element={
             <ProtectedRoute>
               <ChatAIPage />
+            </ProtectedRoute>
+          } />
+
+          {/* Rotas de Orçamento Paramétrico */}
+          <Route path="dashboard/orcamentos" element={
+            <ProtectedRoute>
+              <OrcamentosLista />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/orcamentos/novo" element={
+            <ProtectedRoute>
+              <NovoOrcamento />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/orcamentos/:id" element={
+            <ProtectedRoute>
+              <OrcamentoDetalhe />
+            </ProtectedRoute>
+          } />
+
+          {/* Rota de Consulta SINAPI */}
+          <Route path="dashboard/sinapi" element={
+            <ProtectedRoute>
+              <ConsultaSinapi />
             </ProtectedRoute>
           } />
           

@@ -1,0 +1,257 @@
+{
+  "name": "obrasai-leads-simples",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "obrasai-simples",
+        "options": {
+          "noResponseBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "id": "webhook-simples",
+      "name": "🤖 Webhook",
+      "webhookId": "obrasai-simples-leads"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "nome",
+              "name": "nome",
+              "value": "={{ $json.body.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "telefone",
+              "name": "telefone",
+              "value": "={{ $json.body.telefone || 'Não informado' }}",
+              "type": "string"
+            },
+            {
+              "id": "empresa",
+              "name": "empresa",
+              "value": "={{ $json.body.empresa }}",
+              "type": "string"
+            },
+            {
+              "id": "cargo",
+              "name": "cargo",
+              "value": "={{ $json.body.cargo }}",
+              "type": "string"
+            },
+            {
+              "id": "interesse",
+              "name": "interesse",
+              "value": "={{ $json.body.interesse || 'médio' }}",
+              "type": "string"
+            },
+            {
+              "id": "origem",
+              "name": "origem",
+              "value": "={{ $json.body.origem || 'chatbot' }}",
+              "type": "string"
+            },
+            {
+              "id": "data_lead",
+              "name": "data_lead",
+              "value": "={{ new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0],
+      "id": "preparar-dados",
+      "name": "📋 Preparar Dados"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1r8x182-OCOCVRdC5X6ugche6Ju18KWULMHU7FXpCLLE",
+          "mode": "list",
+          "cachedResultName": "leads_obrasai"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "leads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": ["Email"],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "Email",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nome",
+              "displayName": "Nome",
+              "required": false,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "telefone",
+              "displayName": "Telefone",
+              "required": false,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "empresa",
+              "displayName": "Empresa",
+              "required": false,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "cargo",
+              "displayName": "Cargo",
+              "required": false,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "interesse",
+              "displayName": "Interesse",
+              "required": false,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "origem",
+              "displayName": "Origem",
+              "required": false,
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "data_lead",
+              "displayName": "Data/Hora",
+              "required": false,
+              "display": true,
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [440, 0],
+      "id": "google-sheets",
+      "name": "📊 Google Sheets"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "leads",
+        "records": {
+          "nome": "={{ $json.nome }}",
+          "email": "={{ $json.email }}",
+          "telefone": "={{ $json.telefone }}",
+          "empresa": "={{ $json.empresa }}",
+          "cargo": "={{ $json.cargo }}",
+          "interesse_nivel": "={{ $json.interesse }}",
+          "origem": "={{ $json.origem }}",
+          "created_at": "={{ new Date().toISOString() }}"
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [660, 0],
+      "id": "supabase-insert",
+      "name": "🗄️ Supabase"
+    },
+    {
+      "parameters": {
+        "sendTo": "ottof6@gmail.com",
+        "subject": "🎯 Novo Lead ObrasAI - {{ $('preparar-dados').item.json.nome }}",
+        "emailType": "html",
+        "message": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <style>\n    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }\n    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }\n    .header { background: #007bff; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }\n    .info { background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0; }\n    .label { font-weight: bold; color: #666; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>🎯 Novo Lead ObrasAI</h1>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">👤 Nome:</div>\n      <div>{{ $('preparar-dados').item.json.nome }}</div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">📧 Email:</div>\n      <div><a href=\"mailto:{{ $('preparar-dados').item.json.email }}\">{{ $('preparar-dados').item.json.email }}</a></div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">📱 Telefone:</div>\n      <div><a href=\"tel:{{ $('preparar-dados').item.json.telefone }}\">{{ $('preparar-dados').item.json.telefone }}</a></div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">🏢 Empresa:</div>\n      <div>{{ $('preparar-dados').item.json.empresa }}</div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">💼 Cargo:</div>\n      <div>{{ $('preparar-dados').item.json.cargo }}</div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">🎯 Interesse:</div>\n      <div>{{ $('preparar-dados').item.json.interesse }}</div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">📍 Origem:</div>\n      <div>{{ $('preparar-dados').item.json.origem }}</div>\n    </div>\n    \n    <div class=\"info\">\n      <div class=\"label\">🕐 Data/Hora:</div>\n      <div>{{ $('preparar-dados').item.json.data_lead }}</div>\n    </div>\n    \n    <p style=\"text-align: center; margin-top: 30px; color: #666;\">\n      📊 Lead salvo no Google Sheets e Supabase\n    </p>\n  </div>\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [880, 0],
+      "id": "gmail-notification",
+      "name": "📧 Gmail"
+    }
+  ],
+  "connections": {
+    "🤖 Webhook": {
+      "main": [
+        [
+          {
+            "node": "📋 Preparar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📋 Preparar Dados": {
+      "main": [
+        [
+          {
+            "node": "📊 Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "🗄️ Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗄️ Supabase": {
+      "main": [
+        [
+          {
+            "node": "📧 Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "ObrasAI-Simples",
+  "tags": ["leads", "obrasai", "simples"]
+} 

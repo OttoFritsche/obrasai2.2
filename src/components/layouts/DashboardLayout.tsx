@@ -1,15 +1,21 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon, Calculator } from "lucide-react";
+import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import Logo from "@/components/ui/Logo";
+import { useTheme } from "@/providers/theme-provider";
+import obrasAIDark from "@/assets/logo/logo_dark_horizon.png";
+import obrasAILight from "@/assets/logo/logo_light_horizon.png";
+import logoImageDark from "@/assets/logo/logo_image_dark.png";
+import logoImageLight from "@/assets/logo/logo_image_light.png";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -40,6 +46,14 @@ const menuItems = [
     color: "text-green-500 dark:text-green-400",
     bgColor: "bg-green-500/10 dark:bg-green-400/10",
     hoverBg: "hover:bg-green-500/20 dark:hover:bg-green-400/20"
+  },
+  {
+    icon: Calculator,
+    label: "Orçamentos IA",
+    path: "/dashboard/orcamentos",
+    color: "text-cyan-500 dark:text-cyan-400",
+    bgColor: "bg-cyan-500/10 dark:bg-cyan-400/10",
+    hoverBg: "hover:bg-cyan-500/20 dark:hover:bg-cyan-400/20"
   },
   {
     icon: FileText,
@@ -93,17 +107,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           collapsible="icon"
           className="border-r border-border/50 backdrop-blur-md bg-sidebar-background/95"
         >
-          <SidebarHeader className="border-b border-border/50 p-4">
-            <motion.div 
-              className="flex items-center justify-center"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <span className="font-bold text-2xl bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                ObrasAI
-              </span>
-            </motion.div>
+          <SidebarHeader className="p-4">
+            <SidebarHeaderContent />
           </SidebarHeader>
           
           <SidebarContent className="px-3 py-2">
@@ -163,7 +168,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </SidebarMenu>
           </SidebarContent>
           
-          <SidebarFooter className="border-t border-border/50 p-3">
+          <SidebarFooter className="p-3">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
@@ -201,12 +206,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         <div className="flex flex-col flex-grow">
           <DashboardHeader />
-          <main className="flex-grow p-6 bg-gradient-to-br from-background via-background to-muted/20">
+          <main className="flex-grow p-4 lg:p-6 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-auto">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="h-full"
+              className="h-full w-full min-w-0"
             >
               {children}
             </motion.div>
@@ -214,6 +219,45 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </div>
     </SidebarProvider>
+  );
+};
+
+const SidebarHeaderContent = () => {
+  const { state } = useSidebar();
+  const { theme } = useTheme();
+  const isCollapsed = state === "collapsed";
+  
+  // Determinar qual logo usar baseado no tema
+  const logoSrc = theme === "dark" ? obrasAIDark : obrasAILight;
+  const logoImageSrc = theme === "dark" ? logoImageDark : logoImageLight;
+
+  return (
+    <motion.div 
+      className="flex items-center justify-center gap-3"
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Logo - responsiva ao colapso */}
+      <div className={cn(
+        "flex-shrink-0 flex items-center justify-center",
+        isCollapsed ? "h-16 w-16" : "h-18 w-full"
+      )}>
+        {isCollapsed ? (
+          <img 
+            src={logoImageSrc} 
+            alt="ObrasAI Logo" 
+            className="h-16 w-16 object-contain"
+          />
+        ) : (
+          <img 
+            src={logoSrc} 
+            alt="ObrasAI Logo" 
+            className="h-10 w-auto object-contain max-w-full"
+          />
+        )}
+      </div>
+    </motion.div>
   );
 };
 

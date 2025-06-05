@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Constants } from "@/integrations/supabase/types";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { 
@@ -41,8 +40,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { despesasApi, obrasApi } from "@/services/api";
 import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { useDespesas } from "@/hooks/useDespesas";
+import { useObras } from "@/hooks/useObras";
+import { calculateDespesasMetrics, calculatePeriodTrend } from "@/lib/utils/metrics";
 
 type Despesa = {
   id: string;
@@ -66,15 +67,8 @@ const DespesasLista = () => {
   const [selectedCategoria, setSelectedCategoria] = useState<string>("all");
   const [selectedEtapa, setSelectedEtapa] = useState<string>("all");
 
-  const { data: despesas, isLoading, isError, refetch } = useQuery({
-    queryKey: ["despesas"],
-    queryFn: despesasApi.getAll,
-  });
-
-  const { data: obras } = useQuery({
-    queryKey: ["obras"],
-    queryFn: obrasApi.getAll,
-  });
+  const { despesas, isLoading, error, refetch, deleteDespesa } = useDespesas();
+  const { obras } = useObras();
 
   const filteredDespesas = despesas?.filter(despesa => {
     const obraMatch = selectedObraId === "all" || despesa.obra_id === selectedObraId;
@@ -83,18 +77,22 @@ const DespesasLista = () => {
     return obraMatch && categoriaMatch && etapaMatch;
   });
 
-  // Calcular métricas
-  const totalDespesas = filteredDespesas?.length || 0;
-  const totalValor = filteredDespesas?.reduce((sum, despesa) => sum + despesa.custo, 0) || 0;
-  const despesasPagas = filteredDespesas?.filter(d => d.pago).length || 0;
-  const valorPago = filteredDespesas?.filter(d => d.pago).reduce((sum, despesa) => sum + despesa.custo, 0) || 0;
+  // Calcular métricas reais usando a função utilitária
+  const metrics = calculateDespesasMetrics(despesas || [], filteredDespesas || []);
+  
+  // Calcular tendências baseadas em dados históricos reais
+  const trendTotalDespesas = calculatePeriodTrend(despesas || [], 'custo', 'data_despesa');
+  const trendDespesasPagas = calculatePeriodTrend(
+    despesas?.filter(d => d.pago) || [], 
+    'custo', 
+    'data_pagamento'
+  );
 
   const handleDelete = async () => {
     if (!despesaToDelete) return;
 
     try {
-      await despesasApi.delete(despesaToDelete);
-      refetch();
+      await deleteDespesa.mutateAsync(despesaToDelete);
       setDespesaToDelete(null);
     } catch (error) {
       console.error("Error deleting despesa:", error);
@@ -122,7 +120,10 @@ const DespesasLista = () => {
       accessorKey: "categoria",
       header: "Categoria",
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-xs">
+        <Badge 
+          variant="outline" 
+          className="text-xs bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300"
+        >
           {row.original.categoria || "-"}
         </Badge>
       ),
@@ -138,7 +139,7 @@ const DespesasLista = () => {
       accessorKey: "custo",
       header: "Valor",
       cell: ({ row }) => (
-        <span className="font-mono font-medium">
+        <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
           {formatCurrencyBR(row.original.custo)}
         </span>
       ),
@@ -157,12 +158,13 @@ const DespesasLista = () => {
       header: "Status",
       cell: ({ row }) => 
         row.original.pago ? (
-          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+          <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 hover:bg-emerald-200 dark:hover:bg-emerald-900/50">
             <Check className="h-3 w-3 mr-1" />
             Pago
           </Badge>
         ) : (
-          <Badge variant="outline" className="border-orange-500/20 text-orange-600">
+          <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300">
+            <AlertTriangle className="h-3 w-3 mr-1" />
             Pendente
           </Badge>
         ),
@@ -176,7 +178,7 @@ const DespesasLista = () => {
             size="icon"
             title="Editar"
             onClick={() => navigate(`/dashboard/despesas/${row.original.id}/editar`)}
-            className="h-8 w-8 text-blue-500 hover:bg-blue-500/10"
+            className="h-8 w-8 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -185,7 +187,7 @@ const DespesasLista = () => {
             size="icon"
             title="Excluir"
             onClick={() => setDespesaToDelete(row.original.id)}
-            className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+            className="h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -211,7 +213,7 @@ const DespesasLista = () => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <DashboardLayout>
         <motion.div
@@ -283,7 +285,7 @@ const DespesasLista = () => {
           </motion.div>
         </div>
 
-        {/* Cards de métricas */}
+        {/* Cards de métricas com dados reais */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -292,31 +294,35 @@ const DespesasLista = () => {
         >
           <MetricCard
             title="Total de Despesas"
-            value={totalDespesas.toString()}
+            value={metrics.totalDespesas.toString()}
             icon={Receipt}
-            trend={{ value: 12, isUpward: true }}
-            color="blue"
+            trend={trendTotalDespesas}
+            iconColor="primary"
+            className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
           />
           <MetricCard
             title="Valor Total"
-            value={formatCurrencyBR(totalValor)}
+            value={formatCurrencyBR(metrics.totalValor)}
             icon={Receipt}
-            trend={{ value: 8, isUpward: false }}
-            color="green"
+            trend={trendTotalDespesas}
+            iconColor="success"
+            className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700"
           />
           <MetricCard
             title="Despesas Pagas"
-            value={despesasPagas.toString()}
+            value={metrics.despesasPagas.toString()}
             icon={Check}
-            trend={{ value: 15, isUpward: true }}
-            color="purple"
+            trend={trendDespesasPagas}
+            iconColor="success"
+            className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700"
           />
           <MetricCard
             title="Valor Pago"
-            value={formatCurrencyBR(valorPago)}
+            value={formatCurrencyBR(metrics.valorPago)}
             icon={Check}
-            trend={{ value: 5, isUpward: true }}
-            color="orange"
+            trend={trendDespesasPagas}
+            iconColor="info"
+            className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700"
           />
         </motion.div>
         
@@ -326,21 +332,23 @@ const DespesasLista = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+          <Card className="border-indigo-200/50 dark:border-indigo-700/50 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-900/10 dark:to-purple-900/10 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Filter className="h-5 w-5 text-blue-500" />
-                Filtros
+                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center">
+                  <Filter className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
+                </div>
+                <span className="text-indigo-700 dark:text-indigo-300">Filtros</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
+                  <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
                     Obra
                   </label>
                   <Select value={selectedObraId} onValueChange={setSelectedObraId}>
-                    <SelectTrigger className="bg-background/50">
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
                       <SelectValue placeholder="Todas as obras" />
                     </SelectTrigger>
                     <SelectContent>
@@ -355,11 +363,11 @@ const DespesasLista = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
+                  <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
                     Categoria
                   </label>
                   <Select value={selectedCategoria} onValueChange={setSelectedCategoria}>
-                    <SelectTrigger className="bg-background/50">
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
                       <SelectValue placeholder="Todas as categorias" />
                     </SelectTrigger>
                     <SelectContent>
@@ -374,11 +382,11 @@ const DespesasLista = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
+                  <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
                     Etapa
                   </label>
                   <Select value={selectedEtapa} onValueChange={setSelectedEtapa}>
-                    <SelectTrigger className="bg-background/50">
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
                       <SelectValue placeholder="Todas as etapas" />
                     </SelectTrigger>
                     <SelectContent>
@@ -402,7 +410,7 @@ const DespesasLista = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+          <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
             <CardContent className="p-0">
               <DataTable columns={columns} data={filteredDespesas || []} />
             </CardContent>

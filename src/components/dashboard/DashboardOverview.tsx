@@ -1,32 +1,53 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { t } from "@/lib/i18n";
 import { formatCurrencyBR } from "@/lib/i18n";
+import { useObras } from "@/hooks/useObras";
+import { useDespesas } from "@/hooks/useDespesas";
+import { useNotasFiscais } from "@/hooks/useNotasFiscais";
 
 export const DashboardOverview = () => {
-  // Placeholder data - in a real application, this would come from the database
+  const { obras } = useObras();
+  const { despesas } = useDespesas();
+  const { notasFiscais } = useNotasFiscais();
+
+  // Calcular estatísticas reais
+  const obrasEmAndamento = obras?.filter(obra => 
+    obra.data_inicio && (!obra.data_prevista_termino || new Date(obra.data_prevista_termino) > new Date())
+  ).length || 0;
+
+  const totalDespesas = despesas?.reduce((sum, despesa) => sum + despesa.custo, 0) || 0;
+  const orcamentoTotal = obras?.reduce((sum, obra) => sum + obra.orcamento, 0) || 0;
+  const orcamentoDisponivel = orcamentoTotal - totalDespesas;
+  const totalNotas = notasFiscais?.length || 0;
+
+  // Calcular mudanças (por enquanto zeradas, mas pode ser implementado com dados históricos)
+  const mudancaDespesas = 0;
+  const mudancaOrcamento = 0;
+  const mudancaNotas = 0;
+
   const stats = [
     {
       title: "Obras em Andamento",
-      value: "5",
-      change: "+2",
+      value: obrasEmAndamento.toString(),
+      change: "+0",
       changeType: "increase" as const,
     },
     {
       title: "Total de Despesas",
-      value: formatCurrencyBR(342500.75),
-      change: formatCurrencyBR(15000),
-      changeType: "increase" as const,
+      value: formatCurrencyBR(totalDespesas),
+      change: formatCurrencyBR(mudancaDespesas),
+      changeType: mudancaDespesas >= 0 ? "increase" as const : "decrease" as const,
     },
     {
       title: "Orçamento Disponível",
-      value: formatCurrencyBR(567400),
-      change: formatCurrencyBR(15000),
-      changeType: "decrease" as const,
+      value: formatCurrencyBR(orcamentoDisponivel),
+      change: formatCurrencyBR(mudancaOrcamento),
+      changeType: mudancaOrcamento >= 0 ? "increase" as const : "decrease" as const,
     },
     {
       title: "Notas Fiscais",
-      value: "37",
-      change: "+4",
+      value: totalNotas.toString(),
+      change: `+${mudancaNotas}`,
       changeType: "increase" as const,
     },
   ];

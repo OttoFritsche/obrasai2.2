@@ -66,6 +66,28 @@ const ChatAIPage = () => {
         >
           {features.map((feature, index) => {
             const Icon = feature.icon;
+            const colorClasses = {
+              "text-purple-500": {
+                bg: "bg-purple-50 dark:bg-purple-900/20",
+                border: "border-purple-200 dark:border-purple-700",
+                iconBg: "bg-purple-500/10 dark:bg-purple-400/10",
+                iconColor: "text-purple-500 dark:text-purple-400"
+              },
+              "text-blue-500": {
+                bg: "bg-blue-50 dark:bg-blue-900/20",
+                border: "border-blue-200 dark:border-blue-700",
+                iconBg: "bg-blue-500/10 dark:bg-blue-400/10",
+                iconColor: "text-blue-500 dark:text-blue-400"
+              },
+              "text-yellow-500": {
+                bg: "bg-amber-50 dark:bg-amber-900/20",
+                border: "border-amber-200 dark:border-amber-700",
+                iconBg: "bg-amber-500/10 dark:bg-amber-400/10",
+                iconColor: "text-amber-500 dark:text-amber-400"
+              }
+            };
+            const colors = colorClasses[feature.color as keyof typeof colorClasses];
+            
             return (
               <motion.div
                 key={feature.title}
@@ -74,15 +96,15 @@ const ChatAIPage = () => {
                 transition={{ delay: 0.3 + index * 0.1 }}
                 whileHover={{ scale: 1.02, y: -2 }}
               >
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm h-full">
+                <Card className={`${colors.border} ${colors.bg} backdrop-blur-sm h-full hover:shadow-lg transition-all duration-300`}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0">
-                        <Icon className={`h-5 w-5 ${feature.color}`} />
+                      <div className={`h-10 w-10 rounded-lg ${colors.iconBg} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`h-5 w-5 ${colors.iconColor}`} />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="font-semibold text-sm">{feature.title}</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <h3 className="font-semibold text-sm text-slate-700 dark:text-slate-300">{feature.title}</h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                           {feature.description}
                         </p>
                       </div>
@@ -100,13 +122,15 @@ const ChatAIPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+          <Card className="border-indigo-200/50 dark:border-indigo-700/50 bg-gradient-to-br from-indigo-50/50 to-blue-50/50 dark:from-indigo-900/10 dark:to-blue-900/10 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-blue-500" />
-                Como usar o Chat IA
+                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
+                </div>
+                <span className="text-indigo-700 dark:text-indigo-300">Como usar o Chat IA</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-600 dark:text-slate-400">
                 Faça perguntas sobre construção civil, orçamentos, materiais, cronogramas,
                 ou qualquer aspecto relacionado às suas obras. Nossa IA está pronta para ajudar!
               </CardDescription>

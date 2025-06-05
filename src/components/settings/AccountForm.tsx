@@ -1,8 +1,6 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
 
@@ -30,18 +28,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { changePasswordSchema } from "@/lib/validations/auth";
 
-// Define password schema
-const passwordFormSchema = z.object({
-  currentPassword: z.string().min(6, "A senha atual deve ter pelo menos 6 caracteres"),
-  newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres"),
-  confirmPassword: z.string().min(6, "A confirmação de senha deve ter pelo menos 6 caracteres"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-});
-
-type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+type PasswordFormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
 
 export function AccountForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +42,7 @@ export function AccountForm() {
 
   // Initialize form with the zod schema
   const form = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordFormSchema),
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       currentPassword: "",
       newPassword: "",

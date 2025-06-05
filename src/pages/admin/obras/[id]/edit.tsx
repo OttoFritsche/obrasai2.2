@@ -14,7 +14,7 @@ const EditarObraPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Busca a obra pelo id
-  const obra = obras?.find((o: any) => o.id === id);
+  const obra = obras?.find((o: { id: string }) => o.id === id);
 
   // Configuração do formulário com validação Zod
   const {

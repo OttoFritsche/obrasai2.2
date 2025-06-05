@@ -28,9 +28,9 @@ export interface AuthContextType {
   session: Session | null;
   loading: boolean;
   subscription: Subscription | null;
-  login: (email: string, password: string) => Promise<{ error?: any }>;
-  loginWithGoogle: () => Promise<{ error?: any }>;
-  register: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error?: any }>;
+  login: (email: string, password: string) => Promise<{ error?: unknown }>;
+  loginWithGoogle: () => Promise<{ error?: unknown }>;
+  register: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error?: unknown }>;
   logout: () => Promise<void>;
   checkSubscription: () => Promise<void>;
 }

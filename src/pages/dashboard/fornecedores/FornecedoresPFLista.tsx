@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { 
@@ -32,6 +31,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { useAuth } from "@/contexts/auth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fornecedoresPFApi } from "@/services/api";
 import { t, formatDateBR } from "@/lib/i18n";
 
@@ -48,22 +49,41 @@ type FornecedorPF = {
 const FornecedoresPFLista = () => {
   const navigate = useNavigate();
   const [fornecedorToDelete, setFornecedorToDelete] = useState<string | null>(null);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  // Obter tenant_id corretamente do usuário logado
+  const tenantId = user?.profile?.tenant_id;
+  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
 
   const { data: fornecedores, isLoading, isError, refetch } = useQuery({
-    queryKey: ["fornecedores_pf"],
-    queryFn: fornecedoresPFApi.getAll,
+    queryKey: ["fornecedores_pf", validTenantId],
+    queryFn: () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado ou inválido');
+      }
+      return fornecedoresPFApi.getAll(validTenantId);
+    },
+    enabled: !!validTenantId,
+    retry: (failureCount, error) => {
+      return failureCount < 1; // Máximo 1 tentativa
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => fornecedoresPFApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["fornecedores_pf", validTenantId]);
+      setFornecedorToDelete(null);
+    },
+    onError: (error) => {
+      console.error("Error deleting fornecedor PF:", error);
+    },
   });
 
   const handleDelete = async () => {
     if (!fornecedorToDelete) return;
-
-    try {
-      await fornecedoresPFApi.delete(fornecedorToDelete);
-      refetch();
-      setFornecedorToDelete(null);
-    } catch (error) {
-      console.error("Error deleting fornecedor PF:", error);
-    }
+    deleteMutation.mutate(fornecedorToDelete);
   };
 
   const columns: ColumnDef<FornecedorPF>[] = [
@@ -86,18 +106,18 @@ const FornecedoresPFLista = () => {
       header: "Tipo",
       cell: ({ row }) => 
         row.original.tipo_fornecedor ? (
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300">
             {row.original.tipo_fornecedor}
           </Badge>
         ) : (
-          <span className="text-muted-foreground">-</span>
+          <span className="text-slate-500 dark:text-slate-400">-</span>
         ),
     },
     {
       accessorKey: "email",
       header: "Email",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-slate-600 dark:text-slate-400">
           {row.original.email || "-"}
         </span>
       ),
@@ -106,7 +126,7 @@ const FornecedoresPFLista = () => {
       accessorKey: "telefone_principal",
       header: "Telefone",
       cell: ({ row }) => (
-        <span className="font-mono text-sm">
+        <span className="font-mono text-sm text-slate-600 dark:text-slate-400">
           {row.original.telefone_principal || "-"}
         </span>
       ),
@@ -115,7 +135,7 @@ const FornecedoresPFLista = () => {
       accessorKey: "data_nascimento",
       header: "Nascimento",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-slate-500 dark:text-slate-400">
           {formatDateBR(row.original.data_nascimento)}
         </span>
       ),
@@ -129,7 +149,7 @@ const FornecedoresPFLista = () => {
             size="icon"
             title="Editar"
             onClick={() => navigate(`/dashboard/fornecedores/pf/${row.original.id}/editar`)}
-            className="h-8 w-8 text-blue-500 hover:bg-blue-500/10"
+            className="h-8 w-8 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -138,7 +158,7 @@ const FornecedoresPFLista = () => {
             size="icon"
             title="Excluir"
             onClick={() => setFornecedorToDelete(row.original.id)}
-            className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+            className="h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -258,71 +278,19 @@ const FornecedoresPFLista = () => {
             </TabsList>
 
             <TabsContent value="pf">
-              {/* Estatísticas */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
-              >
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                        <Users className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total PF</p>
-                        <p className="text-xl font-bold">{fornecedores?.length || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                        <User className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Com Email</p>
-                        <p className="text-xl font-bold">
-                          {fornecedores?.filter(f => f.email).length || 0}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                        <User className="h-5 w-5 text-purple-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Com Telefone</p>
-                        <p className="text-xl font-bold">
-                          {fornecedores?.filter(f => f.telefone_principal).length || 0}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
               {/* Tabela */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+                <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-pink-500" />
-                      Fornecedores Pessoa Física
+                      <div className="h-8 w-8 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 flex items-center justify-center">
+                        <User className="h-5 w-5 text-pink-500 dark:text-pink-400" />
+                      </div>
+                      <span className="text-pink-700 dark:text-pink-300">Fornecedores Pessoa Física</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">

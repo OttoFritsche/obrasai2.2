@@ -8,13 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { t } from "@/lib/i18n";
-import { Loader2, Building2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Logo from "@/components/ui/Logo";
+import logoImage from "@/assets/logo/ObrasAI_dark.png";
+import { supabase } from "@/integrations/supabase/client";
+import loginBg from "@/assets/images/4d142594-a29e-4e94-bd77-48cf91ebcfac.png";
+// ✅ Comentar temporariamente o painel de debug
+// import AuthDebugPanel from "@/components/debug/AuthDebugPanel";
 
 // Esquema de validação do formulário
 const loginSchema = z.object({
@@ -48,43 +53,40 @@ const Login = () => {
       const { error } = await login(data.email, data.password);
       
       if (error) {
-        toast.error(error.message || t("auth.loginError"));
+        const errorMessage = (error instanceof Error) ? error.message : t("auth.loginError");
+        toast.error(errorMessage);
         return;
       }
       
       toast.success(t("messages.loginSuccess"));
       navigate("/dashboard");
-    } catch (error: any) {
-      toast.error(error.message || t("messages.generalError"));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : t("messages.generalError");
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Elementos decorativos de fundo */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
-      </div>
-
-      {/* Theme Toggle */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="absolute top-6 right-6"
-      >
-        <ThemeToggle />
-      </motion.div>
-
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      {/* Imagem de fundo com overlay */}
+      <img
+        src={loginBg}
+        alt="Background ObrasAI"
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{ filter: "blur(0px) brightness(0.6)" }}
+      />
+      <div className="absolute inset-0 bg-black/70 z-10" />
+      
+      {/* ✅ Restaurar layout original sem debug panel */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-20 w-full max-w-md"
       >
-        <Card className="border-border/50 backdrop-blur-md bg-card/95 shadow-2xl">
+        <Card className="border-gray-200 backdrop-blur-md bg-white shadow-2xl">
           <CardHeader className="space-y-1 text-center pb-8">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -92,8 +94,8 @@ const Login = () => {
               transition={{ delay: 0.1 }}
               className="flex justify-center mb-4"
             >
-              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                <Building2 className="h-9 w-9 text-white" />
+              <div className="h-16 w-full flex items-center justify-center">
+                <Logo variant="horizontal" width={240} height={64} alt="Logo Obras.AI" />
               </div>
             </motion.div>
             <motion.div
@@ -101,11 +103,8 @@ const Login = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <CardTitle className="text-3xl font-bold">
-                Bem-vindo ao{" "}
-                <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                  ObrasAI
-                </span>
+              <CardTitle className="text-3xl font-bold text-gray-800 text-center">
+                Bem-vindo
               </CardTitle>
             </motion.div>
             <motion.div
@@ -113,7 +112,7 @@ const Login = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <CardDescription className="text-muted-foreground">
+              <CardDescription className="text-gray-600">
                 Entre com suas credenciais para acessar o sistema
               </CardDescription>
             </motion.div>
@@ -135,10 +134,10 @@ const Login = () => {
               className="relative"
             >
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
+                <span className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
+                <span className="bg-white px-2 text-gray-500">
                   ou continue com e-mail
                 </span>
               </div>
@@ -156,20 +155,16 @@ const Login = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-foreground">E-mail</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">E-mail</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="seu@email.com"
                             {...field}
                             disabled={isLoading}
-                            className={cn(
-                              "bg-background/50 border-border/50",
-                              "focus:bg-background focus:border-primary",
-                              "transition-all duration-300"
-                            )}
+                            className="bg-gray-50 border-gray-300 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-red-600" />
                       </FormItem>
                     )}
                   />
@@ -185,7 +180,7 @@ const Login = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-foreground">Senha</FormLabel>
+                        <FormLabel className="text-gray-700 font-medium">Senha</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Input
@@ -193,16 +188,12 @@ const Login = () => {
                               placeholder="••••••••"
                               {...field}
                               disabled={isLoading}
-                              className={cn(
-                                "bg-background/50 border-border/50 pr-10",
-                                "focus:bg-background focus:border-primary",
-                                "transition-all duration-300"
-                              )}
+                              className="bg-gray-50 border-gray-300 text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 pr-10 transition-all duration-300"
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                             >
                               {showPassword ? (
                                 <EyeOff className="h-4 w-4" />
@@ -212,7 +203,7 @@ const Login = () => {
                             </button>
                           </div>
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-red-600" />
                       </FormItem>
                     )}
                   />
@@ -225,13 +216,7 @@ const Login = () => {
                 >
                   <Button
                     type="submit"
-                    className={cn(
-                      "w-full h-11 font-semibold",
-                      "bg-gradient-to-r from-blue-500 to-purple-600",
-                      "hover:from-blue-600 hover:to-purple-700",
-                      "text-white shadow-lg",
-                      "transition-all duration-300 transform hover:scale-[1.02]"
-                    )}
+                    className="w-full h-11 font-semibold bg-gray-700 border-gray-600 text-white hover:bg-gray-600 hover:border-[#daa916] shadow-lg transition-all duration-300 transform hover:scale-[1.02] border-0"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -257,7 +242,7 @@ const Login = () => {
             >
               <Link
                 to="/forgot-password"
-                className="text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
+                className="text-blue-600 hover:text-blue-700 transition-colors underline-offset-4 hover:underline"
               >
                 Esqueceu sua senha?
               </Link>
@@ -266,12 +251,12 @@ const Login = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className="text-sm text-center text-muted-foreground"
+              className="text-sm text-center text-gray-600"
             >
               Não tem uma conta?{" "}
               <Link
                 to="/register"
-                className="text-primary hover:text-primary/80 transition-colors font-medium underline-offset-4 hover:underline"
+                className="text-blue-600 hover:text-blue-700 transition-colors font-medium underline-offset-4 hover:underline"
               >
                 Criar conta
               </Link>

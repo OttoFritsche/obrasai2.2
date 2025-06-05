@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LogOut, Bell, Search } from "lucide-react";
@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { formatDateBR } from "@/lib/i18n";
 
 export const DashboardHeader = () => {
   const { user, logout } = useAuth();
@@ -33,7 +34,7 @@ export const DashboardHeader = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-background/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-40"
+      className="bg-background/80 backdrop-blur-md sticky top-0 z-40"
     >
       <div className="px-6 py-4">
         <div className="flex justify-between items-center">

@@ -21,8 +21,9 @@ export const GoogleAuthButton = ({ buttonText }: GoogleAuthButtonProps) => {
       if (error) {
         toast.error(error.message || t("auth.loginError"));
       }
-    } catch (error: any) {
-      toast.error(error.message || t("messages.generalError"));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : t("messages.generalError");
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

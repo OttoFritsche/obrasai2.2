@@ -13,10 +13,14 @@ import {
   AlertTriangle,
   TrendingUp,
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Brain,
+  Sparkles
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -33,7 +37,9 @@ import InterfaceChat from "@/components/ai/InterfaceChat";
 const ObraDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("detalhes");
+  const [isGeneratingEmbeddings, setIsGeneratingEmbeddings] = useState(false);
 
   const { data: obra, isLoading, isError } = useQuery({
     queryKey: ["obra", id],
@@ -46,6 +52,37 @@ const ObraDetalhe = () => {
     { id: "insights", label: "Insights IA", icon: TrendingUp, color: "text-purple-500" },
     { id: "chat", label: "Chat IA", icon: MessageSquare, color: "text-green-500" },
   ];
+
+  const handleGenerateEmbeddings = async () => {
+    if (!obra) return;
+    
+    setIsGeneratingEmbeddings(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('gerar-embeddings-obra', {
+        body: {
+          obra_id: obra.id,
+          tipo_conteudo: 'todos'
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "✅ Conhecimento da IA atualizado!",
+        description: `${data.embeddings_gerados} embeddings gerados com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Erro ao gerar embeddings:', error);
+      toast({
+        title: "❌ Erro ao atualizar IA",
+        description: "Não foi possível atualizar o conhecimento da IA.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingEmbeddings(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -129,7 +166,27 @@ const ObraDetalhe = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex gap-2"
           >
+            <Button
+              variant="outline"
+              onClick={handleGenerateEmbeddings}
+              disabled={isGeneratingEmbeddings}
+              className="group hover:border-purple-500/50"
+            >
+              {isGeneratingEmbeddings ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Atualizando IA...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-1 transition-colors group-hover:text-purple-500" />
+                  <Sparkles className="h-3 w-3 mr-2 transition-colors group-hover:text-purple-500" />
+                  Atualizar IA
+                </>
+              )}
+            </Button>
             <Button 
               variant="outline" 
               onClick={() => navigate(`/dashboard/obras/${id}/editar`)}

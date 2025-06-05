@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { 
@@ -32,8 +31,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { fornecedoresPJApi } from "@/services/api";
 import { t } from "@/lib/i18n";
+import { useFornecedoresPJ } from "@/hooks/useFornecedoresPJ";
 
 type FornecedorPJ = {
   id: string;
@@ -48,17 +47,13 @@ const FornecedoresPJLista = () => {
   const navigate = useNavigate();
   const [fornecedorToDelete, setFornecedorToDelete] = useState<string | null>(null);
 
-  const { data: fornecedores, isLoading, isError, refetch } = useQuery({
-    queryKey: ["fornecedores_pj"],
-    queryFn: fornecedoresPJApi.getAll,
-  });
+  const { fornecedoresPJ, isLoading, error, refetch, deleteFornecedorPJ } = useFornecedoresPJ();
 
   const handleDelete = async () => {
     if (!fornecedorToDelete) return;
 
     try {
-      await fornecedoresPJApi.delete(fornecedorToDelete);
-      refetch();
+      await deleteFornecedorPJ.mutateAsync(fornecedorToDelete);
       setFornecedorToDelete(null);
     } catch (error) {
       console.error("Error deleting fornecedor PJ:", error);
@@ -77,7 +72,7 @@ const FornecedoresPJLista = () => {
       accessorKey: "nome_fantasia",
       header: "Nome Fantasia",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-slate-600 dark:text-slate-400">
           {row.original.nome_fantasia || "-"}
         </span>
       ),
@@ -86,14 +81,14 @@ const FornecedoresPJLista = () => {
       accessorKey: "cnpj",
       header: "CNPJ",
       cell: ({ row }) => (
-        <span className="font-mono text-sm">{row.original.cnpj}</span>
+        <span className="font-mono text-sm text-slate-700 dark:text-slate-300">{row.original.cnpj}</span>
       ),
     },
     {
       accessorKey: "email",
       header: "Email",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-slate-600 dark:text-slate-400">
           {row.original.email || "-"}
         </span>
       ),
@@ -102,7 +97,7 @@ const FornecedoresPJLista = () => {
       accessorKey: "telefone_principal",
       header: "Telefone",
       cell: ({ row }) => (
-        <span className="font-mono text-sm">
+        <span className="font-mono text-sm text-slate-600 dark:text-slate-400">
           {row.original.telefone_principal || "-"}
         </span>
       ),
@@ -116,7 +111,7 @@ const FornecedoresPJLista = () => {
             size="icon"
             title="Editar"
             onClick={() => navigate(`/dashboard/fornecedores/pj/${row.original.id}/editar`)}
-            className="h-8 w-8 text-blue-500 hover:bg-blue-500/10"
+            className="h-8 w-8 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -125,7 +120,7 @@ const FornecedoresPJLista = () => {
             size="icon"
             title="Excluir"
             onClick={() => setFornecedorToDelete(row.original.id)}
-            className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+            className="h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -151,7 +146,7 @@ const FornecedoresPJLista = () => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <DashboardLayout>
         <motion.div
@@ -245,75 +240,23 @@ const FornecedoresPJLista = () => {
             </TabsList>
 
             <TabsContent value="pj">
-              {/* Estatísticas */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
-              >
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total PJ</p>
-                        <p className="text-xl font-bold">{fornecedores?.length || 0}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Com Email</p>
-                        <p className="text-xl font-bold">
-                          {fornecedores?.filter(f => f.email).length || 0}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-purple-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Com Telefone</p>
-                        <p className="text-xl font-bold">
-                          {fornecedores?.filter(f => f.telefone_principal).length || 0}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
               {/* Tabela */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
-                <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+                <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-pink-500" />
-                      Fornecedores Pessoa Jurídica
+                      <div className="h-8 w-8 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-pink-500 dark:text-pink-400" />
+                      </div>
+                      <span className="text-pink-700 dark:text-pink-300">Fornecedores Pessoa Jurídica</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <DataTable columns={columns} data={fornecedores || []} />
+                    <DataTable columns={columns} data={fornecedoresPJ || []} />
                   </CardContent>
                 </Card>
               </motion.div>

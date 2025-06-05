@@ -4,13 +4,12 @@ import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { BenefitsSection } from "@/components/landing/BenefitsSection";
+import { AISection } from "@/components/landing/AISection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { DemoSection } from "@/components/landing/DemoSection";
 import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQSection } from "@/components/landing/FAQSection";
-import { CTASection } from "@/components/landing/CTASection";
 import { Footer } from "@/components/landing/Footer";
+import LandingChat from "@/components/landing/LandingChat";
 
 const Index = () => {
   useEffect(() => {
@@ -135,13 +134,14 @@ const Index = () => {
         >
           <FeaturesSection />
         </motion.div>
-        
+
+        {/* 🤖 Nova seção de IA */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          <BenefitsSection />
+          <AISection />
         </motion.div>
         
         <motion.div
@@ -157,7 +157,7 @@ const Index = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.7 }}
         >
-          <DemoSection />
+          <PricingSection />
         </motion.div>
         
         <motion.div
@@ -165,23 +165,7 @@ const Index = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <PricingSection />
-        </motion.div>
-        
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-        >
           <FAQSection />
-        </motion.div>
-        
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1.0 }}
-        >
-          <CTASection />
         </motion.div>
       </main>
       
@@ -192,6 +176,9 @@ const Index = () => {
       >
         <Footer />
       </motion.div>
+
+      {/* 🤖 Chat de IA flutuante */}
+      <LandingChat />
     </motion.div>
   );
 };

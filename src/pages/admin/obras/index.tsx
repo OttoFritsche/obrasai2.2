@@ -41,7 +41,7 @@ const ObrasListPage: React.FC = () => {
         </thead>
         <tbody>
           {obras && obras.length > 0 ? (
-            obras.map((obra: any) => (
+            obras.map((obra: { id: string; nome: string; endereco: string; cidade: string }) => (
               <tr key={obra.id} className="border-b">
                 <td className="p-2">{obra.nome}</td>
                 <td className="p-2">{obra.endereco}</td>

@@ -1,96 +1,116 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateBR, formatCurrencyBR } from "@/lib/i18n";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useObras } from "@/hooks/useObras";
+import { Link } from "react-router-dom";
+
+// Definir tipo para obra
+interface Obra {
+  id: string;
+  nome: string;
+  cidade: string;
+  estado: string;
+  orcamento: number;
+  data_inicio?: string;
+  data_prevista_termino?: string;
+}
 
 export const RecentProjects = () => {
-  // Placeholder data - in a real application, this would come from the database
-  const projects = [
-    {
-      id: "1",
-      name: "Edifício Residencial Aurora",
-      city: "São Paulo",
-      state: "SP",
-      budget: 1250000,
-      endDate: "2023-12-15",
-      status: "Em andamento",
-    },
-    {
-      id: "2",
-      name: "Condomínio Marina Bay",
-      city: "Rio de Janeiro",
-      state: "RJ",
-      budget: 3450000,
-      endDate: "2024-03-10",
-      status: "Em andamento",
-    },
-    {
-      id: "3",
-      name: "Centro Comercial Ipanema",
-      city: "Belo Horizonte",
-      state: "MG",
-      budget: 2185000,
-      endDate: "2023-11-20",
-      status: "Atrasado",
-    },
-    {
-      id: "4",
-      name: "Residencial Jardim das Flores",
-      city: "Curitiba",
-      state: "PR",
-      budget: 1840000,
-      endDate: "2024-01-05",
-      status: "Em andamento",
-    },
-  ];
+  const { obras, isLoading } = useObras();
+
+  // Pegar as 4 obras mais recentes
+  const recentProjects = obras?.slice(0, 4) || [];
+
+  const getStatusColor = (obra: Obra): string => {
+    if (!obra.data_inicio) return "bg-gray-500";
+    if (obra.data_prevista_termino && new Date(obra.data_prevista_termino) < new Date()) {
+      return "bg-red-500"; // Atrasado
+    }
+    return "bg-green-500"; // Em andamento
+  };
+
+  const getStatusLabel = (obra: Obra): string => {
+    if (!obra.data_inicio) return "Planejamento";
+    if (obra.data_prevista_termino && new Date(obra.data_prevista_termino) < new Date()) {
+      return "Atrasado";
+    }
+    return "Em andamento";
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-[#182b4d] text-white border border-[#daa916]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium text-[#daa916]">
+            Obras Recentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#daa916]"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="col-span-1 lg:col-span-2 bg-[#182b4d] text-white border border-[#daa916]">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-2xl font-medium text-[#daa916] text-center flex-grow">
+    <Card className="bg-[#182b4d] text-white border border-[#daa916]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-medium text-[#daa916] flex items-center justify-between">
           Obras Recentes
+          <Button variant="outline" size="sm" asChild className="text-[#daa916] border-[#daa916]">
+            <Link to="/dashboard/obras">Ver todas</Link>
+          </Button>
         </CardTitle>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="bg-transparent border-gray-400 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-[#daa916]"
-        >
-          <Ellipsis className="h-4 w-4" />
-        </Button>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-3 font-medium">Nome</th>
-                <th className="text-left py-3 font-medium">Localização</th>
-                <th className="text-left py-3 font-medium">Orçamento</th>
-                <th className="text-left py-3 font-medium">Término</th>
-                <th className="text-left py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((project) => (
-                <tr key={project.id} className="border-b">
-                  <td className="py-3">{project.name}</td>
-                  <td className="py-3">{project.city}, {project.state}</td>
-                  <td className="py-3">{formatCurrencyBR(project.budget)}</td>
-                  <td className="py-3">{formatDateBR(project.endDate)}</td>
-                  <td className="py-3">
-                    <Badge
-                      variant={project.status === "Em andamento" ? "default" : "destructive"}
-                      className={project.status === "Em andamento" ? "bg-green-500" : ""}
-                    >
-                      {project.status}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {recentProjects.length === 0 ? (
+          <div className="text-center py-8 space-y-4">
+            <Building className="h-12 w-12 text-gray-400 mx-auto" />
+            <div>
+              <h3 className="font-medium text-white">Nenhuma obra cadastrada</h3>
+              <p className="text-sm text-gray-400">
+                Comece criando sua primeira obra
+              </p>
+            </div>
+            <Button asChild className="bg-[#daa916] text-[#182b4d] hover:bg-[#daa916]/90">
+              <Link to="/dashboard/obras/nova">Criar Obra</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentProjects.map((project) => (
+              <div
+                key={project.id}
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-600/50 bg-gray-800/50"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${getStatusColor(project)}`}></div>
+                  <div>
+                    <p className="font-medium text-white">{project.nome}</p>
+                    <p className="text-sm text-gray-400">
+                      {project.cidade}/{project.estado}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-white">
+                    {formatCurrencyBR(project.orcamento)}
+                  </p>
+                  <Badge 
+                    variant="outline" 
+                    className={`text-xs ${getStatusColor(project).replace('bg-', 'border-')} ${getStatusColor(project).replace('bg-', 'text-')}`}
+                  >
+                    {getStatusLabel(project)}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

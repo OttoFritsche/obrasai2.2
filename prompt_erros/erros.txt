@@ -1,0 +1,101 @@
+
+[
+{
+"email": 
+"otto.consigmais@gmail.com",
+"nome": 
+"otto",
+"telefone": 
+"6198767678",
+"empresa": 
+"teste",
+"cargo": 
+"gerente",
+"interesse": 
+"gerenciar obra",
+"origem": 
+"chatbot_landing_page",
+"data_lead": 
+"2025-05-06T18:29:04+00:00"
+}
+]
+
+####
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .header { background: #007bff; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+    .info { background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 10px 0; }
+    .label { font-weight: bold; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 Novo Lead ObrasAI</h1>
+    </div>
+    
+    <div class="info">
+      <div class="label">👤 Nome:</div>
+      <div>{{ $('preparar-dados').item.json.nome }}</div>
+    </div>
+    
+    <div class="info">
+      <div class="label">📧 Email:</div>
+      <div><a href="mailto:{{ $('preparar-dados').item.json.email }}">{{ $('preparar-dados').item.json.email }}</a></div>
+    </div>
+    
+    <div class="info">
+      <div class="label">📱 Telefone:</div>
+      <div><a href="tel:{{ $('preparar-dados').item.json.telefone }}">{{ $('preparar-dados').item.json.telefone }}</a></div>
+    </div>
+    
+    <div class="info">
+      <div class="label">🏢 Empresa:</div>
+      <div>{{ $('preparar-dados').item.json.empresa }}</div>
+    </div>
+    
+    <div class="info">
+      <div class="label">💼 Cargo:</div>
+      <div>{{ $('preparar-dados').item.json.cargo }}</div>
+    </div>
+    
+    <div class="info">
+      <div class="label">🎯 Interesse:</div>
+      <div>{{ $('preparar-dados').item.json.interesse }}</div>
+    </div>
+    
+    <div class="info">
+      <div class="label">📍 Origem:</div>
+      <div>{{ $('preparar-dados').item.json.origem }}</div>
+    </div>
+    
+    <div class="info">
+      <div class="label">🕐 Data/Hora:</div>
+      <div>{{ $('preparar-dados').item.json.data_lead }}</div>
+    </div>
+    
+    <p style="text-align: center; margin-top: 30px; color: #666;">
+      📊 Lead salvo no Google Sheets e Supabase
+    </p>
+  </div>
+</body>
+</html>
+
+####
+
+output:
+
+
+id
+19741ff6bd133364
+threadId
+19741ff6bd133364
+labelIds
+labelIds[0]
+SENT

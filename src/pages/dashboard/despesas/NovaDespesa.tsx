@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Constants } from "@/integrations/supabase/types";
 import { despesaSchema, DespesaFormValues, formasPagamento } from "@/lib/validations/despesa";
 import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
+import { useAuth } from "@/contexts/auth";
 import { formatDate } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,11 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 
 const NovaDespesa = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  // Obter tenant_id corretamente
+  const tenantId = user?.profile?.tenant_id;
+  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
   
   const form = useForm<DespesaFormValues>({
     resolver: zodResolver(despesaSchema),
@@ -67,17 +73,34 @@ const NovaDespesa = () => {
   });
 
   const { data: fornecedoresPJ, isLoading: isLoadingPJ } = useQuery({
-    queryKey: ["fornecedores_pj"],
-    queryFn: fornecedoresPJApi.getAll,
+    queryKey: ["fornecedores_pj", validTenantId],
+    queryFn: () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado ou inválido');
+      }
+      return fornecedoresPJApi.getAll(validTenantId);
+    },
+    enabled: !!validTenantId,
   });
 
   const { data: fornecedoresPF, isLoading: isLoadingPF } = useQuery({
-    queryKey: ["fornecedores_pf"],
-    queryFn: fornecedoresPFApi.getAll,
+    queryKey: ["fornecedores_pf", validTenantId],
+    queryFn: () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado ou inválido');
+      }
+      return fornecedoresPFApi.getAll(validTenantId);
+    },
+    enabled: !!validTenantId,
   });
 
   const { mutate, isPending } = useMutation({
-    mutationFn: despesasApi.create,
+    mutationFn: (despesa: DespesaFormValues) => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return despesasApi.create(despesa, validTenantId);
+    },
     onSuccess: (data, variables) => {
       if (variables.pago && variables.data_pagamento && variables.forma_pagamento) {
         toast.success(

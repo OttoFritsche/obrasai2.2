@@ -1,207 +1,197 @@
-import { motion } from "framer-motion";
-import { ChartBar, Calendar, Shield, Zap, Brain, Database, TrendingUp, Clock, Users } from "lucide-react";
-import { useState } from "react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+  Building2, 
+  Calculator, 
+  Users, 
+  FileText, 
+  BarChart3, 
+  Shield,
+  CheckCircle,
+  Clock,
+  DollarSign
+} from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
-interface FeatureCardProps {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  index: number;
-  color: string;
-  badge: string;
-}
-
-const FeatureCard = ({ title, description, icon: Icon, index, color, badge }: FeatureCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      viewport={{ once: true }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative h-full group"
-    >
-      {/* Glow effect */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`} />
-      
-      <div className="relative h-full bg-slate-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 hover:border-construction-accent/50 transition-all duration-300">
-        {/* Icon container with animation */}
-        <motion.div
-          animate={{ 
-            scale: isHovered ? 1.1 : 1
-          }}
-          transition={{ duration: 0.5 }}
-          className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${color} mb-6 relative`}
-        >
-          <Icon className="w-8 h-8 text-white" />
-          
-          {/* Floating particles around icon */}
-          {isHovered && (
-            <>
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="absolute -top-1 -right-1 w-3 h-3 bg-construction-accent rounded-full"
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 }}
-                className="absolute -bottom-1 -left-1 w-2 h-2 bg-orange-400 rounded-full"
-              />
-            </>
-          )}
-        </motion.div>
-        
-        {/* Badge */}
-        <div className="mb-4">
-          <span className="text-sm font-semibold px-3 py-1 bg-construction-accent/20 text-construction-accent rounded-full border border-construction-accent/30">
-            {badge}
-          </span>
-        </div>
-        
-        {/* Content */}
-        <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-construction-accent transition-colors duration-300">
-          {title}
-        </h3>
-        <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors duration-300">
-          {description}
-        </p>
-        
-        {/* Progress indicator */}
-        <motion.div
-          animate={{ width: isHovered ? "100%" : "0%" }}
-          transition={{ duration: 0.3 }}
-          className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-construction-accent to-orange-400 rounded-b-2xl"
-        />
-        
-        {/* Corner decoration */}
-        <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-construction-accent/20 group-hover:border-construction-accent/50 transition-colors duration-300" />
-      </div>
-    </motion.div>
-  );
-};
-
-export const FeaturesSection = () => {
+const FeaturesSection = () => {
   const features = [
     {
-      title: "Previsão de Custos com IA",
-      description: "Antecipe desvios orçamentários antes que aconteçam com previsões baseadas em IA e dados em tempo real do seu projeto, alcançando até 98% de precisão.",
-      icon: ChartBar,
-      color: "from-construction-accent to-orange-500",
-      badge: "IA Avançada"
+      icon: Building2,
+      title: 'Gestão Completa de Obras',
+      description: 'Controle total das suas obras com CRUD completo, validação de datas, orçamentos e endereços.',
+      stats: { label: 'Obras ativas', value: 'Ilimitadas' },
+      color: 'from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30'
     },
     {
-      title: "Otimização de Cronograma",
-      description: "Otimize prazos e alocação de recursos usando insights de machine learning para evitar gargalos e atrasos, melhorando a eficiência em até 40%.",
-      icon: Calendar,
-      color: "from-blue-500 to-cyan-500",
-      badge: "Machine Learning"
+      icon: Calculator,
+      title: 'Orçamento Paramétrico com IA',
+      description: 'Cálculo automático de custos baseado na base SINAPI oficial e parâmetros personalizáveis.',
+      stats: { label: 'Base SINAPI', value: 'Integrada' },
+      color: 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30'
     },
     {
-      title: "Análise Preditiva de Riscos",
-      description: "Identifique potenciais problemas antecipadamente através do reconhecimento de padrões em relatórios e progresso, prevenindo 85% dos riscos.",
-      icon: Shield,
-      color: "from-green-500 to-emerald-500",
-      badge: "Prevenção"
-    },
-    {
-      title: "Dashboard Inteligente",
-      description: "Visualize todos os seus projetos em um painel unificado com métricas em tempo real, KPIs personalizados e alertas automáticos.",
-      icon: Database,
-      color: "from-purple-500 to-pink-500",
-      badge: "Tempo Real"
-    },
-    {
-      title: "Automação de Processos",
-      description: "Automatize tarefas repetitivas como relatórios, aprovações e notificações, economizando até 60% do tempo administrativo da equipe.",
-      icon: Zap,
-      color: "from-yellow-500 to-orange-500",
-      badge: "Automação"
-    },
-    {
-      title: "Gestão de Equipes",
-      description: "Coordene equipes distribuídas com ferramentas colaborativas, rastreamento de produtividade e comunicação centralizada.",
       icon: Users,
-      color: "from-indigo-500 to-purple-500",
-      badge: "Colaboração"
+      title: 'Fornecedores PJ e PF',
+      description: 'CRUD completo com validação de CNPJ/CPF, razão social e dados completos.',
+      stats: { label: 'Validação', value: 'Automática' },
+      color: 'from-purple-100 to-purple-200 dark:from-purple-900/30 dark:to-purple-800/30'
+    },
+    {
+      icon: FileText,
+      title: 'Controle de Despesas',
+      description: 'Categorização detalhada por 21 etapas de obra e 150+ insumos especializados.',
+      stats: { label: 'Categorias', value: '21 etapas' },
+      color: 'from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30'
+    },
+    {
+      icon: BarChart3,
+      title: 'Relatórios e Dashboards',
+      description: 'Métricas consolidadas, listagens avançadas com filtros e exportação de dados.',
+      stats: { label: 'Relatórios', value: 'Tempo real' },
+      color: 'from-indigo-100 to-indigo-200 dark:from-indigo-900/30 dark:to-indigo-800/30'
+    },
+    {
+      icon: Shield,
+      title: 'Segurança Multi-tenant',
+      description: 'RLS (Row Level Security) nativo com isolamento completo de dados por tenant.',
+      stats: { label: 'Segurança', value: 'ISO 27001' },
+      color: 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30'
     }
   ];
 
   return (
-    <section id="features" className="py-24 bg-gradient-to-b from-slate-800 to-slate-900 relative overflow-hidden">
-      {/* Background effects */}
+    <section id="features" className="relative py-24 bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Background sutil igual à hero */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-construction-accent/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-5" />
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-[0.02] dark:opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-orange-50/20 dark:from-blue-950/20 dark:via-transparent dark:to-orange-950/10" />
       </div>
-      
+
       <div className="container mx-auto px-4 relative z-10">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 bg-construction-accent/20 text-construction-accent px-4 py-2 rounded-full mb-4"
-          >
-            <Brain className="w-5 h-5" />
-            <span className="font-semibold">Recursos Inteligentes</span>
-          </motion.div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Transforme Sua Gestão com{" "}
-            <span className="bg-gradient-to-r from-construction-accent to-orange-400 bg-clip-text text-transparent">
-              Recursos Inteligentes
+          <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 mb-6">
+            <Building2 className="w-4 h-4 mr-2" />
+            Funcionalidades
+          </Badge>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            <span className="text-slate-900 dark:text-white">Sistema </span>
+            <span className="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+              Completo
             </span>
+            <span className="text-slate-900 dark:text-white"> para Construção</span>
           </h2>
-          
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Nossa tecnologia de inteligência artificial oferece insights precisos para que você 
-            tome decisões baseadas em dados e revolucione sua forma de construir
+
+          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
+            Todas as ferramentas necessárias para gerenciar suas obras de forma profissional,
+            integradas em uma única plataforma moderna e segura.
           </p>
         </motion.div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {features.map((feature, index) => (
-            <FeatureCard key={index} {...feature} index={index} />
-          ))}
-        </div>
-        
-        {/* Bottom stats */}
+
+        {/* Features Grid */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+          className="grid lg:grid-cols-3 gap-8"
         >
-          {[
-            { number: "98%", label: "Precisão nas Previsões", icon: TrendingUp },
-            { number: "40%", label: "Redução de Custos", icon: ChartBar },
-            { number: "60%", label: "Economia de Tempo", icon: Clock }
-          ].map((stat, index) => (
+          {features.map((feature, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="text-center bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/30"
+              whileHover={{ y: -5 }}
+              className="group"
             >
-              <stat.icon className="w-8 h-8 text-construction-accent mx-auto mb-3" />
-              <div className="text-3xl font-bold text-white mb-2">{stat.number}</div>
-              <div className="text-gray-400">{stat.label}</div>
+              <Card className="h-full p-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all duration-300">
+                {/* Icon */}
+                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-6`}>
+                  <feature.icon className="h-8 w-8 text-slate-600 dark:text-slate-300" />
+                </div>
+
+                {/* Content */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                    {feature.description}
+                  </p>
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">{feature.stats.label}</span>
+                    <span className="text-sm font-semibold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                      {feature.stats.value}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Status implementado */}
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Implementado</span>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Benefits Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="grid md:grid-cols-3 gap-8 mt-16"
+        >
+          {[
+            { 
+              icon: Clock, 
+              title: 'Implementação', 
+              value: '24h', 
+              desc: 'Setup completo' 
+            },
+            { 
+              icon: DollarSign, 
+              title: 'Economia projetada', 
+              value: '30%', 
+              desc: 'Otimização de custos' 
+            },
+            { 
+              icon: Shield, 
+              title: 'Segurança', 
+              value: 'RLS', 
+              desc: 'Nível enterprise' 
+            }
+          ].map((benefit, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <Card className="p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                  <benefit.icon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{benefit.value}</div>
+                <div className="text-sm font-medium text-slate-900 dark:text-white mb-1">{benefit.title}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">{benefit.desc}</div>
+              </Card>
             </motion.div>
           ))}
         </motion.div>
@@ -209,3 +199,5 @@ export const FeaturesSection = () => {
     </section>
   );
 };
+
+export { FeaturesSection };

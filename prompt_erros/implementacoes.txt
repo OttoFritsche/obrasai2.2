@@ -1,0 +1,115 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+chunk-3KILPBH2.js?v=1e64285d:324 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ chunk-3KILPBH2.js?v=1e64285d:324
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=1e64285d:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=1e64285d:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=1e64285d:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=1e64285d:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=1e64285d:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=1e64285d:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=1e64285d:19447
+commitRootImpl @ chunk-NFC5BX5N.js?v=1e64285d:19416
+commitRoot @ chunk-NFC5BX5N.js?v=1e64285d:19277
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=1e64285d:18895
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=1e64285d:9119
+(anonymous) @ chunk-NFC5BX5N.js?v=1e64285d:18627Understand this error
+chunk-3KILPBH2.js?v=1e64285d:338 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-3KILPBH2.js?v=1e64285d:338
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=1e64285d:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=1e64285d:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=1e64285d:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=1e64285d:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=1e64285d:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=1e64285d:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=1e64285d:19447
+commitRootImpl @ chunk-NFC5BX5N.js?v=1e64285d:19416
+commitRoot @ chunk-NFC5BX5N.js?v=1e64285d:19277
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=1e64285d:18895
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=1e64285d:9119
+(anonymous) @ chunk-NFC5BX5N.js?v=1e64285d:18627Understand this warning
+chunk-3KILPBH2.js?v=1e64285d:324 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+(anonymous) @ chunk-3KILPBH2.js?v=1e64285d:324
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=1e64285d:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=1e64285d:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=1e64285d:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=1e64285d:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=1e64285d:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=1e64285d:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=1e64285d:19447
+commitRootImpl @ chunk-NFC5BX5N.js?v=1e64285d:19416
+commitRoot @ chunk-NFC5BX5N.js?v=1e64285d:19277
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=1e64285d:18895
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=1e64285d:9119
+(anonymous) @ chunk-NFC5BX5N.js?v=1e64285d:18627Understand this error
+chunk-3KILPBH2.js?v=1e64285d:338 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-3KILPBH2.js?v=1e64285d:338
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=1e64285d:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=1e64285d:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=1e64285d:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=1e64285d:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=1e64285d:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=1e64285d:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=1e64285d:19447
+commitRootImpl @ chunk-NFC5BX5N.js?v=1e64285d:19416
+commitRoot @ chunk-NFC5BX5N.js?v=1e64285d:19277
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=1e64285d:18895
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=1e64285d:9119
+(anonymous) @ chunk-NFC5BX5N.js?v=1e64285d:18627Understand this warning
+LeadChatbot.tsx:114 Refused to connect to 'https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai' because it violates the following Content Security Policy directive: "connect-src 'self' https://*.supabase.co wss://*.supabase.co".
+
+sendLeadToWebhook @ LeadChatbot.tsx:114
+handleSendMessage @ LeadChatbot.tsx:238
+handleKeyPress @ LeadChatbot.tsx:303
+callCallback2 @ chunk-NFC5BX5N.js?v=1e64285d:3674
+invokeGuardedCallbackDev @ chunk-NFC5BX5N.js?v=1e64285d:3699
+invokeGuardedCallback @ chunk-NFC5BX5N.js?v=1e64285d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-NFC5BX5N.js?v=1e64285d:3736
+executeDispatch @ chunk-NFC5BX5N.js?v=1e64285d:7014
+processDispatchQueueItemsInOrder @ chunk-NFC5BX5N.js?v=1e64285d:7034
+processDispatchQueue @ chunk-NFC5BX5N.js?v=1e64285d:7043
+dispatchEventsForPlugins @ chunk-NFC5BX5N.js?v=1e64285d:7051
+(anonymous) @ chunk-NFC5BX5N.js?v=1e64285d:7174
+batchedUpdates$1 @ chunk-NFC5BX5N.js?v=1e64285d:18913
+batchedUpdates @ chunk-NFC5BX5N.js?v=1e64285d:3579
+dispatchEventForPluginEventSystem @ chunk-NFC5BX5N.js?v=1e64285d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-NFC5BX5N.js?v=1e64285d:5478
+dispatchEvent @ chunk-NFC5BX5N.js?v=1e64285d:5472
+dispatchDiscreteEvent @ chunk-NFC5BX5N.js?v=1e64285d:5449Understand this error
+LeadChatbot.tsx:114 Fetch API cannot load https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai. Refused to connect because it violates the document's Content Security Policy.
+sendLeadToWebhook @ LeadChatbot.tsx:114
+handleSendMessage @ LeadChatbot.tsx:238
+handleKeyPress @ LeadChatbot.tsx:303
+callCallback2 @ chunk-NFC5BX5N.js?v=1e64285d:3674
+invokeGuardedCallbackDev @ chunk-NFC5BX5N.js?v=1e64285d:3699
+invokeGuardedCallback @ chunk-NFC5BX5N.js?v=1e64285d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-NFC5BX5N.js?v=1e64285d:3736
+executeDispatch @ chunk-NFC5BX5N.js?v=1e64285d:7014
+processDispatchQueueItemsInOrder @ chunk-NFC5BX5N.js?v=1e64285d:7034
+processDispatchQueue @ chunk-NFC5BX5N.js?v=1e64285d:7043
+dispatchEventsForPlugins @ chunk-NFC5BX5N.js?v=1e64285d:7051
+(anonymous) @ chunk-NFC5BX5N.js?v=1e64285d:7174
+batchedUpdates$1 @ chunk-NFC5BX5N.js?v=1e64285d:18913
+batchedUpdates @ chunk-NFC5BX5N.js?v=1e64285d:3579
+dispatchEventForPluginEventSystem @ chunk-NFC5BX5N.js?v=1e64285d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-NFC5BX5N.js?v=1e64285d:5478
+dispatchEvent @ chunk-NFC5BX5N.js?v=1e64285d:5472
+dispatchDiscreteEvent @ chunk-NFC5BX5N.js?v=1e64285d:5449Understand this error
+LeadChatbot.tsx:130 ❌ Erro ao enviar lead para webhook: TypeError: Failed to fetch. Refused to connect because it violates the document's Content Security Policy.
+    at sendLeadToWebhook (LeadChatbot.tsx:114:30)
+    at handleSendMessage (LeadChatbot.tsx:238:40)
+    at handleKeyPress (LeadChatbot.tsx:303:7)
+    at HTMLUnknownElement.callCallback2 (chunk-NFC5BX5N.js?v=1e64285d:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-NFC5BX5N.js?v=1e64285d:3699:24)
+    at invokeGuardedCallback (chunk-NFC5BX5N.js?v=1e64285d:3733:39)
+    at invokeGuardedCallbackAndCatchFirstError (chunk-NFC5BX5N.js?v=1e64285d:3736:33)
+    at executeDispatch (chunk-NFC5BX5N.js?v=1e64285d:7014:11)
+    at processDispatchQueueItemsInOrder (chunk-NFC5BX5N.js?v=1e64285d:7034:15)
+    at processDispatchQueue (chunk-NFC5BX5N.js?v=1e64285d:7043:13)

@@ -1,18 +1,24 @@
-
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Lightbulb } from "lucide-react";
 import WidgetAnaliseAI from "./WidgetAnaliseAI";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 type InsightObraProps = {
   obraId: string;
 };
 
-// Define the type more explicitly for insight_data
+// Define tipos mais específicos para insight_data
 type InsightData = {
-  [key: string]: any;
+  detalhe?: string;
+  recomendacao?: string;
+  valor_estimado?: number;
+  probabilidade?: number;
+  impacto?: string;
+  prioridade?: 'alta' | 'media' | 'baixa';
+  [key: string]: unknown;
 };
 
 interface Insight {
@@ -26,6 +32,8 @@ interface Insight {
 }
 
 const InsightsObra = ({ obraId }: InsightObraProps) => {
+  const queryClient = useQueryClient();
+
   // Buscar insights para a obra específica
   const { data: insights, isLoading } = useQuery({
     queryKey: ["ai_insights", obraId],
@@ -41,10 +49,45 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
     },
   });
 
-  // Função de placeholder para gerar novos insights
+  // Mutation para gerar novos insights
+  const generateInsightsMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Usuário não autenticado');
+
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/ai-generate-insights`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          obra_id: obraId,
+          insight_types: ['RISK_PREDICTION', 'COST_OPTIMIZATION']
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao gerar insights');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidar e refetch dos insights
+      queryClient.invalidateQueries({ queryKey: ["ai_insights", obraId] });
+      toast.success("Insights gerados com sucesso!");
+    },
+    onError: (error: Error) => {
+      console.error('Erro ao gerar insights:', error);
+      toast.error(`Erro ao gerar insights: ${error.message}`);
+    },
+  });
+
+  // Função para gerar novos insights
   const handleGenerateInsights = () => {
-    // TODO: Implementar chamada real para API/Função de geração de insights AI
-    console.log("Gerando insights para a obra ID:", obraId);
+    generateInsightsMutation.mutate();
   };
 
   if (isLoading) {
@@ -66,8 +109,15 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
         <p className="text-muted-foreground">
           Ainda não há análises de IA disponíveis para esta obra.
         </p>
-        <Button onClick={handleGenerateInsights}>
-          Gerar Insights de IA
+        <Button onClick={handleGenerateInsights} disabled={generateInsightsMutation.isPending}>
+          {generateInsightsMutation.isPending ? (
+            <>
+              <Spinner size="sm" className="mr-2" />
+              Gerando Insights...
+            </>
+          ) : (
+            "Gerar Insights de IA"
+          )}
         </Button>
       </div>
     );
@@ -80,8 +130,15 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
           <Lightbulb className="h-5 w-5" />
           Insights de IA
         </h2>
-        <Button onClick={handleGenerateInsights} size="sm">
-          Atualizar Insights
+        <Button onClick={handleGenerateInsights} size="sm" disabled={generateInsightsMutation.isPending}>
+          {generateInsightsMutation.isPending ? (
+            <>
+              <Spinner size="sm" className="mr-2" />
+              Atualizando...
+            </>
+          ) : (
+            "Atualizar Insights"
+          )}
         </Button>
       </div>
 

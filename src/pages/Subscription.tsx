@@ -2,13 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { CheckIcon, XIcon, CreditCard, Crown, Zap, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { toast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/formatters";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Check, X, Calendar } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Planos de assinatura
 const subscriptionPlans = [

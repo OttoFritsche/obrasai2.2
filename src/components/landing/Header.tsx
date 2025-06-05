@@ -3,11 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Zap, ChevronDown } from "lucide-react";
+import { useTheme } from "@/providers/theme-provider";
+import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
+import logoLightHorizon from "@/assets/logo/logo_light_horizon.png";
 
 export const Header = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { theme } = useTheme();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -27,6 +31,9 @@ export const Header = () => {
     { href: "#faq", label: "FAQ" }
   ];
 
+  // Determinar qual logo usar baseado no tema
+  const logoSrc = theme === "light" ? logoLightHorizon : logoDarkHorizon;
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -43,18 +50,14 @@ export const Header = () => {
           {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-3"
+            className="flex items-center"
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="w-10 h-10 bg-gradient-to-br from-construction-accent to-orange-500 rounded-xl flex items-center justify-center"
-            >
-              <Zap className="w-6 h-6 text-white" />
-            </motion.div>
-            
-            <a href="/" className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              ObrasAI
+            <a href="/" className="flex items-center">
+              <img 
+                src={logoSrc} 
+                alt="ObrasAI" 
+                className="h-10 w-auto object-contain"
+              />
             </a>
           </motion.div>
 

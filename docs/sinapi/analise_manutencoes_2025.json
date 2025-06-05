@@ -1,0 +1,93 @@
+{
+  "arquivo": "docs\\sinapi\\Cópia de SINAPI_Manutenções_2025_04.xlsx",
+  "data_analise": "2025-06-02T19:58:07.999345",
+  "abas": {
+    "Manutenções": {
+      "nome": "Manutenções",
+      "linhas": 25361,
+      "colunas": 5,
+      "colunas_nomes": [
+        "Referência",
+        "Tipo",
+        "Código",
+        "Descrição",
+        "Manutenção"
+      ],
+      "tipos_dados": {
+        "Referência": "datetime64[ns]",
+        "Tipo": "object",
+        "Código": "int64",
+        "Descrição": "object",
+        "Manutenção": "object"
+      },
+      "valores_nulos": {
+        "Referência": 0,
+        "Tipo": 0,
+        "Código": 0,
+        "Descrição": 0,
+        "Manutenção": 0
+      },
+      "amostra_dados": [
+        {
+          "Referência": "2025-04-01 00:00:00",
+          "Tipo": "INSUMO",
+          "Código": 34643,
+          "Descrição": "CAIXA DE INSPECAO PARA ATERRAMENTO E PARA RAIOS, EM POLIPROPILENO, DIAMETRO = 300 MM X ALTURA = 400 MM (INCLUIDA TAMPA SEM ESCOTILHA)",
+          "Manutenção": "ALTERAÇÃO DE DESCRIÇÃO"
+        },
+        {
+          "Referência": "2025-04-01 00:00:00",
+          "Tipo": "INSUMO",
+          "Código": 41474,
+          "Descrição": "CAIXA DE INSPECAO PARA ATERRAMENTO OU OUTRO USO, EM PVC, DN = 300 X *300* MM (INCLUIDA TAMPA EM FERRO FUNDIDO SEM ESCOTILHA)",
+          "Manutenção": "ALTERAÇÃO DE DESCRIÇÃO"
+        },
+        {
+          "Referência": "2025-04-01 00:00:00",
+          "Tipo": "INSUMO",
+          "Código": 41475,
+          "Descrição": "CAIXA DE INSPECAO PARA ATERRAMENTO OU OUTRO USO, EM PVC, DN = 300 X 250 MM (INCLUIDA TAMPA EM FERRO FUNDIDO SEM ESCOTILHA)",
+          "Manutenção": "ALTERAÇÃO DE DESCRIÇÃO"
+        }
+      ],
+      "colunas_relevantes": [
+        "Tipo"
+      ]
+    }
+  },
+  "resumo_geral": {
+    "total_abas": 1,
+    "total_linhas": 25361,
+    "total_colunas_relevantes": 1,
+    "abas_com_dados": 1
+  },
+  "aplicabilidade": {
+    "util_para_orcamentos": true,
+    "motivos": [
+      "Volume significativo de dados (>100 registros)",
+      "Recomendada integração como módulo complementar"
+    ],
+    "areas_aplicacao": [
+      "Orçamentos de manutenção predial",
+      "Reformas e reparos",
+      "Serviços de conservação",
+      "Complemento aos dados de construção nova"
+    ],
+    "limitacoes": [
+      "Foco específico em manutenções (não construção nova)",
+      "Pode ter sobreposição com dados existentes",
+      "Necessita validação de compatibilidade regional"
+    ],
+    "integracao_recomendada": true
+  },
+  "recomendacoes": [
+    "✅ INTEGRAR: Dados úteis para módulo de manutenções",
+    "🔄 Criar tabela específica: sinapi_manutencoes",
+    "🎯 Focar em: Serviços de reforma e reparo",
+    "📊 Mapear para: Categorias existentes do sistema",
+    "🔍 Validar: Compatibilidade com coeficientes atuais",
+    "📝 Documentar: Processo de importação se aprovado",
+    "🧪 Testar: Importação em ambiente de desenvolvimento",
+    "👥 Validar: Com usuários especialistas em manutenção"
+  ]
+}

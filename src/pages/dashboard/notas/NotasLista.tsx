@@ -1,27 +1,28 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { 
+  Pencil, 
   Trash2, 
   FileText, 
   Plus, 
-  Download,
+  Check, 
   Filter,
   Loader2,
   AlertTriangle,
   Receipt,
-  ExternalLink
+  ExternalLink,
+  Eye
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/ui/metric-card";
-import { Badge } from "@/components/ui/badge";
+import FileViewer from "@/components/ui/file-viewer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,8 +41,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { notasFiscaisApi, obrasApi } from "@/services/api";
-import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { useNotasFiscais } from "@/hooks/useNotasFiscais";
+import { useObras } from "@/hooks/useObras";
+import { calculateNotasMetrics, calculatePeriodTrend } from "@/lib/utils/metrics";
 
 // Updated type definition to properly handle potential query errors
 type NotaFiscal = {
@@ -75,36 +78,44 @@ const NotasLista = () => {
   const navigate = useNavigate();
   const [notaToDelete, setNotaToDelete] = useState<string | null>(null);
   const [selectedObraId, setSelectedObraId] = useState<string>("all");
-
-  const { data: notasData, isLoading, isError, refetch } = useQuery({
-    queryKey: ["notas_fiscais"],
-    queryFn: notasFiscaisApi.getAll,
+  const [fileViewerState, setFileViewerState] = useState<{
+    isOpen: boolean;
+    fileUrl: string;
+    fileName: string;
+    fileType: string;
+  }>({
+    isOpen: false,
+    fileUrl: "",
+    fileName: "",
+    fileType: ""
   });
 
-  const { data: obras } = useQuery({
-    queryKey: ["obras"],
-    queryFn: obrasApi.getAll,
-  });
+  const { notasFiscais, isLoading, error, refetch, deleteNotaFiscal } = useNotasFiscais();
+  const { obras } = useObras();
 
   // Cast the data to the proper type
-  const notas = notasData as unknown as NotaFiscal[];
+  const notas = notasFiscais as unknown as NotaFiscal[];
 
   const filteredNotas = selectedObraId === "all" && notas
     ? notas
     : notas?.filter(nota => nota.obra_id === selectedObraId);
 
-  // Calcular métricas
-  const totalNotas = filteredNotas?.length || 0;
-  const valorTotal = filteredNotas?.reduce((sum, nota) => sum + nota.valor_total, 0) || 0;
-  const notasComArquivo = filteredNotas?.filter(n => n.arquivo_url).length || 0;
-  const mediaValor = totalNotas > 0 ? valorTotal / totalNotas : 0;
+  // Calcular métricas reais usando a função utilitária
+  const metrics = calculateNotasMetrics(notas || [], filteredNotas || []);
+  
+  // Calcular tendências baseadas em dados históricos reais
+  const trendTotalNotas = calculatePeriodTrend(notas || [], 'valor_total', 'data_emissao');
+  const trendNotasComArquivo = calculatePeriodTrend(
+    notas?.filter(n => n.arquivo_url) || [], 
+    'valor_total', 
+    'data_emissao'
+  );
 
   const handleDelete = async () => {
     if (!notaToDelete) return;
 
     try {
-      await notasFiscaisApi.delete(notaToDelete);
-      refetch();
+      await deleteNotaFiscal.mutateAsync(notaToDelete);
       setNotaToDelete(null);
     } catch (error) {
       console.error("Error deleting nota fiscal:", error);
@@ -119,6 +130,46 @@ const NotasLista = () => {
       return nota.fornecedores_pf.nome;
     }
     return "-";
+  };
+
+  const handleViewFile = (nota: NotaFiscal) => {
+    if (!nota.arquivo_url) return;
+    
+    // Determinar tipo de arquivo pela extensão da URL
+    const getFileType = (url: string): string => {
+      const extension = url.split('.').pop()?.toLowerCase();
+      switch (extension) {
+        case 'pdf':
+          return 'application/pdf';
+        case 'jpg':
+        case 'jpeg':
+          return 'image/jpeg';
+        case 'png':
+          return 'image/png';
+        case 'xml':
+          return 'text/xml';
+        default:
+          return 'application/pdf';
+      }
+    };
+
+    const fileName = `Nota_Fiscal_${nota.numero || nota.id}.${nota.arquivo_url.split('.').pop()}`;
+    
+    setFileViewerState({
+      isOpen: true,
+      fileUrl: nota.arquivo_url,
+      fileName,
+      fileType: getFileType(nota.arquivo_url)
+    });
+  };
+
+  const closeFileViewer = () => {
+    setFileViewerState({
+      isOpen: false,
+      fileUrl: "",
+      fileName: "",
+      fileType: ""
+    });
   };
 
   const columns: ColumnDef<NotaFiscal>[] = [
@@ -162,7 +213,7 @@ const NotasLista = () => {
       accessorKey: "valor_total",
       header: "Valor Total",
       cell: ({ row }) => (
-        <span className="font-mono font-medium">
+        <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
           {formatCurrencyBR(row.original.valor_total)}
         </span>
       ),
@@ -172,17 +223,28 @@ const NotasLista = () => {
       header: "Arquivo",
       cell: ({ row }) => (
         row.original.arquivo_url ? (
-          <a
-            href={row.original.arquivo_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center text-blue-500 hover:text-blue-600 text-sm"
-          >
-            <ExternalLink className="h-3 w-3 mr-1" />
-            Visualizar
-          </a>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleViewFile(row.original)}
+              className="h-8 px-2 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              Visualizar
+            </Button>
+            <a
+              href={row.original.arquivo_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 text-xs transition-colors p-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+              title="Abrir em nova aba"
+            >
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
         ) : (
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-600">
             Sem arquivo
           </Badge>
         )
@@ -195,9 +257,18 @@ const NotasLista = () => {
           <Button
             variant="ghost"
             size="icon"
+            title="Editar"
+            onClick={() => navigate(`/dashboard/notas/editar/${row.original.id}`)}
+            className="h-8 w-8 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             title="Excluir"
             onClick={() => setNotaToDelete(row.original.id)}
-            className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+            className="h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -223,7 +294,7 @@ const NotasLista = () => {
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
       <DashboardLayout>
         <motion.div
@@ -295,7 +366,7 @@ const NotasLista = () => {
           </motion.div>
         </div>
 
-        {/* Cards de métricas */}
+        {/* Cards de métricas com dados reais */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -304,31 +375,35 @@ const NotasLista = () => {
         >
           <MetricCard
             title="Total de Notas"
-            value={totalNotas.toString()}
+            value={metrics.totalNotas.toString()}
             icon={Receipt}
-            trend={{ value: 8, isUpward: true }}
-            color="blue"
+            trend={trendTotalNotas}
+            iconColor="primary"
+            className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
           />
           <MetricCard
             title="Valor Total"
-            value={formatCurrencyBR(valorTotal)}
+            value={formatCurrencyBR(metrics.valorTotal)}
             icon={Receipt}
-            trend={{ value: 12, isUpward: true }}
-            color="green"
+            trend={trendTotalNotas}
+            iconColor="success"
+            className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700"
           />
           <MetricCard
             title="Com Arquivo"
-            value={notasComArquivo.toString()}
+            value={metrics.notasComArquivo.toString()}
             icon={FileText}
-            trend={{ value: 15, isUpward: true }}
-            color="purple"
+            trend={trendNotasComArquivo}
+            iconColor="info"
+            className="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/20 dark:to-violet-800/20 border-violet-200 dark:border-violet-700"
           />
           <MetricCard
             title="Valor Médio"
-            value={formatCurrencyBR(mediaValor)}
+            value={formatCurrencyBR(metrics.mediaValor)}
             icon={Receipt}
-            trend={{ value: 3, isUpward: false }}
-            color="orange"
+            trend={undefined}
+            iconColor="warning"
+            className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
           />
         </motion.div>
         
@@ -338,21 +413,23 @@ const NotasLista = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+          <Card className="border-orange-200/50 dark:border-orange-700/50 bg-gradient-to-br from-orange-50/50 to-amber-50/50 dark:from-orange-900/10 dark:to-amber-900/10 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Filter className="h-5 w-5 text-blue-500" />
-                Filtros
+                <div className="h-8 w-8 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center">
+                  <Filter className="h-5 w-5 text-orange-500 dark:text-orange-400" />
+                </div>
+                <span className="text-orange-700 dark:text-orange-300">Filtros</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">
+                  <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
                     Obra
                   </label>
                   <Select value={selectedObraId} onValueChange={setSelectedObraId}>
-                    <SelectTrigger className="bg-background/50">
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 transition-colors">
                       <SelectValue placeholder="Todas as obras" />
                     </SelectTrigger>
                     <SelectContent>
@@ -376,7 +453,7 @@ const NotasLista = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
+          <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
             <CardContent className="p-0">
               <DataTable columns={columns} data={filteredNotas || []} />
             </CardContent>
@@ -403,6 +480,15 @@ const NotasLista = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Visualizador de arquivos */}
+        <FileViewer
+          isOpen={fileViewerState.isOpen}
+          onClose={closeFileViewer}
+          fileUrl={fileViewerState.fileUrl}
+          fileName={fileViewerState.fileName}
+          fileType={fileViewerState.fileType}
+        />
       </motion.div>
     </DashboardLayout>
   );

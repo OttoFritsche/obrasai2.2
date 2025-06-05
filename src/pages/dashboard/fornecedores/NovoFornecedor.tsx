@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -14,7 +14,11 @@ import {
   Calendar,
   MapPin,
   FileText,
-  Loader2
+  Loader2,
+  Search,
+  CheckCircle,
+  AlertCircle,
+  Globe
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -27,6 +31,9 @@ import {
   FornecedorType
 } from "@/lib/validations/fornecedor";
 import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
+import { useAuth } from "@/contexts/auth";
+import { useCNPJLookup } from "@/hooks/useCNPJLookup";
+import { formatCNPJ, formatCPF, formatPhone, formatCEP, unformat, isComplete } from "@/lib/utils/formatters";
 import { t, brazilianStates } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
@@ -55,7 +62,16 @@ import { toast } from "sonner";
 
 const NovoFornecedor = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [fornecedorType, setFornecedorType] = useState<FornecedorType>("pj");
+  const { lookupCNPJ, isLoading: isLoadingCNPJ, data: cnpjData, reset: resetCNPJ } = useCNPJLookup();
+  
+  // Flag para controlar se o preenchimento automático já foi feito
+  const filledFromCNPJRef = useRef<string | null>(null);
+  
+  // Obter tenant_id corretamente
+  const tenantId = user?.profile?.tenant_id;
+  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
   
   const pjForm = useForm<FornecedorPJFormValues>({
     resolver: zodResolver(fornecedorPJSchema),
@@ -65,6 +81,13 @@ const NovoFornecedor = () => {
       nome_fantasia: "",
       email: "",
       telefone_principal: "",
+      endereco: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
+      cep: "",
     },
   });
 
@@ -79,8 +102,100 @@ const NovoFornecedor = () => {
     },
   });
 
+  // Watch do campo CNPJ para busca automática
+  const cnpjValue = pjForm.watch("cnpj");
+
+  // Effect para buscar CNPJ automaticamente quando o campo for preenchido
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      // Verificar se o CNPJ está completo e se ainda não foi preenchido
+      if (cnpjValue && isComplete(cnpjValue, 'cnpj') && filledFromCNPJRef.current !== cnpjValue) {
+        const data = await lookupCNPJ(cnpjValue);
+        
+        if (data) {
+          // Marcar que este CNPJ já foi processado
+          filledFromCNPJRef.current = cnpjValue;
+          
+          // Preencher automaticamente TODOS os campos disponíveis
+          pjForm.setValue("razao_social", data.razao_social);
+          pjForm.setValue("nome_fantasia", data.nome_fantasia || "");
+          
+          if (data.email) {
+            pjForm.setValue("email", data.email);
+          }
+          
+          if (data.telefone_principal) {
+            pjForm.setValue("telefone_principal", data.telefone_principal);
+          }
+          
+          // Preencher dados de endereço se disponíveis
+          if (data.endereco) {
+            if (data.endereco.logradouro) {
+              pjForm.setValue("endereco", data.endereco.logradouro);
+            }
+            if (data.endereco.numero) {
+              pjForm.setValue("numero", data.endereco.numero);
+            }
+            if (data.endereco.complemento) {
+              pjForm.setValue("complemento", data.endereco.complemento);
+            }
+            if (data.endereco.bairro) {
+              pjForm.setValue("bairro", data.endereco.bairro);
+            }
+            if (data.endereco.municipio) {
+              pjForm.setValue("cidade", data.endereco.municipio);
+            }
+            if (data.endereco.uf) {
+              pjForm.setValue("estado", data.endereco.uf);
+            }
+            if (data.endereco.cep) {
+              pjForm.setValue("cep", formatCEP(data.endereco.cep));
+            }
+          }
+          
+          // Mostrar feedback sobre o preenchimento automático
+          const fieldsCount = [
+            data.razao_social,
+            data.nome_fantasia,
+            data.telefone_principal,
+            data.endereco?.logradouro,
+            data.endereco?.bairro,
+            data.endereco?.municipio,
+            data.endereco?.uf,
+            data.endereco?.cep
+          ].filter(Boolean).length;
+          
+          if (fieldsCount > 3) {
+            toast.success(`${fieldsCount} campos preenchidos automaticamente!`);
+          }
+        }
+      }
+    }, 1000); // Delay de 1 segundo para evitar muitas requisições
+
+    return () => clearTimeout(timer);
+  }, [cnpjValue, lookupCNPJ, pjForm]); // Adicionado pjForm nas dependências
+
+  // Resetar dados do CNPJ quando mudar de aba
+  useEffect(() => {
+    resetCNPJ();
+    // Resetar a flag também
+    filledFromCNPJRef.current = null;
+  }, [fornecedorType, resetCNPJ]);
+
+  // Resetar flag quando o CNPJ for alterado manualmente
+  useEffect(() => {
+    if (!cnpjValue || !isComplete(cnpjValue, 'cnpj')) {
+      filledFromCNPJRef.current = null;
+    }
+  }, [cnpjValue]);
+
   const pjMutation = useMutation({
-    mutationFn: fornecedoresPJApi.create,
+    mutationFn: (values: FornecedorPJFormValues) => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPJApi.create(values, validTenantId);
+    },
     onSuccess: () => {
       toast.success("Fornecedor PJ criado com sucesso!");
       navigate("/dashboard/fornecedores/pj");
@@ -92,7 +207,12 @@ const NovoFornecedor = () => {
   });
 
   const pfMutation = useMutation({
-    mutationFn: fornecedoresPFApi.create,
+    mutationFn: (values: FornecedorPFFormValues) => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPFApi.create(values, validTenantId);
+    },
     onSuccess: () => {
       toast.success("Fornecedor PF criado com sucesso!");
       navigate("/dashboard/fornecedores/pf");
@@ -109,6 +229,57 @@ const NovoFornecedor = () => {
 
   const onSubmitPF = (values: FornecedorPFFormValues) => {
     pfMutation.mutate(values);
+  };
+
+  // Função para buscar CNPJ manualmente
+  const handleManualCNPJLookup = async () => {
+    const cnpjValue = pjForm.getValues("cnpj");
+    if (cnpjValue) {
+      const data = await lookupCNPJ(cnpjValue);
+      
+      if (data) {
+        // Marcar que este CNPJ já foi processado para evitar duplicação
+        filledFromCNPJRef.current = cnpjValue;
+        
+        // Mesmo preenchimento automático da função principal
+        pjForm.setValue("razao_social", data.razao_social);
+        pjForm.setValue("nome_fantasia", data.nome_fantasia || "");
+        
+        if (data.email) {
+          pjForm.setValue("email", data.email);
+        }
+        
+        if (data.telefone_principal) {
+          pjForm.setValue("telefone_principal", data.telefone_principal);
+        }
+        
+        if (data.endereco) {
+          if (data.endereco.logradouro) pjForm.setValue("endereco", data.endereco.logradouro);
+          if (data.endereco.numero) pjForm.setValue("numero", data.endereco.numero);
+          if (data.endereco.complemento) pjForm.setValue("complemento", data.endereco.complemento);
+          if (data.endereco.bairro) pjForm.setValue("bairro", data.endereco.bairro);
+          if (data.endereco.municipio) pjForm.setValue("cidade", data.endereco.municipio);
+          if (data.endereco.uf) pjForm.setValue("estado", data.endereco.uf);
+          if (data.endereco.cep) pjForm.setValue("cep", formatCEP(data.endereco.cep));
+        }
+        
+        // Mostrar feedback sobre o preenchimento manual
+        const fieldsCount = [
+          data.razao_social,
+          data.nome_fantasia,
+          data.telefone_principal,
+          data.endereco?.logradouro,
+          data.endereco?.bairro,
+          data.endereco?.municipio,
+          data.endereco?.uf,
+          data.endereco?.cep
+        ].filter(Boolean).length;
+        
+        if (fieldsCount > 3) {
+          toast.success(`${fieldsCount} campos preenchidos manualmente!`);
+        }
+      }
+    }
   };
 
   return (
@@ -202,7 +373,7 @@ const NovoFornecedor = () => {
                       Dados da Pessoa Jurídica
                     </CardTitle>
                     <CardDescription>
-                      Preencha os dados do fornecedor pessoa jurídica
+                      Preencha os dados do fornecedor pessoa jurídica. Os campos serão preenchidos automaticamente após digitar o CNPJ.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -223,12 +394,52 @@ const NovoFornecedor = () => {
                                 <FormItem>
                                   <FormLabel>CNPJ</FormLabel>
                                   <FormControl>
-                                    <Input 
-                                      placeholder="00.000.000/0000-00" 
-                                      {...field} 
-                                      className="bg-background/50 focus:bg-background transition-colors"
-                                    />
+                                    <div className="relative">
+                                      <Input 
+                                        placeholder="00.000.000/0000-00" 
+                                        {...field} 
+                                        value={formatCNPJ(field.value || '')}
+                                        onChange={(e) => {
+                                          const formatted = formatCNPJ(e.target.value);
+                                          field.onChange(formatted);
+                                        }}
+                                        className={cn(
+                                          "bg-background/50 focus:bg-background transition-colors pr-10",
+                                          isLoadingCNPJ && "pr-16"
+                                        )}
+                                      />
+                                      {/* Indicadores visuais do estado da busca */}
+                                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                        {isLoadingCNPJ && (
+                                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                        )}
+                                        {cnpjData && cnpjData.situacao_ativa && (
+                                          <CheckCircle className="h-4 w-4 text-green-500" />
+                                        )}
+                                        {cnpjData && !cnpjData.situacao_ativa && (
+                                          <AlertCircle className="h-4 w-4 text-yellow-500" />
+                                        )}
+                                        {/* Botão para busca manual */}
+                                        {field.value && isComplete(field.value, 'cnpj') && !isLoadingCNPJ && (
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleManualCNPJLookup}
+                                            className="h-6 w-6 p-0 hover:bg-pink-50 dark:hover:bg-pink-950"
+                                          >
+                                            <Search className="h-3 w-3 text-pink-500" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
                                   </FormControl>
+                                  <FormDescription>
+                                    {isLoadingCNPJ && "Buscando dados do CNPJ..."}
+                                    {cnpjData && cnpjData.situacao_ativa && "✓ Empresa ativa encontrada"}
+                                    {cnpjData && !cnpjData.situacao_ativa && "⚠ Empresa encontrada mas inativa"}
+                                    {!isLoadingCNPJ && !cnpjData && "Digite o CNPJ para busca automática"}
+                                  </FormDescription>
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -244,7 +455,11 @@ const NovoFornecedor = () => {
                                     <Input 
                                       placeholder="Razão Social da empresa" 
                                       {...field} 
-                                      className="bg-background/50 focus:bg-background transition-colors"
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -262,7 +477,11 @@ const NovoFornecedor = () => {
                                     <Input 
                                       placeholder="Nome fantasia (opcional)" 
                                       {...field} 
-                                      className="bg-background/50 focus:bg-background transition-colors"
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
                                     />
                                   </FormControl>
                                   <FormDescription>
@@ -337,8 +556,16 @@ const NovoFornecedor = () => {
                                       <Input 
                                         placeholder="(00) 00000-0000" 
                                         {...field} 
-                                        value={field.value ?? ''} 
-                                        className="pl-9 bg-background/50 focus:bg-background transition-colors"
+                                        value={formatPhone(field.value || '')}
+                                        onChange={(e) => {
+                                          const formatted = formatPhone(e.target.value);
+                                          field.onChange(formatted);
+                                        }}
+                                        className={cn(
+                                          "pl-9 bg-background/50 focus:bg-background transition-colors",
+                                          cnpjData && cnpjData.telefone_principal && "border-green-200 dark:border-green-800"
+                                        )}
+                                        disabled={isLoadingCNPJ}
                                       />
                                     </div>
                                   </FormControl>
@@ -346,7 +573,249 @@ const NovoFornecedor = () => {
                                 </FormItem>
                               )}
                             />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="website"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Website</FormLabel>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                      <Input 
+                                        placeholder="https://www.empresa.com" 
+                                        {...field} 
+                                        value={field.value ?? ''} 
+                                        className="pl-9 bg-background/50 focus:bg-background transition-colors"
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormDescription>
+                                    Site da empresa (opcional)
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           </div>
+                        </div>
+
+                        {/* Seção: Endereço */}
+                        <div className="space-y-4">
+                          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Endereço
+                          </h3>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <FormField
+                              control={pjForm.control}
+                              name="cep"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>CEP</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="00000-000" 
+                                      {...field} 
+                                      value={formatCEP(field.value || '')}
+                                      onChange={(e) => {
+                                        const formatted = formatCEP(e.target.value);
+                                        field.onChange(formatted);
+                                      }}
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && cnpjData.endereco?.cep && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="endereco"
+                              render={({ field }) => (
+                                <FormItem className="md:col-span-2">
+                                  <FormLabel>Logradouro</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Rua, Avenida, etc." 
+                                      {...field} 
+                                      value={field.value ?? ''} 
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && cnpjData.endereco?.logradouro && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="numero"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Número</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="123" 
+                                      {...field} 
+                                      value={field.value ?? ''} 
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && cnpjData.endereco?.numero && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="complemento"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Complemento</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Sala, Andar, etc." 
+                                      {...field} 
+                                      value={field.value ?? ''} 
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && cnpjData.endereco?.complemento && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="bairro"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Bairro</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Nome do bairro" 
+                                      {...field} 
+                                      value={field.value ?? ''} 
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && cnpjData.endereco?.bairro && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="cidade"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Cidade</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="Nome da cidade" 
+                                      {...field} 
+                                      value={field.value ?? ''} 
+                                      className={cn(
+                                        "bg-background/50 focus:bg-background transition-colors",
+                                        cnpjData && cnpjData.endereco?.municipio && "border-green-200 dark:border-green-800"
+                                      )}
+                                      disabled={isLoadingCNPJ}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={pjForm.control}
+                              name="estado"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Estado</FormLabel>
+                                  <FormControl>
+                                    <Select 
+                                      value={field.value ?? ''} 
+                                      onValueChange={field.onChange}
+                                      disabled={isLoadingCNPJ}
+                                    >
+                                      <SelectTrigger 
+                                        className={cn(
+                                          "bg-background/50 focus:bg-background transition-colors",
+                                          cnpjData && cnpjData.endereco?.uf && "border-green-200 dark:border-green-800"
+                                        )}
+                                      >
+                                        <SelectValue placeholder="Selecione o estado" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {brazilianStates.map((state) => (
+                                          <SelectItem key={state.value} value={state.value}>
+                                            {state.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Seção: Observações */}
+                        <div className="space-y-4">
+                          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Informações Adicionais
+                          </h3>
+                          
+                          <FormField
+                            control={pjForm.control}
+                            name="observacoes"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Observações</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Informações adicionais sobre o fornecedor..." 
+                                    {...field} 
+                                    value={field.value ?? ''} 
+                                    className="bg-background/50 focus:bg-background transition-colors min-h-[80px]"
+                                    rows={3}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Informações extras que possam ser úteis (opcional)
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
 
                         {/* Botões de ação */}
@@ -361,7 +830,7 @@ const NovoFornecedor = () => {
                           </Button>
                           <Button 
                             type="submit" 
-                            disabled={pjMutation.isPending}
+                            disabled={pjMutation.isPending || isLoadingCNPJ}
                             className={cn(
                               "min-w-[140px]",
                               "bg-gradient-to-r from-pink-500 to-pink-600",
@@ -446,6 +915,11 @@ const NovoFornecedor = () => {
                                     <Input 
                                       placeholder="000.000.000-00" 
                                       {...field} 
+                                      value={formatCPF(field.value || '')}
+                                      onChange={(e) => {
+                                        const formatted = formatCPF(e.target.value);
+                                        field.onChange(formatted);
+                                      }}
                                       className="bg-background/50 focus:bg-background transition-colors"
                                     />
                                   </FormControl>
@@ -519,7 +993,11 @@ const NovoFornecedor = () => {
                                       <Input 
                                         placeholder="(00) 00000-0000" 
                                         {...field} 
-                                        value={field.value ?? ''} 
+                                        value={formatPhone(field.value || '')}
+                                        onChange={(e) => {
+                                          const formatted = formatPhone(e.target.value);
+                                          field.onChange(formatted);
+                                        }}
                                         className="pl-9 bg-background/50 focus:bg-background transition-colors"
                                       />
                                     </div>
