@@ -11,6 +11,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeFormData } from "@/lib/input-sanitizer";
 import { secureLogger } from "@/lib/secure-logger";
+import { analytics } from "@/services/analyticsApi";
 import {
   OrcamentoParametricoInput,
   OrcamentoParametrico,
@@ -302,6 +303,29 @@ export const orcamentosParametricosApi = {
       secureLogger.error("Error in orcamentosParametricosApi.duplicate", error, { orcamentoId: id });
       throw error;
     }
+  },
+
+  /**
+   * Busca orçamentos vinculados a uma obra específica
+   */
+  getByObra: async (obraId: string): Promise<OrcamentoParametrico[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("orcamentos_parametricos")
+        .select("*")
+        .eq("obra_id", obraId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        secureLogger.error("Failed to fetch orçamentos by obra", error, { obraId });
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      secureLogger.error("Error in orcamentosParametricosApi.getByObra", error, { obraId });
+      throw error;
+    }
   }
 };
 
@@ -344,6 +368,17 @@ export const calculoOrcamentoApi = {
           console.log(`📋 Itens: ${data.itens_inseridos}`);
           console.log(`🏗️ Etapas: ${data.composicao_detalhada?.resumo_etapas?.length || 0}`);
           console.log(`👷 Mão de obra: ${data.composicao_detalhada?.percentual_mao_obra}%`);
+          
+          // 📊 Track orçamento gerado
+          await analytics.trackAIUsage('orcamento', {
+            orcamento_id: request.orcamento_id,
+            custo_estimado: data.custo_estimado,
+            custo_m2: data.custo_m2,
+            itens_inseridos: data.itens_inseridos,
+            tempo_calculo_ms: data.estatisticas?.tempo_calculo_ms,
+            versao_funcao: '9.0.0',
+            forcar_recalculo: request.forcar_recalculo
+          });
           
           return {
             success: true,

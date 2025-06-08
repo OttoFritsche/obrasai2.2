@@ -119,8 +119,8 @@ const NovaObra = () => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <div className="h-10 w-10 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center">
-              <Building className="h-6 w-6 text-purple-500 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+              <Building className="h-6 w-6 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Nova Obra</h1>
@@ -410,8 +410,8 @@ const NovaObra = () => {
                       disabled={isPending}
                       className={cn(
                         "min-w-[120px]",
-                        "bg-gradient-to-r from-purple-500 to-purple-600",
-                        "hover:from-purple-600 hover:to-purple-700",
+                                      "bg-gradient-to-r from-blue-500 to-blue-600",
+              "hover:from-blue-600 hover:to-blue-700",
                         "text-white shadow-lg",
                         "transition-all duration-300"
                       )}

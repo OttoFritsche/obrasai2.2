@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import logoImageDark from '@/assets/logo/logo_image_dark.png';
+import { useAnalytics } from '@/services/analyticsApi';
 
 interface Message {
   id: string;
@@ -49,13 +50,32 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { trackEvent, trackLead, trackAIUsage } = useAnalytics();
 
-  console.log('🚀 Estado atual do chatbot:', {
-    currentStep,
-    isLeadCaptured,
-    leadData,
-    messagesCount: messages.length
-  });
+  // 📊 Track abertura do chatbot
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent({
+        event_type: 'chatbot_opened',
+        page: 'landing_page',
+        properties: {
+          timestamp: new Date().toISOString(),
+          source: 'landing_page_cta'
+        }
+      });
+    }
+  }, [isOpen, trackEvent]);
+
+  // Log apenas em desenvolvimento e quando há mudanças significativas
+  const isDev = import.meta.env.DEV;
+  if (isDev && (currentStep !== 'nome' || Object.keys(leadData).length > 0)) {
+    console.log('🚀 Estado do chatbot:', {
+      currentStep,
+      isLeadCaptured,
+      leadDataKeys: Object.keys(leadData),
+      messagesCount: messages.length
+    });
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -142,7 +162,9 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
 
   const sendLeadToWebhook = async (leadData: LeadData) => {
     try {
-      console.log('🔄 Iniciando envio de lead para n8n...', leadData);
+      if (import.meta.env.DEV) {
+        console.log('🔄 Enviando lead para n8n...');
+      }
       
       const webhookData = {
         nome: leadData.nome,
@@ -156,8 +178,6 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
         plataforma: 'ObrasAI'
       };
 
-      console.log('📤 Dados sendo enviados para webhook:', webhookData);
-
       const response = await fetch('https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai', {
         method: 'POST',
         headers: {
@@ -166,13 +186,13 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
         body: JSON.stringify(webhookData)
       });
 
-      console.log('📡 Resposta do webhook:', response.status, response.statusText);
-
       if (response.ok) {
-        console.log('✅ Lead enviado com sucesso para webhook n8n');
+        if (import.meta.env.DEV) {
+          console.log('✅ Lead enviado com sucesso');
+        }
         return true;
       } else {
-        console.error('❌ Erro ao enviar lead para webhook:', response.status);
+        console.error('❌ Erro ao enviar lead:', response.status);
         return false;
       }
     } catch (error) {
@@ -216,8 +236,10 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    console.log('📥 INICIANDO handleSendMessage com input:', inputValue.trim());
-    console.log('📊 Estado atual:', { currentStep, isLeadCaptured, leadData });
+    // Log apenas em desenvolvimento para debug
+    if (import.meta.env.DEV) {
+      console.log('📥 handleSendMessage:', inputValue.trim());
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -233,14 +255,17 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
 
     try {
       if (!isLeadCaptured) {
-        console.log(`🔄 Processando step: ${currentStep}, input: ${currentInput}`);
-        
         // Processo de captura de leads
         const currentStepData = leadFlow[currentStep as keyof typeof leadFlow];
-        console.log('📋 Dados do step atual:', currentStepData);
+        
+        if (import.meta.env.DEV) {
+          console.log(`🔄 Step: ${currentStep} -> ${currentInput}`);
+        }
         
         if (currentStepData && currentStepData.validation && !currentStepData.validation(currentInput)) {
-          console.log('❌ Validação falhou para input:', currentInput);
+          if (import.meta.env.DEV) {
+            console.log('❌ Validação falhou:', currentInput);
+          }
           let errorMessage = 'Por favor, verifique a informação digitada.';
           if (currentStep === 'email') {
             errorMessage = 'Por favor, digite um email válido.';
@@ -259,23 +284,45 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
           return;
         }
 
-        console.log('✅ Validação passou!');
-
         // Atualizar dados do lead
         const updatedLeadData = { ...leadData, [currentStep]: currentInput };
         setLeadData(updatedLeadData);
         
-        console.log('📝 Dados do lead atualizados:', updatedLeadData);
+        if (import.meta.env.DEV) {
+          console.log('✅ Lead atualizado:', Object.keys(updatedLeadData));
+        }
 
         // VERIFICAÇÃO EXPLÍCITA SE É O ÚLTIMO STEP
         if (currentStep === 'interesse') {
-          console.log('🎯 CONFIRMADO: ÚLTIMO STEP - INTERESSE!');
-          console.log('🚀 EXECUTANDO WEBHOOK AUTOMÁTICO...');
+          if (import.meta.env.DEV) {
+            console.log('🎯 Último step - enviando webhook...');
+          }
           
           // Finalizar captura de leads
           const webhookSuccess = await sendLeadToWebhook(updatedLeadData);
           
-          console.log('📡 Resultado do webhook:', webhookSuccess ? 'SUCESSO' : 'FALHA');
+          // 📊 Track lead capturado
+          if (webhookSuccess) {
+            await trackLead({
+              email: updatedLeadData.email!,
+              source: 'chatbot_landing_page',
+              campaign: 'lead_capture_flow',
+              referrer: document.referrer
+            });
+            
+            // Track conversão de lead
+            await trackEvent({
+              event_type: 'conversion_lead',
+              page: 'landing_page',
+              properties: {
+                lead_source: 'chatbot',
+                lead_email: updatedLeadData.email,
+                lead_empresa: updatedLeadData.empresa,
+                lead_cargo: updatedLeadData.cargo,
+                webhook_success: webhookSuccess
+              }
+            });
+          }
           
           const completionMessage = webhookSuccess 
             ? `🎉 Perfeito! Suas informações foram enviadas para nossa equipe comercial.\n\nNossa equipe entrará em contato em breve para apresentar como o ObrasAI pode transformar sua gestão de obras!\n\nEnquanto isso, posso responder suas dúvidas sobre nossa plataforma. O que você gostaria de saber?`
@@ -297,7 +344,9 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
           // Próxima pergunta do fluxo
           const nextStep = currentStepData?.nextStep || 'completed';
           
-          console.log(`➡️ MUDANDO DE: ${currentStep} PARA: ${nextStep}`);
+          if (import.meta.env.DEV) {
+            console.log(`➡️ ${currentStep} -> ${nextStep}`);
+          }
           
           setCurrentStep(nextStep);
           
@@ -315,9 +364,19 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
           }
         }
       } else {
-        console.log('💬 Conversa com IA (lead já capturado)');
+        if (import.meta.env.DEV) {
+          console.log('💬 Conversa com IA');
+        }
         // Conversa com IA após captura de leads - USAR PRD CONTEXT
         const aiResponse = await sendAIMessage(currentInput);
+        
+        // 📊 Track uso da IA
+        await trackAIUsage('chat', {
+          user_message: currentInput,
+          ai_response_length: aiResponse.length,
+          conversation_stage: 'post_lead_capture',
+          source: 'chatbot_landing_page'
+        });
         
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -338,7 +397,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
-      console.log('🏁 Finalizando handleSendMessage');
+      // Log removido para console limpo
       setIsLoading(false);
     }
   };
@@ -402,7 +461,9 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  console.log('🔄 RESETANDO CHAT');
+                  if (import.meta.env.DEV) {
+                    console.log('🔄 Reset chat');
+                  }
                   resetChat();
                 }}
                 className="text-white hover:bg-slate-600 h-6 w-6 p-0"

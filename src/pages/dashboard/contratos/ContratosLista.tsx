@@ -1,0 +1,459 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ColumnDef } from "@tanstack/react-table";
+import { 
+  FileText, 
+  Plus, 
+  Eye, 
+  Edit, 
+  Send,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Filter,
+  Download,
+  MoreHorizontal,
+  Trash2,
+  Bot,
+  ChevronDown
+} from "lucide-react";
+import { motion } from "framer-motion";
+
+import { DataTable } from "@/components/ui/data-table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MetricCard } from "@/components/ui/metric-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { useContratos, useGerarPDF } from "@/hooks/useContratos";
+import { useObras } from "@/hooks/useObras";
+
+interface Contrato {
+  id: string;
+  numero_contrato: string;
+  titulo: string;
+  obra_id: string;
+  obras?: { nome: string };
+  contratado_nome: string;
+  contratado_documento: string;
+  valor_total: number;
+  status: string;
+  data_inicio?: string;
+  prazo_execucao: number;
+  created_at: string;
+  url_documento?: string;
+}
+
+const ContratosLista = () => {
+  const navigate = useNavigate();
+  const [selectedObraId, setSelectedObraId] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [contratoToDelete, setContratoToDelete] = useState<string | null>(null);
+
+  const { contratos, isLoading, error, deleteContrato } = useContratos();
+  const { obras } = useObras();
+
+  // Filtrar contratos
+  const filteredContratos = contratos?.filter(contrato => {
+    const obraMatch = selectedObraId === "all" || contrato.obra_id === selectedObraId;
+    const statusMatch = selectedStatus === "all" || contrato.status === selectedStatus;
+    return obraMatch && statusMatch;
+  });
+
+  // Calcular métricas
+  const totalContratos = contratos?.length || 0;
+  const contratosAtivos = contratos?.filter(c => c.status === 'ATIVO').length || 0;
+  const contratosAguardando = contratos?.filter(c => c.status === 'AGUARDANDO_ASSINATURA').length || 0;
+  const valorTotalContratos = contratos?.reduce((sum, c) => sum + c.valor_total, 0) || 0;
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { variant: any; label: string; icon?: any }> = {
+      'RASCUNHO': { variant: 'secondary', label: 'Rascunho', icon: Edit },
+      'AGUARDANDO_ASSINATURA': { variant: 'warning', label: 'Aguardando Assinatura', icon: Clock },
+      'ATIVO': { variant: 'success', label: 'Ativo', icon: CheckCircle },
+      'CONCLUIDO': { variant: 'default', label: 'Concluído', icon: CheckCircle },
+      'CANCELADO': { variant: 'destructive', label: 'Cancelado', icon: AlertCircle }
+    };
+    
+    const config = statusConfig[status] || statusConfig['RASCUNHO'];
+    const Icon = config.icon;
+    
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        {Icon && <Icon className="h-3 w-3" />}
+        {config.label}
+      </Badge>
+    );
+  };
+
+  const handleDelete = async () => {
+    if (contratoToDelete) {
+      await deleteContrato.mutateAsync(contratoToDelete);
+      setContratoToDelete(null);
+    }
+  };
+
+  const columns: ColumnDef<Contrato>[] = [
+    {
+      accessorKey: "numero_contrato",
+      header: "Número",
+      cell: ({ row }) => (
+        <div className="font-mono text-sm">
+          {row.original.numero_contrato}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "titulo",
+      header: "Título",
+      cell: ({ row }) => (
+        <div className="max-w-[300px]">
+          <p className="font-medium truncate">{row.original.titulo}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatDateBR(row.original.created_at)}
+          </p>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "obras.nome",
+      header: "Obra",
+      cell: ({ row }) => (
+        <div className="text-muted-foreground">
+          {row.original.obras?.nome || "-"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "contratado_nome",
+      header: "Contratado",
+      cell: ({ row }) => (
+        <div>
+          <p className="text-sm font-medium">
+            {row.original.contratado_nome || "-"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {row.original.contratado_documento || "-"}
+          </p>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "valor_total",
+      header: "Valor",
+      cell: ({ row }) => (
+        <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
+          {formatCurrencyBR(row.original.valor_total)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => getStatusBadge(row.original.status),
+    },
+
+    {
+      id: "actions",
+      header: "Ações",
+      cell: ({ row }) => {
+        const contrato = row.original;
+        const [gerandoPDF, setGerandoPDF] = useState(false);
+        
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Abrir menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem
+                onClick={() => navigate(`/dashboard/contratos/${contrato.id}`)}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Visualizar
+              </DropdownMenuItem>
+              
+              {contrato.status === 'RASCUNHO' && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => navigate(`/dashboard/contratos/${contrato.id}/editar`)}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Editar
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem
+                    onClick={() => navigate(`/dashboard/contratos/${contrato.id}/editar-ia`)}
+                  >
+                    <Bot className="mr-2 h-4 w-4" />
+                    Editar com IA
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem
+                    onClick={() => navigate(`/dashboard/contratos/${contrato.id}/enviar`)}
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar para Assinatura
+                  </DropdownMenuItem>
+                </>
+              )}
+              
+                              {contrato.url_documento && (
+                  <DropdownMenuItem 
+                    onClick={() => window.open(contrato.url_documento, '_blank')}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Baixar Documento
+                </DropdownMenuItem>
+              )}
+              
+              <DropdownMenuSeparator />
+              
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => setContratoToDelete(contrato.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Carregando contratos...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center space-y-4">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+            <p className="text-muted-foreground">Erro ao carregar contratos</p>
+            <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 260,
+                damping: 20
+              }}
+              className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg"
+            >
+              <FileText className="h-6 w-6 text-white" />
+            </motion.div>
+            <div>
+              <h2 className="text-2xl font-bold">Contratos</h2>
+              <p className="text-muted-foreground">Gerencie seus contratos de obra</p>
+            </div>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link to="/dashboard/contratos/novo">
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Contrato
+              </Link>
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <Bot className="h-4 w-4" />
+                  Assistente IA
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Criar com IA</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard/contratos/novo-ia">
+                    <Bot className="mr-2 h-4 w-4" />
+                    Novo Contrato com IA
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Métricas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <MetricCard
+            title="Total de Contratos"
+            value={totalContratos.toString()}
+            description="Todos os contratos"
+            icon={FileText}
+            iconColor="primary"
+          />
+          <MetricCard
+            title="Contratos Ativos"
+            value={contratosAtivos.toString()}
+            description="Em execução"
+            icon={CheckCircle}
+            iconColor="success"
+          />
+          <MetricCard
+            title="Aguardando Assinatura"
+            value={contratosAguardando.toString()}
+            description="Pendentes de assinatura"
+            icon={Clock}
+            iconColor="warning"
+          />
+          <MetricCard
+            title="Valor Total"
+            value={formatCurrencyBR(valorTotalContratos)}
+            description="Soma de todos os contratos"
+            icon={AlertCircle}
+            iconColor="info"
+          />
+        </div>
+
+        {/* Filtros */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filtros
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Obra</label>
+                <Select value={selectedObraId} onValueChange={setSelectedObraId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todas as obras" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as obras</SelectItem>
+                    {obras?.map((obra) => (
+                      <SelectItem key={obra.id} value={obra.id}>
+                        {obra.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-2 block">Status</label>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os status</SelectItem>
+                    <SelectItem value="RASCUNHO">Rascunho</SelectItem>
+                    <SelectItem value="AGUARDANDO_ASSINATURA">Aguardando Assinatura</SelectItem>
+                    <SelectItem value="ATIVO">Ativo</SelectItem>
+                    <SelectItem value="CONCLUIDO">Concluído</SelectItem>
+                    <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabela */}
+        <Card>
+          <CardContent className="p-0">
+            <DataTable
+              columns={columns}
+              data={filteredContratos || []}
+              searchKey="titulo"
+              searchPlaceholder="Buscar por título..."
+            />
+          </CardContent>
+        </Card>
+
+        {/* Dialog de confirmação de exclusão */}
+        <AlertDialog open={!!contratoToDelete} onOpenChange={() => setContratoToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. O contrato será permanentemente excluído,
+                incluindo todos os dados relacionados.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </motion.div>
+    </DashboardLayout>
+  );
+};
+
+export default ContratosLista; 

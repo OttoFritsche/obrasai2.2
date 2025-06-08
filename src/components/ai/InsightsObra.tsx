@@ -35,16 +35,22 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
   const queryClient = useQueryClient();
 
   // Buscar insights para a obra específica
-  const { data: insights, isLoading } = useQuery({
+  const { data: insights, isLoading, error, refetch } = useQuery({
     queryKey: ["ai_insights", obraId],
     queryFn: async () => {
+      console.log("🔍 Buscando insights para obra:", obraId);
       const { data, error } = await supabase
         .from("ai_insights")
         .select("*")
         .eq("obra_id", obraId)
         .order("generated_at", { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Erro ao buscar insights:", error);
+        throw error;
+      }
+      
+      console.log("✅ Insights encontrados:", data?.length || 0, data);
       return data as Insight[] || [];
     },
   });
@@ -76,7 +82,11 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
     },
     onSuccess: () => {
       // Invalidar e refetch dos insights
-      queryClient.invalidateQueries({ queryKey: ["ai_insights", obraId] });
+      queryClient.invalidateQueries({ queryKey: ["ai_insights"] });
+      // Forçar refetch imediato
+      setTimeout(() => {
+        refetch();
+      }, 1000);
       toast.success("Insights gerados com sucesso!");
     },
     onError: (error: Error) => {
@@ -90,10 +100,33 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
     generateInsightsMutation.mutate();
   };
 
+  // Debug log
+  console.log("🎯 Estado atual:", { 
+    obraId, 
+    insights: insights?.length || 0, 
+    isLoading, 
+    error: error?.message 
+  });
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 border rounded-lg bg-red-50 text-center space-y-4">
+        <div className="flex justify-center">
+          <Lightbulb className="h-12 w-12 text-red-500" />
+        </div>
+        <h3 className="text-lg font-medium text-red-700">Erro ao carregar insights</h3>
+        <p className="text-red-600">{error.message}</p>
+        <Button onClick={() => refetch()} variant="outline">
+          Tentar novamente
+        </Button>
       </div>
     );
   }
@@ -109,16 +142,21 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
         <p className="text-muted-foreground">
           Ainda não há análises de IA disponíveis para esta obra.
         </p>
-        <Button onClick={handleGenerateInsights} disabled={generateInsightsMutation.isPending}>
-          {generateInsightsMutation.isPending ? (
-            <>
-              <Spinner size="sm" className="mr-2" />
-              Gerando Insights...
-            </>
-          ) : (
-            "Gerar Insights de IA"
-          )}
-        </Button>
+        <div className="flex gap-2 justify-center">
+          <Button onClick={handleGenerateInsights} disabled={generateInsightsMutation.isPending}>
+            {generateInsightsMutation.isPending ? (
+              <>
+                <Spinner size="sm" className="mr-2" />
+                Gerando Insights...
+              </>
+            ) : (
+              "Gerar Insights de IA"
+            )}
+          </Button>
+          <Button onClick={() => refetch()} variant="outline">
+            Recarregar
+          </Button>
+        </div>
       </div>
     );
   }
@@ -128,18 +166,23 @@ const InsightsObra = ({ obraId }: InsightObraProps) => {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <Lightbulb className="h-5 w-5" />
-          Insights de IA
+          Insights de IA ({insights.length})
         </h2>
-        <Button onClick={handleGenerateInsights} size="sm" disabled={generateInsightsMutation.isPending}>
-          {generateInsightsMutation.isPending ? (
-            <>
-              <Spinner size="sm" className="mr-2" />
-              Atualizando...
-            </>
-          ) : (
-            "Atualizar Insights"
-          )}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => refetch()} variant="outline" size="sm">
+            Recarregar
+          </Button>
+          <Button onClick={handleGenerateInsights} size="sm" disabled={generateInsightsMutation.isPending}>
+            {generateInsightsMutation.isPending ? (
+              <>
+                <Spinner size="sm" className="mr-2" />
+                Atualizando...
+              </>
+            ) : (
+              "Atualizar Insights"
+            )}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

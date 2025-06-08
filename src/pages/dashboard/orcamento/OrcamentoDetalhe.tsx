@@ -232,20 +232,20 @@ const OrcamentoDetalhe: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700 backdrop-blur-sm">
+                <Card className="bg-gradient-to-br from-[#182b4d]/10 to-[#daa916]/10 dark:from-[#182b4d]/20 dark:to-[#daa916]/20 border-[#182b4d]/30 dark:border-[#daa916]/50 backdrop-blur-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">
+          <CardTitle className="text-sm font-medium text-[#182b4d] dark:text-[#daa916]">
             Área Total
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
-            <Ruler className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            <Ruler className="h-5 w-5 text-[#182b4d] dark:text-[#daa916]" />
             <div>
-              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              <div className="text-2xl font-bold text-[#182b4d] dark:text-[#daa916]">
                 {orcamento.area_total.toFixed(2)}
               </div>
-              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+              <p className="text-xs text-[#182b4d] dark:text-[#daa916] mt-1">
                 Metros quadrados
               </p>
             </div>
@@ -534,7 +534,7 @@ const OrcamentoDetalhe: React.FC = () => {
                     </CardTitle>
                     <CardDescription>
                       {temComposicaoDetalhada ? (
-                        <span className="text-purple-600 flex items-center gap-1">
+                        <span className="text-[#182b4d] dark:text-[#daa916] flex items-center gap-1">
                           <Sparkles className="h-3 w-3" />
                           Análise detalhada disponível na aba "Composição v9.0.0"
                         </span>
@@ -607,7 +607,7 @@ const OrcamentoDetalhe: React.FC = () => {
                       itens.reduce((sum, item) => sum + (item.valor_unitario_base * item.quantidade_estimada), 0)
                     )}
                     {temComposicaoDetalhada && (
-                      <span className="ml-2 text-purple-600">
+                      <span className="ml-2 text-[#182b4d] dark:text-[#daa916]">
                         • Composição detalhada v9.0.0 ativa
                       </span>
                     )}
@@ -687,7 +687,7 @@ const OrcamentoDetalhe: React.FC = () => {
                       Sugestões da IA
                     </CardTitle>
                     {temComposicaoDetalhada && (
-                      <CardDescription className="text-purple-600 flex items-center gap-1">
+                      <CardDescription className="text-[#182b4d] dark:text-[#daa916] flex items-center gap-1">
                         <Sparkles className="h-3 w-3" />
                         Análise avançada v9.0.0 com composição detalhada
                       </CardDescription>
@@ -723,7 +723,7 @@ const OrcamentoDetalhe: React.FC = () => {
                       <ul className="space-y-2">
                         {orcamento.alertas_ia.map((alerta, index) => (
                           <li key={index} className="flex items-start gap-2">
-                            <AlertCircle className="h-4 w-4 text-orange-600 mt-0.5" />
+                            <AlertCircle className="h-4 w-4 text-[#daa916] mt-0.5" />
                             <span className="text-sm">{alerta}</span>
                           </li>
                         ))}
@@ -740,7 +740,7 @@ const OrcamentoDetalhe: React.FC = () => {
                 <CardHeader>
                   <CardTitle>Parâmetros Técnicos</CardTitle>
                   {temComposicaoDetalhada && (
-                    <CardDescription className="text-purple-600 flex items-center gap-1">
+                    <CardDescription className="text-[#182b4d] dark:text-[#daa916] flex items-center gap-1">
                       <Sparkles className="h-3 w-3" />
                       Dados gerados com IA v9.0.0 - Composição Detalhada
                     </CardDescription>

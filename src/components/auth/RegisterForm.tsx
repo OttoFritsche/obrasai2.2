@@ -12,11 +12,13 @@ import { t } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
 import { motion } from "framer-motion";
+import { useAnalytics } from "@/services/analyticsApi";
 
 export const RegisterForm = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { trackConversion } = useAnalytics();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -43,6 +45,15 @@ export const RegisterForm = () => {
         toast.error(error.message || t("auth.registerError"));
         return;
       }
+      
+      // 📊 Track conversão de signup
+      await trackConversion('signup', {
+        user_email: data.email,
+        user_name: `${data.firstName} ${data.lastName}`,
+        referrer: document.referrer,
+        user_agent: navigator.userAgent,
+        registration_method: 'email'
+      });
       
       toast.success("Cadastro realizado com sucesso! Verifique seu email para confirmar sua conta.");
       

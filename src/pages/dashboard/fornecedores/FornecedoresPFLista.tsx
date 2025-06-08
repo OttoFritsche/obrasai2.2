@@ -176,7 +176,7 @@ const FornecedoresPFLista = () => {
           className="flex items-center justify-center h-96"
         >
           <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-pink-500" />
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-green-500" />
             <p className="text-muted-foreground">Carregando fornecedores...</p>
           </div>
         </motion.div>
@@ -223,8 +223,8 @@ const FornecedoresPFLista = () => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <div className="h-10 w-10 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 flex items-center justify-center">
-              <Users className="h-6 w-6 text-pink-500 dark:text-pink-400" />
+            <div className="h-10 w-10 rounded-lg bg-green-500/10 dark:bg-green-400/10 flex items-center justify-center">
+              <Users className="h-6 w-6 text-green-500 dark:text-green-400" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Fornecedores</h1>
@@ -243,8 +243,8 @@ const FornecedoresPFLista = () => {
             <Button 
               asChild 
               className={cn(
-                "bg-gradient-to-r from-pink-500 to-pink-600",
-                "hover:from-pink-600 hover:to-pink-700",
+                              "bg-gradient-to-r from-green-500 to-green-600",
+              "hover:from-green-600 hover:to-green-700",
                 "text-white shadow-lg",
                 "transition-all duration-300"
               )}
@@ -287,10 +287,10 @@ const FornecedoresPFLista = () => {
                 <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 flex items-center justify-center">
-                        <User className="h-5 w-5 text-pink-500 dark:text-pink-400" />
-                      </div>
-                      <span className="text-pink-700 dark:text-pink-300">Fornecedores Pessoa Física</span>
+                                      <div className="h-8 w-8 rounded-lg bg-green-500/10 dark:bg-green-400/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-green-500 dark:text-green-400" />
+                </div>
+                <span className="text-green-700 dark:text-green-300">Fornecedores Pessoa Física</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">

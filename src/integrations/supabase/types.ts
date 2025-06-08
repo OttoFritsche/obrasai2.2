@@ -18,6 +18,7 @@ export type Database = {
           insight_type: string
           obra_id: string
           summary_ptbr: string | null
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -27,6 +28,7 @@ export type Database = {
           insight_type: string
           obra_id: string
           summary_ptbr?: string | null
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -36,45 +38,11 @@ export type Database = {
           insight_type?: string
           obra_id?: string
           summary_ptbr?: string | null
+          tenant_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "ai_insights_obra_id_fkey"
-            columns: ["obra_id"]
-            isOneToOne: false
-            referencedRelation: "obras"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chat_messages: {
-        Row: {
-          created_at: string
-          id: string
-          mensagem: string
-          obra_id: string | null
-          resposta_bot: string | null
-          usuario_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          mensagem: string
-          obra_id?: string | null
-          resposta_bot?: string | null
-          usuario_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          mensagem?: string
-          obra_id?: string | null
-          resposta_bot?: string | null
-          usuario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_messages_obra_id_fkey"
             columns: ["obra_id"]
             isOneToOne: false
             referencedRelation: "obras"
@@ -91,6 +59,7 @@ export type Database = {
           data_pagamento: string | null
           descricao: string
           etapa: Database["public"]["Enums"]["etapa_enum"] | null
+          forma_pagamento: string | null
           fornecedor_pf_id: string | null
           fornecedor_pj_id: string | null
           id: string
@@ -100,6 +69,7 @@ export type Database = {
           observacoes: string | null
           pago: boolean
           quantidade: number
+          tenant_id: string | null
           unidade: string | null
           updated_at: string
           usuario_id: string | null
@@ -113,6 +83,7 @@ export type Database = {
           data_pagamento?: string | null
           descricao: string
           etapa?: Database["public"]["Enums"]["etapa_enum"] | null
+          forma_pagamento?: string | null
           fornecedor_pf_id?: string | null
           fornecedor_pj_id?: string | null
           id?: string
@@ -122,6 +93,7 @@ export type Database = {
           observacoes?: string | null
           pago?: boolean
           quantidade?: number
+          tenant_id?: string | null
           unidade?: string | null
           updated_at?: string
           usuario_id?: string | null
@@ -135,6 +107,7 @@ export type Database = {
           data_pagamento?: string | null
           descricao?: string
           etapa?: Database["public"]["Enums"]["etapa_enum"] | null
+          forma_pagamento?: string | null
           fornecedor_pf_id?: string | null
           fornecedor_pj_id?: string | null
           id?: string
@@ -144,6 +117,7 @@ export type Database = {
           observacoes?: string | null
           pago?: boolean
           quantidade?: number
+          tenant_id?: string | null
           unidade?: string | null
           updated_at?: string
           usuario_id?: string | null
@@ -192,6 +166,7 @@ export type Database = {
           rg: string | null
           telefone_principal: string | null
           telefone_secundario: string | null
+          tenant_id: string | null
           tipo_fornecedor: string | null
           updated_at: string
           usuario_id: string | null
@@ -214,6 +189,7 @@ export type Database = {
           rg?: string | null
           telefone_principal?: string | null
           telefone_secundario?: string | null
+          tenant_id?: string | null
           tipo_fornecedor?: string | null
           updated_at?: string
           usuario_id?: string | null
@@ -236,6 +212,7 @@ export type Database = {
           rg?: string | null
           telefone_principal?: string | null
           telefone_secundario?: string | null
+          tenant_id?: string | null
           tipo_fornecedor?: string | null
           updated_at?: string
           usuario_id?: string | null
@@ -262,6 +239,7 @@ export type Database = {
           razao_social: string
           telefone_principal: string | null
           telefone_secundario: string | null
+          tenant_id: string | null
           updated_at: string
           usuario_id: string | null
           website: string | null
@@ -285,6 +263,7 @@ export type Database = {
           razao_social: string
           telefone_principal?: string | null
           telefone_secundario?: string | null
+          tenant_id?: string | null
           updated_at?: string
           usuario_id?: string | null
           website?: string | null
@@ -308,94 +287,12 @@ export type Database = {
           razao_social?: string
           telefone_principal?: string | null
           telefone_secundario?: string | null
+          tenant_id?: string | null
           updated_at?: string
           usuario_id?: string | null
           website?: string | null
         }
         Relationships: []
-      }
-      notas_fiscais: {
-        Row: {
-          arquivo_path: string | null
-          arquivo_url: string | null
-          chave_acesso: string | null
-          created_at: string
-          data_emissao: string
-          descricao: string | null
-          despesa_id: string | null
-          fornecedor_pf_id: string | null
-          fornecedor_pj_id: string | null
-          id: string
-          numero: string | null
-          obra_id: string
-          updated_at: string
-          usuario_upload_id: string | null
-          valor_total: number
-        }
-        Insert: {
-          arquivo_path?: string | null
-          arquivo_url?: string | null
-          chave_acesso?: string | null
-          created_at?: string
-          data_emissao?: string
-          descricao?: string | null
-          despesa_id?: string | null
-          fornecedor_pf_id?: string | null
-          fornecedor_pj_id?: string | null
-          id?: string
-          numero?: string | null
-          obra_id: string
-          updated_at?: string
-          usuario_upload_id?: string | null
-          valor_total: number
-        }
-        Update: {
-          arquivo_path?: string | null
-          arquivo_url?: string | null
-          chave_acesso?: string | null
-          created_at?: string
-          data_emissao?: string
-          descricao?: string | null
-          despesa_id?: string | null
-          fornecedor_pf_id?: string | null
-          fornecedor_pj_id?: string | null
-          id?: string
-          numero?: string | null
-          obra_id?: string
-          updated_at?: string
-          usuario_upload_id?: string | null
-          valor_total?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notas_fiscais_despesa_id_fkey"
-            columns: ["despesa_id"]
-            isOneToOne: false
-            referencedRelation: "despesas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notas_fiscais_fornecedor_pf_id_fkey"
-            columns: ["fornecedor_pf_id"]
-            isOneToOne: false
-            referencedRelation: "fornecedores_pf"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notas_fiscais_fornecedor_pj_id_fkey"
-            columns: ["fornecedor_pj_id"]
-            isOneToOne: false
-            referencedRelation: "fornecedores_pj"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notas_fiscais_obra_id_fkey"
-            columns: ["obra_id"]
-            isOneToOne: false
-            referencedRelation: "obras"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       obras: {
         Row: {
@@ -409,6 +306,7 @@ export type Database = {
           id: string
           nome: string
           orcamento: number
+          tenant_id: string | null
           updated_at: string
           usuario_id: string
         }
@@ -423,6 +321,7 @@ export type Database = {
           id?: string
           nome: string
           orcamento?: number
+          tenant_id?: string | null
           updated_at?: string
           usuario_id: string
         }
@@ -437,6 +336,7 @@ export type Database = {
           id?: string
           nome?: string
           orcamento?: number
+          tenant_id?: string | null
           updated_at?: string
           usuario_id?: string
         }
@@ -452,6 +352,7 @@ export type Database = {
           last_name: string | null
           role: string
           telefone: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -463,6 +364,7 @@ export type Database = {
           last_name?: string | null
           role?: string
           telefone?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -474,52 +376,8 @@ export type Database = {
           last_name?: string | null
           role?: string
           telefone?: string | null
+          tenant_id?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          cancel_at_period_end: boolean | null
-          created_at: string
-          current_period_end: string | null
-          current_period_start: string | null
-          id: string
-          status: string | null
-          stripe_customer_id: string | null
-          stripe_price_id: string | null
-          stripe_product_id: string | null
-          stripe_subscription_id: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          cancel_at_period_end?: boolean | null
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_product_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          cancel_at_period_end?: boolean | null
-          created_at?: string
-          current_period_end?: string | null
-          current_period_start?: string | null
-          id?: string
-          status?: string | null
-          stripe_customer_id?: string | null
-          stripe_price_id?: string | null
-          stripe_product_id?: string | null
-          stripe_subscription_id?: string | null
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -533,7 +391,7 @@ export type Database = {
     Enums: {
       categoria_enum:
         | "MATERIAL_CONSTRUCAO"
-        | "MAO_DE_OBRA" 
+        | "MAO_DE_OBRA"
         | "ALUGUEL_EQUIPAMENTOS"
         | "TRANSPORTE_FRETE"
         | "TAXAS_LICENCAS"
@@ -573,6 +431,9 @@ export type Database = {
         | "ENTREGA_VISTORIA"
         | "DOCUMENTACAO"
         | "OUTROS"
+        | "ADAPTACAO_ESTRUTURAL"
+        | "RECUPERACAO_ESTRUTURAL"
+        | "READEQUACAO_INSTALACOES"
       insumo_enum:
         | "CONCRETO_USINADO"
         | "ACO_CA50"
@@ -880,6 +741,9 @@ export const Constants = {
         "ENTREGA_VISTORIA",
         "DOCUMENTACAO",
         "OUTROS",
+        "ADAPTACAO_ESTRUTURAL",
+        "RECUPERACAO_ESTRUTURAL",
+        "READEQUACAO_INSTALACOES",
       ],
       insumo_enum: [
         "CONCRETO_USINADO",
@@ -1033,4 +897,4 @@ export const Constants = {
       ],
     },
   },
-} as const
+} as const 

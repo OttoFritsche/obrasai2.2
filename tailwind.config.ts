@@ -18,11 +18,17 @@ export default {
     },
     extend: {
       colors: {
+        // Paleta profissional para construção civil
         construction: {
-          dark: "#182b4d",
-          light: "#ffffff",
-          accent: "#daa916",
+          primary: "hsl(var(--construction-primary))",
+          secondary: "hsl(var(--construction-secondary))",
+          accent: "hsl(var(--construction-accent))",
+          success: "hsl(var(--construction-success))",
+          warning: "hsl(var(--construction-warning))",
+          danger: "hsl(var(--construction-danger))",
         },
+        
+        // Sistema de design base
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

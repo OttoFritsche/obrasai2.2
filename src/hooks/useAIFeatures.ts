@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useToast } from './use-toast';
+import { analytics } from '@/services/analyticsApi';
 
 /**
  * 🤖 Hook: useAIFeatures
@@ -196,6 +197,16 @@ export function useAIFeatures() {
           searchSuggestions: response.sugestoes_relacionadas || [],
           averageResponseTime: (prev.averageResponseTime + response.tempo_processamento_ms) / 2
         }));
+
+        // 📊 Track busca SINAPI
+        await analytics.trackAIUsage('sinapi', {
+          query: searchParams.query,
+          resultados_encontrados: response.total_encontrados,
+          tempo_processamento_ms: response.tempo_processamento_ms,
+          tipo_busca: searchParams.tipo_busca,
+          estado: searchParams.estado,
+          threshold: searchParams.threshold
+        });
 
         toast({
           title: "✅ Busca concluída",

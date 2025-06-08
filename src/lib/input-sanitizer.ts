@@ -145,8 +145,11 @@ export const sanitizeFormData = (data: Record<string, unknown>): Record<string, 
       }
     } else if (typeof value === 'number') {
       sanitized[key as keyof Record<string, unknown>] = value;
+    } else if (value instanceof Date) {
+      // Preservar objetos Date sem alterar
+      sanitized[key as keyof Record<string, unknown>] = value;
     } else if (typeof value === 'object' && value !== null) {
-      // Recursão para objetos aninhados
+      // Recursão para objetos aninhados (mas não Date)
       sanitized[key as keyof Record<string, unknown>] = sanitizeFormData(value as Record<string, unknown>) as Record<string, unknown>[keyof Record<string, unknown>];
     } else {
       sanitized[key as keyof Record<string, unknown>] = value;

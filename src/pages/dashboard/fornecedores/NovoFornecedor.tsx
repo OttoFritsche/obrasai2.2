@@ -298,11 +298,11 @@ const NovoFornecedor = () => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <div className="h-10 w-10 rounded-lg bg-pink-500/10 dark:bg-pink-400/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg bg-green-500/10 dark:bg-green-400/10 flex items-center justify-center">
               {fornecedorType === "pj" ? (
-                <Building2 className="h-6 w-6 text-pink-500 dark:text-pink-400" />
+                <Building2 className="h-6 w-6 text-green-500 dark:text-green-400" />
               ) : (
-                <User className="h-6 w-6 text-pink-500 dark:text-pink-400" />
+                <User className="h-6 w-6 text-green-500 dark:text-green-400" />
               )}
             </div>
             <div>
@@ -369,7 +369,7 @@ const NovoFornecedor = () => {
                 <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-pink-500" />
+                      <Building2 className="h-5 w-5 text-green-500" />
                       Dados da Pessoa Jurídica
                     </CardTitle>
                     <CardDescription>
@@ -426,9 +426,9 @@ const NovoFornecedor = () => {
                                             variant="ghost"
                                             size="sm"
                                             onClick={handleManualCNPJLookup}
-                                            className="h-6 w-6 p-0 hover:bg-pink-50 dark:hover:bg-pink-950"
+                                            className="h-6 w-6 p-0 hover:bg-green-50 dark:hover:bg-green-950"
                                           >
-                                            <Search className="h-3 w-3 text-pink-500" />
+                                            <Search className="h-3 w-3 text-green-500" />
                                           </Button>
                                         )}
                                       </div>
@@ -833,8 +833,8 @@ const NovoFornecedor = () => {
                             disabled={pjMutation.isPending || isLoadingCNPJ}
                             className={cn(
                               "min-w-[140px]",
-                              "bg-gradient-to-r from-pink-500 to-pink-600",
-                              "hover:from-pink-600 hover:to-pink-700",
+                              "bg-gradient-to-r from-green-500 to-green-600",
+                              "hover:from-green-600 hover:to-green-700",
                               "text-white shadow-lg",
                               "transition-all duration-300"
                             )}
@@ -869,7 +869,7 @@ const NovoFornecedor = () => {
                 <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-pink-500" />
+                      <User className="h-5 w-5 text-green-500" />
                       Dados da Pessoa Física
                     </CardTitle>
                     <CardDescription>
@@ -1024,8 +1024,8 @@ const NovoFornecedor = () => {
                             disabled={pfMutation.isPending}
                             className={cn(
                               "min-w-[140px]",
-                              "bg-gradient-to-r from-pink-500 to-pink-600",
-                              "hover:from-pink-600 hover:to-pink-700",
+                              "bg-gradient-to-r from-green-500 to-green-600",
+                              "hover:from-green-600 hover:to-green-700",
                               "text-white shadow-lg",
                               "transition-all duration-300"
                             )}

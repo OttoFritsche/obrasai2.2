@@ -178,7 +178,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#182b4d] to-blue-600 bg-clip-text text-transparent">
                 Novo Orçamento Paramétrico
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
@@ -202,7 +202,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
             </Badge>
             <Badge 
               variant="outline" 
-              className="flex items-center space-x-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-700"
+                              className="flex items-center space-x-1 bg-[#182b4d]/10 dark:bg-[#182b4d]/30 text-[#182b4d] dark:text-[#daa916] border-[#182b4d]/30 dark:border-[#daa916]/50"
             >
               <Layers className="h-4 w-4" />
               <span>Composição Detalhada</span>
@@ -216,7 +216,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 backdrop-blur-sm">
+                      <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/50 to-[#182b4d]/10 dark:from-blue-900/10 dark:to-[#182b4d]/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-blue-900 dark:text-blue-300">
                 <div className="h-8 w-8 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
@@ -270,26 +270,26 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                   className="space-y-4"
                 >
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-purple-500 dark:text-purple-400" />
-                    </div>
-                    <h3 className="font-semibold text-purple-900 dark:text-purple-300">Mão de Obra Realística</h3>
-                  </div>
-                  <ul className="space-y-2 text-sm text-purple-700 dark:text-purple-300">
+                                    <div className="h-8 w-8 rounded-lg bg-[#182b4d]/10 dark:bg-[#daa916]/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-[#182b4d] dark:text-[#daa916]" />
+                </div>
+                <h3 className="font-semibold text-[#182b4d] dark:text-[#daa916]">Mão de Obra Realística</h3>
+              </div>
+              <ul className="space-y-2 text-sm text-[#182b4d] dark:text-[#daa916]">
                     <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-500" />
+                      <CheckCircle className="h-4 w-4 text-[#182b4d] dark:text-[#daa916]" />
                       <span>30-35% do custo total</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-500" />
+                      <CheckCircle className="h-4 w-4 text-[#182b4d] dark:text-[#daa916]" />
                       <span>12 especialidades diferentes</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-500" />
+                      <CheckCircle className="h-4 w-4 text-[#182b4d] dark:text-[#daa916]" />
                       <span>Horas detalhadas por função</span>
                     </li>
                     <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-purple-500" />
+                      <CheckCircle className="h-4 w-4 text-[#182b4d] dark:text-[#daa916]" />
                       <span>Valores regionais</span>
                     </li>
                   </ul>
@@ -302,28 +302,28 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                   className="space-y-4"
                 >
                   <div className="flex items-center space-x-2">
-                    <div className="h-8 w-8 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center">
-                      <Hammer className="h-5 w-5 text-orange-500 dark:text-orange-400" />
+                    <div className="h-8 w-8 rounded-lg bg-[#daa916]/10 dark:bg-[#daa916]/20 flex items-center justify-center">
+                      <Hammer className="h-5 w-5 text-[#daa916] dark:text-[#daa916]" />
                     </div>
-                    <h3 className="font-semibold text-orange-900 dark:text-orange-300">Materiais Detalhados</h3>
+                    <h3 className="font-semibold text-[#daa916] dark:text-[#daa916]">Materiais Detalhados</h3>
                   </div>
-                  <ul className="space-y-2 text-sm text-orange-700 dark:text-orange-300">
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-orange-500" />
-                      <span>35+ itens específicos</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-orange-500" />
-                      <span>Quantidades técnicas precisas</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-orange-500" />
-                      <span>Preços SINAPI atualizados</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-orange-500" />
-                      <span>Índices regionais aplicados</span>
-                    </li>
+                  <ul className="space-y-2 text-sm text-[#daa916] dark:text-[#daa916]">
+                                          <li className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-[#daa916]" />
+                        <span>35+ itens específicos</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-[#daa916]" />
+                        <span>Quantidades técnicas precisas</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-[#daa916]" />
+                        <span>Preços SINAPI atualizados</span>
+                      </li>
+                      <li className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-[#daa916]" />
+                        <span>Índices regionais aplicados</span>
+                      </li>
                   </ul>
                 </motion.div>
               </div>

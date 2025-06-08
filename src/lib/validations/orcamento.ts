@@ -557,13 +557,13 @@ export const STATUS_ORCAMENTO_LABELS: Record<StatusOrcamento, string> = {
 };
 
 /**
- * Cores para status (Tailwind classes)
+ * Cores para status (Tailwind classes) - Paleta profissional construção civil
  */
 export const STATUS_ORCAMENTO_CORES: Record<StatusOrcamento, string> = {
-  RASCUNHO: "bg-gray-100 text-gray-800",
-  CONCLUIDO: "bg-blue-100 text-blue-800",
-  VINCULADO_OBRA: "bg-green-100 text-green-800",
-  CONVERTIDO: "bg-purple-100 text-purple-800"
+  RASCUNHO: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+  CONCLUIDO: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  VINCULADO_OBRA: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  CONVERTIDO: "bg-[#daa916]/20 text-[#182b4d] dark:bg-[#daa916]/30 dark:text-[#daa916]"
 };
 
 /**

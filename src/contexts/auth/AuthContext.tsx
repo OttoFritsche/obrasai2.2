@@ -39,7 +39,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error loading user data:', error);
       // ✅ Se houver erro ao carregar dados, pode ser token corrompido
       if (error instanceof Error && error.message.includes('JWT')) {
-        console.log('🔄 Token JWT corrompido detectado, limpando dados...');
+        if (import.meta.env.DEV) {
+          console.log('🔄 Token corrompido, limpando dados...');
+        }
         await clearCorruptedAuthData();
         setUser(null);
         setSession(null);
@@ -61,8 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth state changes FIRST
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // ✅ Log apenas eventos importantes
-        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        // ✅ Log apenas eventos importantes em desenvolvimento
+        const isDev = import.meta.env.DEV;
+        if (isDev && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
           console.log('🔄 Auth:', event);
         }
         
@@ -70,7 +73,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
           // Se for TOKEN_REFRESHED mas sem session, significa que o refresh falhou
           if (event === 'TOKEN_REFRESHED' && !session) {
-            console.log('🔄 Token refresh failed, clearing session');
+            if (import.meta.env.DEV) {
+              console.log('🔄 Token refresh failed');
+            }
             await clearCorruptedAuthData();
             setUser(null);
             setSession(null);

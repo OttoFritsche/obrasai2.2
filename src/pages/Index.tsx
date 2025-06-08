@@ -86,7 +86,7 @@ const Index = () => {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-purple-500/5 blur-3xl"
+          className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-[#182b4d]/5 blur-3xl"
         />
         <motion.div
           animate={{
@@ -98,7 +98,7 @@ const Index = () => {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute top-1/2 left-1/2 h-96 w-96 rounded-full bg-orange-500/5 blur-3xl transform -translate-x-1/2 -translate-y-1/2"
+          className="absolute top-1/2 left-1/2 h-96 w-96 rounded-full bg-[#daa916]/5 blur-3xl transform -translate-x-1/2 -translate-y-1/2"
         />
       </div>
 

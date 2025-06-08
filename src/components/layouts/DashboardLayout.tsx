@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon, Calculator } from "lucide-react";
+import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon, Calculator, Building2, FileSignature } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
@@ -21,63 +21,79 @@ type DashboardLayoutProps = {
   children: React.ReactNode;
 };
 
-// Configuração dos itens do menu com cores suaves
+// Configuração dos itens do menu com cores profissionais da construção civil
 const menuItems = [
   {
     icon: LayoutDashboard,
     label: "Dashboard",
     path: "/dashboard",
-    color: "text-blue-500 dark:text-blue-400",
-    bgColor: "bg-blue-500/10 dark:bg-blue-400/10",
-    hoverBg: "hover:bg-blue-500/20 dark:hover:bg-blue-400/20"
+    color: "text-slate-600 dark:text-slate-400",
+    bgColor: "bg-slate-600/10 dark:bg-slate-400/10",
+    hoverBg: "hover:bg-slate-600/20 dark:hover:bg-slate-400/20"
   },
   {
     icon: Building,
     label: "Obras",
     path: "/dashboard/obras",
-    color: "text-purple-500 dark:text-purple-400",
-    bgColor: "bg-purple-500/10 dark:bg-purple-400/10",
-    hoverBg: "hover:bg-purple-500/20 dark:hover:bg-purple-400/20"
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-600/10 dark:bg-blue-400/10",
+    hoverBg: "hover:bg-blue-600/20 dark:hover:bg-blue-400/20"
   },
   {
     icon: Banknote,
     label: "Despesas",
     path: "/dashboard/despesas",
-    color: "text-green-500 dark:text-green-400",
-    bgColor: "bg-green-500/10 dark:bg-green-400/10",
-    hoverBg: "hover:bg-green-500/20 dark:hover:bg-green-400/20"
+    color: "text-orange-600 dark:text-orange-400",
+    bgColor: "bg-orange-600/10 dark:bg-orange-400/10",
+    hoverBg: "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
   },
   {
     icon: Calculator,
     label: "Orçamentos IA",
     path: "/dashboard/orcamentos",
-    color: "text-cyan-500 dark:text-cyan-400",
-    bgColor: "bg-cyan-500/10 dark:bg-cyan-400/10",
-    hoverBg: "hover:bg-cyan-500/20 dark:hover:bg-cyan-400/20"
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-600/10 dark:bg-emerald-400/10",
+    hoverBg: "hover:bg-emerald-600/20 dark:hover:bg-emerald-400/20"
   },
   {
     icon: FileText,
     label: "Notas Fiscais",
     path: "/dashboard/notas",
-    color: "text-orange-500 dark:text-orange-400",
-    bgColor: "bg-orange-500/10 dark:bg-orange-400/10",
-    hoverBg: "hover:bg-orange-500/20 dark:hover:bg-orange-400/20"
+    color: "text-indigo-600 dark:text-indigo-400",
+    bgColor: "bg-indigo-600/10 dark:bg-indigo-400/10",
+    hoverBg: "hover:bg-indigo-600/20 dark:hover:bg-indigo-400/20"
   },
   {
     icon: Users,
     label: "Fornecedores",
     path: "/dashboard/fornecedores/pj",
-    color: "text-pink-500 dark:text-pink-400",
-    bgColor: "bg-pink-500/10 dark:bg-pink-400/10",
-    hoverBg: "hover:bg-pink-500/20 dark:hover:bg-pink-400/20"
+    color: "text-teal-600 dark:text-teal-400",
+    bgColor: "bg-teal-600/10 dark:bg-teal-400/10",
+    hoverBg: "hover:bg-teal-600/20 dark:hover:bg-teal-400/20"
+  },
+  {
+    icon: FileSignature,
+    label: "Contratos",
+    path: "/dashboard/contratos",
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-600/10 dark:bg-amber-400/10",
+    hoverBg: "hover:bg-amber-600/20 dark:hover:bg-amber-400/20"
   },
   {
     icon: Sparkles,
     label: "Chat IA",
     path: "/dashboard/chat",
-    color: "text-yellow-500 dark:text-yellow-400",
-    bgColor: "bg-yellow-500/10 dark:bg-yellow-400/10",
-    hoverBg: "hover:bg-yellow-500/20 dark:hover:bg-yellow-400/20"
+    color: "text-purple-600 dark:text-purple-400",
+    bgColor: "bg-purple-600/10 dark:bg-purple-400/10",
+    hoverBg: "hover:bg-purple-600/20 dark:hover:bg-purple-400/20"
+  },
+  {
+    icon: Building2,
+    label: "Plantas IA",
+    path: "/dashboard/plantas",
+    color: "text-cyan-600 dark:text-cyan-400",
+    bgColor: "bg-cyan-600/10 dark:bg-cyan-400/10",
+    hoverBg: "hover:bg-cyan-600/20 dark:hover:bg-cyan-400/20"
   }
 ];
 

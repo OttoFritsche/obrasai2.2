@@ -4,109 +4,141 @@
 
 @layer base {
   :root {
-    /* Light mode colors - mais suaves e modernas */
+    /* Light mode colors - paleta profissional corporativa para construção civil */
     --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    --foreground: 218 23% 23%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card-foreground: 218 23% 23%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
+    --popover-foreground: 218 23% 23%;
 
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
+    /* Azul corporativo como cor principal */
+    --primary: 214 32% 27%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
+    /* Cinza médio como secundário */
+    --secondary: 214 13% 93%;
+    --secondary-foreground: 218 23% 23%;
 
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
+    --muted: 214 13% 96%;
+    --muted-foreground: 214 16% 46%;
 
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
+    --accent: 214 13% 93%;
+    --accent-foreground: 218 23% 23%;
 
-    --destructive: 0 72.2% 50.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 214 32% 27%;
 
     --radius: 0.75rem;
 
-    /* Sidebar light mode - cores suaves */
-    --sidebar-background: 210 20% 98%;
-    --sidebar-foreground: 224 71.4% 4.1%;
-    --sidebar-primary: 220.9 39.3% 11%;
-    --sidebar-primary-foreground: 210 20% 98%;
-    --sidebar-accent: 220 14.3% 95.9%;
-    --sidebar-accent-foreground: 220.9 39.3% 11%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 224 71.4% 4.1%;
+    /* Sidebar light mode - tons corporativos */
+    --sidebar-background: 216 20% 98%;
+    --sidebar-foreground: 218 23% 23%;
+    --sidebar-primary: 214 32% 27%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 13% 93%;
+    --sidebar-accent-foreground: 218 23% 23%;
+    --sidebar-border: 214 20% 88%;
+    --sidebar-ring: 214 32% 27%;
 
-    /* Cores especiais light mode */
-    --gradient-start: 220 100% 97%;
-    --gradient-end: 220 95% 92%;
-    --card-hover: 220 20% 97%;
-    --success: 142 70% 45%;
+    /* Cores funcionais light mode - paleta profissional */
+    --gradient-start: 216 20% 98%;
+    --gradient-end: 214 13% 93%;
+    --card-hover: 214 15% 95%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 32 95% 44%;
     --warning-foreground: 0 0% 100%;
-    --info: 217 91% 60%;
+    --info: 214 84% 56%;
     --info-foreground: 0 0% 100%;
+
+    /* Cores específicas da construção civil - versão profissional */
+    --construction-primary: 214 32% 27%;
+    /* Azul corporativo */
+    --construction-secondary: 214 13% 93%;
+    /* Cinza claro */
+    --construction-accent: 214 84% 56%;
+    /* Azul informativo */
+    --construction-success: 142 71% 45%;
+    /* Verde sucesso */
+    --construction-warning: 32 95% 44%;
+    /* Laranja alerta */
+    --construction-danger: 0 72% 51%;
+    /* Vermelho erro */
   }
 
   .dark {
-    /* Dark mode colors - mais suaves e elegantes */
-    --background: 224 71% 4%;
-    --foreground: 210 20% 98%;
+    /* Dark mode colors - elegante e profissional */
+    --background: 218 23% 6%;
+    --foreground: 214 20% 95%;
 
-    --card: 224 71% 4%;
-    --card-foreground: 210 20% 98%;
+    --card: 218 23% 8%;
+    --card-foreground: 214 20% 95%;
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 218 23% 8%;
+    --popover-foreground: 214 20% 95%;
 
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
+    /* Azul claro como primário no escuro */
+    --primary: 214 84% 70%;
+    --primary-foreground: 218 23% 6%;
 
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
+    /* Cinza escuro como secundário */
+    --secondary: 218 23% 14%;
+    --secondary-foreground: 214 20% 95%;
 
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 218 23% 14%;
+    --muted-foreground: 214 16% 65%;
 
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 218 23% 14%;
+    --accent-foreground: 214 20% 95%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 72% 61%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+    --border: 218 23% 14%;
+    --input: 218 23% 14%;
+    --ring: 214 84% 70%;
 
-    /* Sidebar dark mode - cores suaves */
-    --sidebar-background: 224 71% 4%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 210 20% 98%;
-    --sidebar-primary-foreground: 220.9 39.3% 11%;
-    --sidebar-accent: 215 27.9% 16.9%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 215 27.9% 16.9%;
-    --sidebar-ring: 216 12.2% 83.9%;
+    /* Sidebar dark mode - tons corporativos */
+    --sidebar-background: 218 23% 6%;
+    --sidebar-foreground: 214 20% 95%;
+    --sidebar-primary: 214 84% 70%;
+    --sidebar-primary-foreground: 218 23% 6%;
+    --sidebar-accent: 218 23% 14%;
+    --sidebar-accent-foreground: 214 20% 95%;
+    --sidebar-border: 218 23% 14%;
+    --sidebar-ring: 214 84% 70%;
 
-    /* Cores especiais dark mode */
-    --gradient-start: 224 71% 6%;
-    --gradient-end: 224 71% 10%;
-    --card-hover: 224 71% 8%;
-    --success: 142 70% 45%;
+    /* Cores funcionais dark mode - paleta profissional */
+    --gradient-start: 218 23% 8%;
+    --gradient-end: 218 23% 12%;
+    --card-hover: 218 23% 10%;
+    --success: 142 71% 55%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 32 95% 54%;
     --warning-foreground: 0 0% 100%;
-    --info: 217 91% 60%;
-    --info-foreground: 0 0% 100%;
+    --info: 214 84% 70%;
+    --info-foreground: 218 23% 6%;
+
+    /* Cores específicas da construção civil - modo escuro */
+    --construction-primary: 214 84% 70%;
+    /* Azul claro */
+    --construction-secondary: 218 23% 14%;
+    /* Cinza escuro */
+    --construction-accent: 214 84% 56%;
+    /* Azul informativo */
+    --construction-success: 142 71% 55%;
+    /* Verde sucesso */
+    --construction-warning: 32 95% 54%;
+    /* Laranja alerta */
+    --construction-danger: 0 72% 61%;
+    /* Vermelho erro */
   }
 }
 

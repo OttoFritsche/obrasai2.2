@@ -40,8 +40,8 @@ const subscriptionPlans = [
     period: "/mês",
     description: "Perfeito para construtoras de médio porte",
     icon: Crown,
-    color: "from-purple-500 to-pink-600",
-    iconColor: "text-purple-500",
+    color: "from-[#182b4d] to-[#daa916]",
+    iconColor: "text-[#182b4d]",
     features: [
       "Até 15 obras simultâneas",
       "Análises de IA para previsão de custos",
@@ -59,8 +59,8 @@ const subscriptionPlans = [
     period: "/mês",
     description: "Solução robusta para grandes construtoras",
     icon: Sparkles,
-    color: "from-orange-500 to-red-600",
-    iconColor: "text-orange-500",
+    color: "from-[#daa916] to-red-600",
+    iconColor: "text-[#daa916]",
     features: [
       "Obras ilimitadas",
       "IA avançada para otimização de projetos",
@@ -161,7 +161,7 @@ const Subscription = () => {
               stiffness: 260,
               damping: 20
             }}
-            className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg"
+            className="h-10 w-10 rounded-lg bg-gradient-to-br from-[#182b4d] to-[#daa916] flex items-center justify-center shadow-lg"
           >
             <CreditCard className="h-6 w-6 text-white" />
           </motion.div>
@@ -189,7 +189,7 @@ const Subscription = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                     <p className="font-medium">Plano:</p>
-                    <p className="font-bold bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
+                    <p className="font-bold bg-gradient-to-r from-[#182b4d] to-[#daa916] bg-clip-text text-transparent">
                       {currentPlanId === "basic" ? "Básico" : 
                        currentPlanId === "pro" ? "Profissional" : 
                        "Empresarial"}
@@ -235,7 +235,7 @@ const Subscription = () => {
                 <Button 
                   onClick={handleManageSubscription}
                   disabled={isLoading}
-                  className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+                  className="w-full md:w-auto bg-gradient-to-r from-[#182b4d] to-[#daa916] hover:from-[#182b4d]/90 hover:to-[#daa916]/90 text-white"
                 >
                   {isLoading ? "Carregando..." : "Gerenciar Assinatura"}
                 </Button>
@@ -243,7 +243,7 @@ const Subscription = () => {
                 <Button 
                   onClick={() => handleSubscribe("pro")}
                   disabled={isLoading}
-                  className="w-full md:w-auto bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white"
+                  className="w-full md:w-auto bg-gradient-to-r from-[#182b4d] to-[#daa916] hover:from-[#182b4d]/90 hover:to-[#daa916]/90 text-white"
                 >
                   {isLoading ? "Carregando..." : "Assinar Agora"}
                 </Button>
@@ -275,7 +275,7 @@ const Subscription = () => {
                 >
                   <Card className={cn(
                     "relative border-border/50 bg-card/95 backdrop-blur-sm transition-all duration-300",
-                    plan.highlight && "border-purple-500/50 shadow-lg shadow-purple-500/20"
+                    plan.highlight && "border-[#182b4d]/50 shadow-lg shadow-[#182b4d]/20"
                   )}>
                     {plan.highlight && (
                       <motion.div
@@ -284,7 +284,7 @@ const Subscription = () => {
                         transition={{ delay: 0.5 }}
                         className="absolute -top-3 left-1/2 transform -translate-x-1/2"
                       >
-                        <div className="bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg">
+                        <div className="bg-gradient-to-r from-[#182b4d] to-[#daa916] text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg">
                           Mais Popular
                         </div>
                       </motion.div>
@@ -300,7 +300,7 @@ const Subscription = () => {
                       </div>
                       <CardTitle className={cn(
                         "text-xl font-bold",
-                        plan.highlight && "bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent"
+                        plan.highlight && "bg-gradient-to-r from-[#182b4d] to-[#daa916] bg-clip-text text-transparent"
                       )}>
                         {plan.name}
                       </CardTitle>
@@ -333,7 +333,7 @@ const Subscription = () => {
                         variant={currentPlanId === plan.id ? "outline" : "default"}
                         className={cn(
                           "w-full transition-all duration-300",
-                          plan.highlight && !currentPlanId === plan.id && "bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white",
+                          plan.highlight && !currentPlanId === plan.id && "bg-gradient-to-r from-[#182b4d] to-[#daa916] hover:from-[#182b4d]/90 hover:to-[#daa916]/90 text-white",
                           currentPlanId === plan.id && "border-2 border-green-500/50 bg-green-500/10 text-green-600"
                         )}
                         onClick={() => handleSubscribe(plan.id)}

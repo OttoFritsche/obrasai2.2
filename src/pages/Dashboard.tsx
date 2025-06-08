@@ -351,28 +351,36 @@ const Dashboard = () => {
                     <span className="font-medium">Nova Despesa</span>
                   </Link>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-violet-200 dark:border-violet-700 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" asChild>
+                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" asChild>
                   <Link to="/dashboard/fornecedores/pj">
-                    <div className="h-10 w-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+                    <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
                     </div>
                     <span className="font-medium">Fornecedores</span>
                   </Link>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-orange-200 dark:border-orange-700 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors" asChild>
+                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-[#daa916]/30 dark:border-[#daa916]/50 text-[#daa916] dark:text-[#daa916] hover:bg-[#daa916]/10 dark:hover:bg-[#daa916]/20 transition-colors" asChild>
                   <Link to="/dashboard/orcamentos">
-                    <div className="h-10 w-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                    <div className="h-10 w-10 rounded-lg bg-[#daa916]/20 dark:bg-[#daa916]/30 flex items-center justify-center">
+                      <FileText className="h-6 w-6 text-[#daa916] dark:text-[#daa916]" />
                     </div>
                     <span className="font-medium">Orçamentos IA</span>
                   </Link>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" asChild>
+                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-[#182b4d]/30 dark:border-[#daa916]/50 text-[#182b4d] dark:text-[#daa916] hover:bg-[#182b4d]/10 dark:hover:bg-[#daa916]/20 transition-colors" asChild>
                   <Link to="/dashboard/chat">
-                    <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <div className="h-10 w-10 rounded-lg bg-[#182b4d]/20 dark:bg-[#daa916]/30 flex items-center justify-center">
+                      <Sparkles className="h-6 w-6 text-[#182b4d] dark:text-[#daa916]" />
                     </div>
                     <span className="font-medium">Chat IA</span>
+                  </Link>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-cyan-200 dark:border-cyan-700 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors" asChild>
+                  <Link to="/dashboard/plantas">
+                    <div className="h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                      <Building className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
+                    </div>
+                    <span className="font-medium">Plantas IA</span>
                   </Link>
                 </Button>
               </div>

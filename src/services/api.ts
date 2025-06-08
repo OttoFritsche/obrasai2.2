@@ -65,14 +65,22 @@ export const obrasApi = {
         if (!date) return null;
         
         try {
-          // Se já for um objeto Date
-          if (date instanceof Date) {
+          // Se já for um objeto Date válido
+          if (date instanceof Date && !isNaN(date.getTime())) {
             return date.toISOString().split('T')[0];
           }
           
           // Se for string, tenta converter para Date
-          if (typeof date === 'string') {
+          if (typeof date === 'string' && date.trim() !== '') {
             const dateObj = new Date(date);
+            if (!isNaN(dateObj.getTime())) {
+              return dateObj.toISOString().split('T')[0];
+            }
+          }
+          
+          // Se for objeto que pode ser convertido para Date (timestamp, etc)
+          if (typeof date === 'number' || (typeof date === 'object' && date !== null)) {
+            const dateObj = new Date(date as any);
             if (!isNaN(dateObj.getTime())) {
               return dateObj.toISOString().split('T')[0];
             }
@@ -80,26 +88,31 @@ export const obrasApi = {
           
           return null;
         } catch (error) {
-          console.warn('❌ Erro ao formatar data:', date, error);
+          console.warn('❌ Erro ao formatar data (create):', error);
           return null;
         }
       };
 
+      // Preparar dados para inserção
+      const dataParaInserir = {
+        nome: sanitizedObra.nome,
+        endereco: sanitizedObra.endereco,
+        cidade: sanitizedObra.cidade,
+        estado: sanitizedObra.estado,
+        cep: sanitizedObra.cep,
+        orcamento: sanitizedObra.orcamento,
+        data_inicio: formatDateForDB(sanitizedObra.data_inicio),
+        data_prevista_termino: formatDateForDB(sanitizedObra.data_prevista_termino),
+        usuario_id: user.id
+        // tenant_id: tenantId  // Temporariamente removido
+      };
+      
+
+
       // 🚨 TEMPORÁRIO: Não incluir tenant_id até migração ser aplicada
       const { data, error } = await supabase
         .from("obras")
-        .insert({
-          nome: sanitizedObra.nome,
-          endereco: sanitizedObra.endereco,
-          cidade: sanitizedObra.cidade,
-          estado: sanitizedObra.estado,
-          cep: sanitizedObra.cep,
-          orcamento: sanitizedObra.orcamento,
-          data_inicio: formatDateForDB(sanitizedObra.data_inicio),
-          data_prevista_termino: formatDateForDB(sanitizedObra.data_prevista_termino),
-          usuario_id: user.id
-          // tenant_id: tenantId  // Temporariamente removido
-        })
+        .insert(dataParaInserir)
         .select()
         .single();
 
@@ -125,14 +138,22 @@ export const obrasApi = {
         if (!date) return null;
         
         try {
-          // Se já for um objeto Date
-          if (date instanceof Date) {
+          // Se já for um objeto Date válido
+          if (date instanceof Date && !isNaN(date.getTime())) {
             return date.toISOString().split('T')[0];
           }
           
           // Se for string, tenta converter para Date
-          if (typeof date === 'string') {
+          if (typeof date === 'string' && date.trim() !== '') {
             const dateObj = new Date(date);
+            if (!isNaN(dateObj.getTime())) {
+              return dateObj.toISOString().split('T')[0];
+            }
+          }
+          
+          // Se for objeto que pode ser convertido para Date (timestamp, etc)
+          if (typeof date === 'number' || (typeof date === 'object' && date !== null)) {
+            const dateObj = new Date(date as any);
             if (!isNaN(dateObj.getTime())) {
               return dateObj.toISOString().split('T')[0];
             }
@@ -140,7 +161,7 @@ export const obrasApi = {
           
           return null;
         } catch (error) {
-          console.warn('❌ Erro ao formatar data:', date, error);
+          console.warn('❌ Erro ao formatar data (update):', error);
           return null;
         }
       };
@@ -150,6 +171,8 @@ export const obrasApi = {
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
         data_prevista_termino: formatDateForDB(sanitizedObra.data_prevista_termino),
       };
+      
+
 
       const { data, error } = await supabase
         .from("obras")
@@ -620,12 +643,7 @@ export const despesasApi = {
       // ✅ Calcular o custo total (quantidade * valor_unitario)
       const custoTotal = sanitizedDespesa.quantidade * sanitizedDespesa.valor_unitario;
 
-      console.log('🔍 Criando despesa:', {
-        quantidade: sanitizedDespesa.quantidade,
-        valor_unitario: sanitizedDespesa.valor_unitario,
-        custo_calculado: custoTotal,
-        tenant_id: tenantId.trim()
-      });
+
 
       // ✅ Formatar as datas para o formato do banco de dados
       const formattedDespesa = {
@@ -650,7 +668,6 @@ export const despesasApi = {
         throw error;
       }
 
-      console.log('✅ Despesa criada com sucesso:', data);
       return data;
     } catch (error) {
       secureLogger.error("Error in despesasApi.create", error, { tenantId });

@@ -45,6 +45,18 @@ import ConsultaSinapi from "@/pages/admin/sinapi/ConsultaSinapi";
 // IA
 import ChatAIPage from "@/pages/dashboard/ai/Chat";
 
+// Plantas IA
+import { PlantasIA } from "@/pages/dashboard/PlantasIA";
+
+// Contratos
+import ContratosLista from "@/pages/dashboard/contratos/ContratosLista";
+import NovoContrato from "@/pages/dashboard/contratos/NovoContrato";
+import ContratoDetalhe from "@/pages/dashboard/contratos/ContratoDetalhe";
+import ContratoComIA from "@/pages/dashboard/contratos/ContratoComIA";
+
+// Admin - Dashboard de Métricas (apenas para administradores do sistema)
+import MetricsDashboard from "@/pages/admin/MetricsDashboard";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -157,6 +169,11 @@ const App = () => {
               <ChatAIPage />
             </ProtectedRoute>
           } />
+          <Route path="dashboard/plantas" element={
+            <ProtectedRoute>
+              <PlantasIA />
+            </ProtectedRoute>
+          } />
 
           {/* Rotas de Orçamento Paramétrico */}
           <Route path="dashboard/orcamentos" element={
@@ -179,6 +196,40 @@ const App = () => {
           <Route path="dashboard/sinapi" element={
             <ProtectedRoute>
               <ConsultaSinapi />
+            </ProtectedRoute>
+          } />
+
+          {/* Rotas de Contratos */}
+          <Route path="dashboard/contratos" element={
+            <ProtectedRoute>
+              <ContratosLista />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/contratos/novo" element={
+            <ProtectedRoute>
+              <NovoContrato />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/contratos/novo-ia" element={
+            <ProtectedRoute>
+              <ContratoComIA />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/contratos/:id/editar-ia" element={
+            <ProtectedRoute>
+              <ContratoComIA />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/contratos/:id" element={
+            <ProtectedRoute>
+              <ContratoDetalhe />
+            </ProtectedRoute>
+          } />
+          
+          {/* 📊 ROTA ADMINISTRATIVA - Dashboard de Métricas (apenas para admins do sistema) */}
+          <Route path="admin/metrics" element={
+            <ProtectedRoute>
+              <MetricsDashboard />
             </ProtectedRoute>
           } />
           

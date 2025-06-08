@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
   Building, 
@@ -50,6 +50,7 @@ import { useCEP } from "@/hooks/useCEP";
 const EditarObra = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   
   const form = useForm<ObraFormValues>({
@@ -90,8 +91,14 @@ const EditarObra = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: (values: ObraFormValues) => obrasApi.update(id as string, values),
     onSuccess: () => {
+      // ✅ Invalidar cache da obra específica E todas as obras
+      queryClient.invalidateQueries({ queryKey: ["obra", id] });
+      queryClient.invalidateQueries({ queryKey: ["obras"] });
+      
+      console.log("🔄 Cache invalidado após atualização da obra");
       toast.success("Obra atualizada com sucesso!");
-      navigate("/dashboard/obras");
+      // ✅ Voltar para a página de detalhes da obra ao invés da lista
+      navigate(`/dashboard/obras/${id}`);
     },
     onError: (error) => {
       console.error("Error updating obra:", error);
@@ -136,7 +143,7 @@ const EditarObra = () => {
           className="flex items-center justify-center h-96"
         >
           <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-purple-500" />
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
             <p className="text-muted-foreground">Carregando dados da obra...</p>
           </div>
         </motion.div>
@@ -183,8 +190,8 @@ const EditarObra = () => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <div className="h-10 w-10 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center">
-              <Building className="h-6 w-6 text-purple-500 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+              <Building className="h-6 w-6 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Editar Obra</h1>
@@ -201,7 +208,7 @@ const EditarObra = () => {
           >
             <Button 
               variant="outline" 
-              onClick={() => navigate("/dashboard/obras")}
+              onClick={() => navigate(`/dashboard/obras/${id}`)}
               className="group"
             >
               <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
@@ -463,7 +470,7 @@ const EditarObra = () => {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => navigate("/dashboard/obras")}
+                      onClick={() => navigate(`/dashboard/obras/${id}`)}
                       disabled={isPending}
                     >
                       Cancelar
@@ -473,8 +480,8 @@ const EditarObra = () => {
                       disabled={isPending}
                       className={cn(
                         "min-w-[120px]",
-                        "bg-gradient-to-r from-purple-500 to-purple-600",
-                        "hover:from-purple-600 hover:to-purple-700",
+                                      "bg-gradient-to-r from-blue-500 to-blue-600",
+              "hover:from-blue-600 hover:to-blue-700",
                         "text-white shadow-lg",
                         "transition-all duration-300"
                       )}

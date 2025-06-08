@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { 
   Receipt, 
   ArrowLeft, 
@@ -49,6 +49,11 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 const NovaDespesa = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  
+  // Obter parâmetros da URL
+  const obraIdFromUrl = searchParams.get('obra_id');
+  const retornarPara = searchParams.get('return');
   
   // Obter tenant_id corretamente
   const tenantId = user?.profile?.tenant_id;
@@ -57,6 +62,7 @@ const NovaDespesa = () => {
   const form = useForm<DespesaFormValues>({
     resolver: zodResolver(despesaSchema),
     defaultValues: {
+      obra_id: obraIdFromUrl || "",  // ✅ Pré-popular obra da URL
       descricao: "",
       data_despesa: new Date(),
       quantidade: 1,
@@ -109,7 +115,10 @@ const NovaDespesa = () => {
       } else {
         toast.success("Despesa criada com sucesso!");
       }
-      navigate("/dashboard/despesas");
+      
+      // ✅ Redirecionar para página de retorno ou lista de despesas
+      const redirectTo = retornarPara || "/dashboard/despesas";
+      navigate(redirectTo);
     },
     onError: (error) => {
       console.error("Error creating despesa:", error);
@@ -169,7 +178,16 @@ const NovaDespesa = () => {
             <div>
               <h1 className="text-2xl font-bold">Nova Despesa</h1>
               <p className="text-sm text-muted-foreground">
-                Registre uma nova despesa na obra
+                {obraIdFromUrl ? (
+                  <>
+                    Registre uma nova despesa para a obra selecionada
+                    <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                      Obra pré-selecionada
+                    </span>
+                  </>
+                ) : (
+                  "Registre uma nova despesa na obra"
+                )}
               </p>
             </div>
           </motion.div>
@@ -181,7 +199,7 @@ const NovaDespesa = () => {
           >
             <Button 
               variant="outline" 
-              onClick={() => navigate("/dashboard/despesas")}
+              onClick={() => navigate(retornarPara || "/dashboard/despesas")}
               className="border-border/50 hover:bg-accent"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -285,7 +303,7 @@ const NovaDespesa = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ''}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
                               >
                                 <SelectTrigger className="bg-background/50">
                                   <SelectValue placeholder="Selecione uma categoria" />
@@ -313,7 +331,7 @@ const NovaDespesa = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ''}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
                               >
                                 <SelectTrigger className="bg-background/50">
                                   <SelectValue placeholder="Selecione um insumo" />
@@ -341,7 +359,7 @@ const NovaDespesa = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ''}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
                               >
                                 <SelectTrigger className="bg-background/50">
                                   <SelectValue placeholder="Selecione uma etapa" />

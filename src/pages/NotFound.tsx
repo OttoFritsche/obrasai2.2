@@ -31,7 +31,7 @@ const NotFound = () => {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute top-20 left-10 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl"
+          className="absolute top-20 left-10 h-64 w-64 rounded-full bg-[#daa916]/10 blur-3xl"
         />
         <motion.div
           animate={{
@@ -43,7 +43,7 @@ const NotFound = () => {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute bottom-20 right-10 h-64 w-64 rounded-full bg-purple-500/10 blur-3xl"
+          className="absolute bottom-20 right-10 h-64 w-64 rounded-full bg-[#182b4d]/10 blur-3xl"
         />
       </div>
 
@@ -60,13 +60,13 @@ const NotFound = () => {
           className="flex justify-center mb-8"
         >
           <div className="relative">
-            <div className="h-32 w-32 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-2xl">
+            <div className="h-32 w-32 rounded-3xl bg-gradient-to-br from-[#daa916] to-red-600 flex items-center justify-center shadow-2xl">
               <Construction className="h-16 w-16 text-white" />
             </div>
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute -inset-4 rounded-3xl border-4 border-dashed border-orange-500/30"
+              className="absolute -inset-4 rounded-3xl border-4 border-dashed border-[#daa916]/30"
             />
           </div>
         </motion.div>
@@ -78,7 +78,7 @@ const NotFound = () => {
           transition={{ delay: 0.2 }}
           className="relative mb-6"
         >
-          <h1 className="text-9xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
+          <h1 className="text-9xl font-bold bg-gradient-to-r from-[#daa916] to-red-600 bg-clip-text text-transparent">
             404
           </h1>
           <motion.div
@@ -86,7 +86,7 @@ const NotFound = () => {
             transition={{ duration: 2, repeat: Infinity }}
             className="absolute inset-0 flex items-center justify-center"
           >
-            <AlertTriangle className="h-20 w-20 text-orange-500/20" />
+            <AlertTriangle className="h-20 w-20 text-[#daa916]/20" />
           </motion.div>
         </motion.div>
 
@@ -122,7 +122,7 @@ const NotFound = () => {
             variant="outline"
             className={cn(
               "group relative overflow-hidden",
-              "hover:border-orange-500/50"
+              "hover:border-[#daa916]/50"
             )}
           >
             <span className="relative z-10 flex items-center">
@@ -130,7 +130,7 @@ const NotFound = () => {
               Voltar
             </span>
             <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-600/10"
+              className="absolute inset-0 bg-gradient-to-r from-[#daa916]/10 to-red-600/10"
               initial={{ x: "-100%" }}
               whileHover={{ x: 0 }}
               transition={{ duration: 0.3 }}
@@ -141,8 +141,8 @@ const NotFound = () => {
             onClick={() => navigate("/")}
             className={cn(
               "group relative overflow-hidden",
-              "bg-gradient-to-r from-orange-500 to-red-600",
-              "hover:from-orange-600 hover:to-red-700",
+                          "bg-gradient-to-r from-[#daa916] to-red-600",
+            "hover:from-[#daa916]/90 hover:to-red-700",
               "text-white shadow-lg",
               "transition-all duration-300 transform hover:scale-[1.02]"
             )}

@@ -405,18 +405,18 @@ const OrcamentosLista: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-[#182b4d]/10 to-[#daa916]/10 dark:from-[#182b4d]/20 dark:to-[#daa916]/20 border-[#182b4d]/30 dark:border-[#daa916]/50 backdrop-blur-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                              <CardTitle className="text-sm font-medium text-[#182b4d] dark:text-[#daa916]">
                 v9.0.0 Detalhados
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                                  <Sparkles className="h-5 w-5 text-[#182b4d] dark:text-[#daa916]" />
                 <div>
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{estatisticas.comComposicaoDetalhada}</div>
-                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                                      <div className="text-2xl font-bold text-[#182b4d] dark:text-[#daa916]">{estatisticas.comComposicaoDetalhada}</div>
+                    <p className="text-xs text-[#182b4d] dark:text-[#daa916] mt-1">
                     Com IA avançada
                   </p>
                 </div>
@@ -535,7 +535,7 @@ const OrcamentosLista: React.FC = () => {
               <CardDescription>
                 Visualize e gerencie todos os seus orçamentos paramétricos
                 {estatisticas.comComposicaoDetalhada > 0 && (
-                  <span className="text-purple-600 ml-2">
+                  <span className="text-[#182b4d] dark:text-[#daa916] ml-2">
                     • {estatisticas.comComposicaoDetalhada} com composição detalhada v9.0.0
                   </span>
                 )}
@@ -551,7 +551,7 @@ const OrcamentosLista: React.FC = () => {
                   </p>
                   <Button
                     onClick={() => navigate('/dashboard/orcamentos/novo')}
-                    className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-700 hover:to-purple-700"
+                    className="bg-gradient-to-r from-blue-600 to-[#182b4d] hover:from-blue-700 hover:to-[#182b4d]/90"
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Criar Primeiro Orçamento v9.0.0
@@ -597,7 +597,7 @@ const OrcamentosLista: React.FC = () => {
                         
                         <TableCell>
                           <div className="space-y-1">
-                            <Badge variant="outline" className="text-xs bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300">
+                            <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300">
                               {TIPO_OBRA_LABELS[orcamento.tipo_obra]}
                             </Badge>
                             <div className="text-xs text-muted-foreground">

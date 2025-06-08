@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { analytics } from "@/services/analyticsApi";
 
 export type ChatMessage = {
   id: string;
@@ -81,6 +82,14 @@ export const aiApi = {
     
     // A Edge Function retorna o objeto completo da mensagem salva
     if (data?.result) {
+      // 📊 Track uso da IA Chat
+      await analytics.trackAIUsage('chat', {
+        user_message: message,
+        obra_id: obraId,
+        ai_response_length: data.result.resposta_bot?.length || 0,
+        conversation_type: obraId ? 'contextual_obra' : 'general_chat'
+      });
+      
       return data.result as ChatMessage;
     } else {
       throw new Error('Resposta inválida da IA');

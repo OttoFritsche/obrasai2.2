@@ -13,8 +13,8 @@ interface Obra {
   cidade: string;
   estado: string;
   orcamento: number;
-  data_inicio?: string;
-  data_prevista_termino?: string;
+  data_inicio?: string | null;
+  data_prevista_termino?: string | null;
 }
 
 export const RecentProjects = () => {
@@ -24,11 +24,11 @@ export const RecentProjects = () => {
   const recentProjects = obras?.slice(0, 4) || [];
 
   const getStatusColor = (obra: Obra): string => {
-    if (!obra.data_inicio) return "bg-gray-500";
+    if (!obra.data_inicio) return "bg-slate-500";
     if (obra.data_prevista_termino && new Date(obra.data_prevista_termino) < new Date()) {
       return "bg-red-500"; // Atrasado
     }
-    return "bg-green-500"; // Em andamento
+    return "bg-emerald-500"; // Em andamento
   };
 
   const getStatusLabel = (obra: Obra): string => {
@@ -39,71 +39,81 @@ export const RecentProjects = () => {
     return "Em andamento";
   };
 
+  const getBadgeVariant = (obra: Obra): "default" | "destructive" | "secondary" => {
+    if (!obra.data_inicio) return "secondary";
+    if (obra.data_prevista_termino && new Date(obra.data_prevista_termino) < new Date()) {
+      return "destructive";
+    }
+    return "default";
+  };
+
   if (isLoading) {
     return (
-      <Card className="bg-[#182b4d] text-white border border-[#daa916]">
+      <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium text-[#daa916]">
+          <CardTitle className="text-lg font-semibold text-slate-700 dark:text-slate-300">
             Obras Recentes
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#daa916]"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  if (!recentProjects.length) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+            Obras Recentes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-slate-500 dark:text-slate-400 py-8">
+            Nenhuma obra cadastrada ainda.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="bg-[#182b4d] text-white border border-[#daa916]">
+    <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700 backdrop-blur-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium text-[#daa916] flex items-center justify-between">
+        <CardTitle className="text-lg font-semibold text-slate-700 dark:text-slate-300">
           Obras Recentes
-          <Button variant="outline" size="sm" asChild className="text-[#daa916] border-[#daa916]">
-            <Link to="/dashboard/obras">Ver todas</Link>
-          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>
         {recentProjects.length === 0 ? (
-          <div className="text-center py-8 space-y-4">
-            <Building className="h-12 w-12 text-gray-400 mx-auto" />
-            <div>
-              <h3 className="font-medium text-white">Nenhuma obra cadastrada</h3>
-              <p className="text-sm text-gray-400">
-                Comece criando sua primeira obra
-              </p>
-            </div>
-            <Button asChild className="bg-[#daa916] text-[#182b4d] hover:bg-[#daa916]/90">
-              <Link to="/dashboard/obras/nova">Criar Obra</Link>
-            </Button>
-          </div>
+          <p className="text-center text-slate-500 dark:text-slate-400 py-8">
+            Nenhuma obra encontrada.
+          </p>
         ) : (
           <div className="space-y-3">
             {recentProjects.map((project) => (
               <div
                 key={project.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-600/50 bg-gray-800/50"
+                className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white/60 dark:bg-slate-700/60 hover:bg-white/80 dark:hover:bg-slate-700/80 transition-colors backdrop-blur-sm"
               >
                 <div className="flex items-center space-x-3">
                   <div className={`w-3 h-3 rounded-full ${getStatusColor(project)}`}></div>
                   <div>
-                    <p className="font-medium text-white">{project.nome}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="font-medium text-slate-900 dark:text-slate-100">{project.nome}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                       {project.cidade}/{project.estado}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-white">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                     {formatCurrencyBR(project.orcamento)}
                   </p>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs ${getStatusColor(project).replace('bg-', 'border-')} ${getStatusColor(project).replace('bg-', 'text-')}`}
-                  >
+                  <Badge variant={getBadgeVariant(project)} className="text-xs">
                     {getStatusLabel(project)}
                   </Badge>
                 </div>

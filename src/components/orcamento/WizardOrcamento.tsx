@@ -41,6 +41,7 @@ import {
 import { orcamentosParametricosApi, calculoOrcamentoApi } from "@/services/orcamentoApi";
 import { useCEP } from "@/hooks/useCEP";
 import { SinapiSelector } from "./SinapiSelector";
+import { obrasApi } from "@/services/api";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES
@@ -144,6 +145,8 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
   const [carregando, setCarregando] = useState(false);
   const [calculandoIA, setCalculandoIA] = useState(false);
   const [codigosSinapiSelecionados, setCodigosSinapiSelecionados] = useState<CodigoSinapiSelecionado[]>([]);
+  const [dadosObra, setDadosObra] = useState<any>(null);
+  const [carregandoObra, setCarregandoObra] = useState(false);
 
   // Hook do CEP
   const { buscarCEP, isLoading: cepLoading } = useCEP();
@@ -167,6 +170,48 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
       obra_id: obraId || dadosIniciais?.obra_id
     }
   });
+
+  // ====================================
+  // 🎯 BUSCAR DADOS DA OBRA (NOVO)
+  // ====================================
+
+  /**
+   * Busca dados da obra para pré-popular o formulário
+   */
+  const buscarDadosObra = useCallback(async () => {
+    if (!obraId) return;
+
+    try {
+      setCarregandoObra(true);
+      
+      const obra = await obrasApi.getById(obraId);
+      
+      if (obra) {
+        setDadosObra(obra);
+        
+        // Pré-popular formulário com dados da obra
+        form.setValue('nome_orcamento', `Orçamento - ${obra.nome}`);
+        form.setValue('cidade', obra.cidade);
+        form.setValue('estado', obra.estado);
+        form.setValue('cep', obra.cep);
+        form.setValue('descricao', `Orçamento paramétrico para a obra ${obra.nome}, localizada em ${obra.endereco}, ${obra.cidade}/${obra.estado}.`);
+        
+        toast.success(`✅ Dados da obra "${obra.nome}" carregados!`);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados da obra:', error);
+      toast.error('❌ Erro ao carregar dados da obra');
+    } finally {
+      setCarregandoObra(false);
+    }
+  }, [obraId, form]);
+
+  // Effect para buscar dados da obra quando component montar
+  useEffect(() => {
+    if (obraId && modo === 'novo') {
+      buscarDadosObra();
+    }
+  }, [obraId, modo, buscarDadosObra]);
 
   // ====================================
   // 🎯 FUNÇÃO DE BUSCA AUTOMÁTICA DE CEP
@@ -907,9 +952,24 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
             <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Orçamento Paramétrico com IA
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm lg:text-base">
-              Crie orçamentos precisos em 5 etapas simples
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 text-sm lg:text-base">
+                Crie orçamentos precisos em 5 etapas simples
+              </p>
+              {/* Indicador de obra vinculada */}
+              {carregandoObra && (
+                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700">
+                  <div className="animate-spin rounded-full h-3 w-3 border border-blue-600 border-t-transparent mr-1"></div>
+                  Carregando obra...
+                </Badge>
+              )}
+              {dadosObra && (
+                <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700">
+                  <Building className="h-3 w-3 mr-1" />
+                  Vinculado: {dadosObra.nome}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
         

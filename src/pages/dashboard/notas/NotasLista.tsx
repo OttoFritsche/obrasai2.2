@@ -286,7 +286,7 @@ const NotasLista = () => {
           className="flex items-center justify-center h-96"
         >
           <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-orange-500" />
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-yellow-500" />
             <p className="text-muted-foreground">Carregando notas fiscais...</p>
           </div>
         </motion.div>
@@ -333,8 +333,8 @@ const NotasLista = () => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <div className="h-10 w-10 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center">
-              <Receipt className="h-6 w-6 text-orange-500 dark:text-orange-400" />
+            <div className="h-10 w-10 rounded-lg bg-yellow-500/10 dark:bg-yellow-400/10 flex items-center justify-center">
+              <Receipt className="h-6 w-6 text-yellow-500 dark:text-yellow-400" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">Notas Fiscais</h1>
@@ -352,8 +352,8 @@ const NotasLista = () => {
             <Button 
               asChild 
               className={cn(
-                "bg-gradient-to-r from-orange-500 to-orange-600",
-                "hover:from-orange-600 hover:to-orange-700",
+                              "bg-gradient-to-r from-yellow-500 to-yellow-600",
+              "hover:from-yellow-600 hover:to-yellow-700",
                 "text-white shadow-lg",
                 "transition-all duration-300"
               )}
@@ -395,7 +395,7 @@ const NotasLista = () => {
             icon={FileText}
             trend={trendNotasComArquivo}
             iconColor="info"
-            className="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/20 dark:to-violet-800/20 border-violet-200 dark:border-violet-700"
+                          className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700"
           />
           <MetricCard
             title="Valor Médio"
@@ -403,7 +403,7 @@ const NotasLista = () => {
             icon={Receipt}
             trend={undefined}
             iconColor="warning"
-            className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-700"
+                          className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-200 dark:border-yellow-700"
           />
         </motion.div>
         
@@ -413,13 +413,13 @@ const NotasLista = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="border-orange-200/50 dark:border-orange-700/50 bg-gradient-to-br from-orange-50/50 to-amber-50/50 dark:from-orange-900/10 dark:to-amber-900/10 backdrop-blur-sm">
+                      <Card className="border-yellow-200/50 dark:border-yellow-700/50 bg-gradient-to-br from-yellow-50/50 to-amber-50/50 dark:from-yellow-900/10 dark:to-amber-900/10 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="h-8 w-8 rounded-lg bg-orange-500/10 dark:bg-orange-400/10 flex items-center justify-center">
-                  <Filter className="h-5 w-5 text-orange-500 dark:text-orange-400" />
-                </div>
-                <span className="text-orange-700 dark:text-orange-300">Filtros</span>
+                                  <div className="h-8 w-8 rounded-lg bg-yellow-500/10 dark:bg-yellow-400/10 flex items-center justify-center">
+                    <Filter className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />
+                  </div>
+                  <span className="text-yellow-700 dark:text-yellow-300">Filtros</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -429,7 +429,7 @@ const NotasLista = () => {
                     Obra
                   </label>
                   <Select value={selectedObraId} onValueChange={setSelectedObraId}>
-                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 transition-colors">
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-yellow-300 dark:hover:border-yellow-600 transition-colors">
                       <SelectValue placeholder="Todas as obras" />
                     </SelectTrigger>
                     <SelectContent>

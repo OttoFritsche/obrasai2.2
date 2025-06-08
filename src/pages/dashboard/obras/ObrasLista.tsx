@@ -193,7 +193,7 @@ const ObrasLista = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => navigate(`/dashboard/orcamentos/novo?obra_id=${row.original.id}&return=/dashboard/obras`)}
-                  className="h-8 w-8 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+                  className="h-8 w-8 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                 >
                   <Calculator className="h-4 w-4" />
                 </Button>
@@ -272,8 +272,8 @@ const ObrasLista = () => {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3"
           >
-            <div className="h-10 w-10 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center">
-              <Building className="h-6 w-6 text-purple-500 dark:text-purple-400" />
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+              <Building className="h-6 w-6 text-blue-500 dark:text-blue-400" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">{t("obras.title")}</h1>
@@ -292,15 +292,15 @@ const ObrasLista = () => {
             <Button 
               onClick={() => navigate('/dashboard/orcamentos/novo')}
               variant="outline"
-              className="border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+              className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
               <Calculator className="h-4 w-4 mr-2" />
               Orçamento IA
             </Button>
             
             <Button asChild className={cn(
-              "bg-gradient-to-r from-purple-500 to-purple-600",
-              "hover:from-purple-600 hover:to-purple-700",
+              "bg-gradient-to-r from-blue-500 to-blue-600",
+              "hover:from-blue-600 hover:to-blue-700",
               "text-white shadow-lg",
               "transition-all duration-300 transform hover:scale-[1.02]"
             )}>

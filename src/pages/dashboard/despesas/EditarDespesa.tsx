@@ -342,7 +342,7 @@ const EditarDespesa = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ''}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
                               >
                                 <SelectTrigger className="bg-background/50">
                                   <SelectValue placeholder="Selecione uma categoria" />
@@ -370,7 +370,7 @@ const EditarDespesa = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ''}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
                               >
                                 <SelectTrigger className="bg-background/50">
                                   <SelectValue placeholder="Selecione um insumo" />
@@ -398,7 +398,7 @@ const EditarDespesa = () => {
                             <FormControl>
                               <Select
                                 value={field.value || ''}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
                               >
                                 <SelectTrigger className="bg-background/50">
                                   <SelectValue placeholder="Selecione uma etapa" />

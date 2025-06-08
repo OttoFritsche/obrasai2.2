@@ -21,13 +21,13 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
   
   const tabs = [
-    { id: "profile", label: "Perfil", icon: User, color: "text-blue-500" },
-    { id: "account", label: "Conta", icon: Shield, color: "text-green-500" },
-    { id: "notifications", label: "Notificações", icon: Bell, color: "text-yellow-500" },
-    { id: "appearance", label: "Aparência", icon: Palette, color: "text-purple-500" },
-    { id: "language", label: "Idioma", icon: Globe, color: "text-orange-500" },
-    { id: "devices", label: "Dispositivos", icon: Smartphone, color: "text-pink-500" },
-    { id: "security", label: "Segurança", icon: Key, color: "text-red-500" },
+    { id: "profile", label: "Perfil", icon: User, color: "text-blue-600" },
+    { id: "account", label: "Conta", icon: Shield, color: "text-green-600" },
+    { id: "notifications", label: "Notificações", icon: Bell, color: "text-yellow-600" },
+    { id: "appearance", label: "Aparência", icon: Palette, color: "text-[#182b4d]" },
+    { id: "language", label: "Idioma", icon: Globe, color: "text-[#daa916]" },
+    { id: "devices", label: "Dispositivos", icon: Smartphone, color: "text-blue-500" },
+    { id: "security", label: "Segurança", icon: Key, color: "text-red-600" },
   ];
   
   return (
