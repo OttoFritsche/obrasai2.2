@@ -23,6 +23,7 @@ export const obraSchema = z.object({
     .min(0, { message: t("messages.invalidNumber") }),
   data_inicio: z.date().nullable().optional(),
   data_prevista_termino: z.date().nullable().optional(),
+  construtora_id: z.string().min(1, { message: 'Selecione a construtora/autônomo responsável' }),
 });
 
 export type ObraFormValues = z.infer<typeof obraSchema>;

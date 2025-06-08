@@ -7,7 +7,6 @@ export const DemoSection = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   const features = [
-    { icon: ShieldCheck, label: "ISO 27001 Certificado", color: "text-green-400" },
     { icon: Lock, label: "Dados Criptografados", color: "text-blue-400" },
     { icon: ShieldCheck, label: "LGPD Compliant", color: "text-purple-400" },
     { icon: Zap, label: "99.9% Uptime", color: "text-construction-accent" }

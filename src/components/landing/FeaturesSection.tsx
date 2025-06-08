@@ -55,7 +55,7 @@ const FeaturesSection = () => {
       icon: Shield,
       title: 'Segurança Multi-tenant',
       description: 'RLS (Row Level Security) nativo com isolamento completo de dados por tenant.',
-      stats: { label: 'Segurança', value: 'ISO 27001' },
+      stats: { label: 'Segurança', value: 'RLS por tenant' },
       color: 'from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30'
     }
   ];
@@ -166,7 +166,7 @@ const FeaturesSection = () => {
             { 
               icon: DollarSign, 
               title: 'Economia projetada', 
-              value: '30%', 
+              value: '20%', 
               desc: 'Otimização de custos' 
             },
             { 

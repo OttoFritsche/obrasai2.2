@@ -48,13 +48,23 @@ export const obrasApi = {
     }
   },
 
-  create: async (obra: ObraFormValues, tenantId?: string) => {
+  create: async (obra: ObraFormValues) => {
     try {
       // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
-      
       if (!user) {
         throw new Error("User not authenticated");
+      }
+
+      // Buscar o tenant_id do perfil do usuário
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("tenant_id")
+        .eq("id", user.id)
+        .single();
+      if (profileError || !profile?.tenant_id) {
+        secureLogger.error("Tenant ID não encontrado ao criar obra", { userId: user.id, error: profileError });
+        throw new Error("Tenant ID não encontrado");
       }
 
       // ✅ Sanitizar dados de entrada
@@ -63,29 +73,22 @@ export const obrasApi = {
       // ✅ Função auxiliar para converter data para string ISO ou null
       const formatDateForDB = (date: unknown) => {
         if (!date) return null;
-        
         try {
-          // Se já for um objeto Date válido
           if (date instanceof Date && !isNaN(date.getTime())) {
             return date.toISOString().split('T')[0];
           }
-          
-          // Se for string, tenta converter para Date
           if (typeof date === 'string' && date.trim() !== '') {
             const dateObj = new Date(date);
             if (!isNaN(dateObj.getTime())) {
               return dateObj.toISOString().split('T')[0];
             }
           }
-          
-          // Se for objeto que pode ser convertido para Date (timestamp, etc)
           if (typeof date === 'number' || (typeof date === 'object' && date !== null)) {
             const dateObj = new Date(date as any);
             if (!isNaN(dateObj.getTime())) {
               return dateObj.toISOString().split('T')[0];
             }
           }
-          
           return null;
         } catch (error) {
           console.warn('❌ Erro ao formatar data (create):', error);
@@ -103,13 +106,11 @@ export const obrasApi = {
         orcamento: sanitizedObra.orcamento,
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
         data_prevista_termino: formatDateForDB(sanitizedObra.data_prevista_termino),
-        usuario_id: user.id
-        // tenant_id: tenantId  // Temporariamente removido
+        usuario_id: user.id,
+        construtora_id: sanitizedObra.construtora_id,
+        tenant_id: profile.tenant_id
       };
-      
 
-
-      // 🚨 TEMPORÁRIO: Não incluir tenant_id até migração ser aplicada
       const { data, error } = await supabase
         .from("obras")
         .insert(dataParaInserir)
@@ -117,13 +118,13 @@ export const obrasApi = {
         .single();
 
       if (error) {
-        secureLogger.error("Failed to create obra", error, { userId: user.id, tenantId });
+        secureLogger.error("Failed to create obra", error, { userId: user.id, tenantId: profile.tenant_id });
         throw error;
       }
 
       return data;
     } catch (error) {
-      secureLogger.error("Error in obrasApi.create", error, { tenantId });
+      secureLogger.error("Error in obrasApi.create", error);
       throw error;
     }
   },

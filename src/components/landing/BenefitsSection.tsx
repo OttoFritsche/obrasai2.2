@@ -20,7 +20,7 @@ const BenefitsSection = () => {
       icon: DollarSign,
       title: 'Redução de Custos',
       description: 'Controle preciso de gastos com orçamentos paramétricos baseados na tabela SINAPI oficial.',
-      metric: 'Até 30%',
+      metric: 'Até 20%',
       detail: 'Economia projetada',
       color: 'from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30'
     },
@@ -73,12 +73,7 @@ const BenefitsSection = () => {
       label: 'Arquitetura',
       description: 'Isolamento total de dados'
     },
-    {
-      icon: Shield,
-      number: 'ISO 27001',
-      label: 'Segurança',
-      description: 'Padrão internacional'
-    },
+    
     {
       icon: Clock,
       number: '99.9%',

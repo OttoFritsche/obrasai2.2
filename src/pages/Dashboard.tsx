@@ -11,8 +11,10 @@ import {
   AlertCircle,
   Receipt,
   Users,
-  Sparkles
+  Sparkles,
+  Building2
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -30,6 +32,7 @@ const Dashboard = () => {
   const { obras, isLoading: obrasLoading } = useObras();
   const { despesas, isLoading: despesasLoading } = useDespesas();
   const { notasFiscais, isLoading: notasLoading } = useNotasFiscais();
+  const navigate = useNavigate();
 
   // Calcular métricas reais
   const totalObras = obras?.length || 0;
@@ -382,6 +385,13 @@ const Dashboard = () => {
                     </div>
                     <span className="font-medium">Plantas IA</span>
                   </Link>
+                </Button>
+                <Button
+                  onClick={() => navigate('/dashboard/construtoras/nova')}
+                  className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
+                >
+                  <Building2 className="h-4 w-4 mr-2" />
+                  Nova Construtora
                 </Button>
               </div>
             </CardContent>

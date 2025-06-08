@@ -103,9 +103,6 @@ export function useContratoAI() {
 
       const { data, error } = await supabase.functions.invoke('contrato-ai-assistant', {
         body: request,
-        headers: {
-          'Content-Type': 'application/json',
-        },
         signal: abortControllerRef.current.signal,
       });
 

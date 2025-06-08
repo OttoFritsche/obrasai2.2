@@ -131,132 +131,146 @@ const ContratoDetalhe = () => {
         className="space-y-6"
       >
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex items-center justify-between"
+        >
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/dashboard/contratos")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+              <FileText className="h-6 w-6 text-blue-500 dark:text-blue-400" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold">{contrato.titulo}</h1>
-              <p className="text-muted-foreground">
-                Contrato {contrato.numero_contrato}
-              </p>
+              <p className="text-muted-foreground">Contrato {contrato.numero_contrato}</p>
             </div>
           </div>
-          
           <div className="flex items-center gap-2">
             {getStatusBadge(contrato.status)}
           </div>
-        </div>
+        </motion.div>
 
         {/* Ações */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ações</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={handleGerarPDF}
-                disabled={gerarPDF.isPending}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                {gerarPDF.isPending ? "Gerando..." : "Gerar Documento"}
-              </Button>
-              
-              {contrato.status === 'RASCUNHO' && (
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="email"
-                    placeholder="Email do contratado"
-                    value={emailContratado}
-                    onChange={(e) => setEmailContratado(e.target.value)}
-                  />
-                  <Button
-                    onClick={handleEnviarAssinatura}
-                    disabled={enviarAssinatura.isPending}
-                    className="flex items-center gap-2"
-                  >
-                    <Send className="h-4 w-4" />
-                    {enviarAssinatura.isPending ? "Enviando..." : "Enviar p/ Assinatura"}
-                  </Button>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-900/10 dark:to-purple-900/10 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <div className="h-8 w-8 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 </div>
-              )}
-              
-              {contrato.url_documento && (
-                <Button variant="outline" asChild>
-                  <a href={contrato.url_documento} target="_blank" rel="noopener noreferrer">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver Documento
-                  </a>
+                <span className="text-blue-700 dark:text-blue-300">Ações</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={handleGerarPDF}
+                  disabled={gerarPDF.isPending}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
+                >
+                  <Download className="h-4 w-4" />
+                  {gerarPDF.isPending ? "Gerando..." : "Gerar Documento"}
                 </Button>
-              )}
-              
-              {contrato.hash_documento && !contrato.url_documento && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4" />
-                  Documento gerado (recarregue a página)
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {contrato.status === 'RASCUNHO' && (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="email"
+                      placeholder="Email do contratado"
+                      value={emailContratado}
+                      onChange={(e) => setEmailContratado(e.target.value)}
+                    />
+                    <Button
+                      onClick={handleEnviarAssinatura}
+                      disabled={enviarAssinatura.isPending}
+                      className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:from-green-600 hover:to-green-700 transition-all duration-300"
+                    >
+                      <Send className="h-4 w-4" />
+                      {enviarAssinatura.isPending ? "Enviando..." : "Enviar p/ Assinatura"}
+                    </Button>
+                  </div>
+                )}
+                {contrato.url_documento && (
+                  <Button variant="outline" asChild>
+                    <a href={contrato.url_documento} target="_blank" rel="noopener noreferrer">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Documento
+                    </a>
+                  </Button>
+                )}
+                {contrato.hash_documento && !contrato.url_documento && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                    Documento gerado (recarregue a página)
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Informações do Documento */}
         {(contrato.url_documento || contrato.hash_documento) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Documento Gerado
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {contrato.url_documento ? (
-                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="border-green-200/50 dark:border-green-700/50 bg-gradient-to-br from-green-50/50 to-green-100/50 dark:from-green-900/10 dark:to-green-900/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FileText className="h-5 w-5 text-green-700 dark:text-green-300" />
+                  <span className="text-green-700 dark:text-green-300">Documento Gerado</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {contrato.url_documento ? (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div>
+                        <p className="font-medium text-green-800">Documento disponível</p>
+                        <p className="text-sm text-green-600">Clique em \"Ver Documento\" para acessar</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={contrato.url_documento} target="_blank" rel="noopener noreferrer">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Abrir
+                      </a>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                     <div>
-                      <p className="font-medium text-green-800">Documento disponível</p>
-                      <p className="text-sm text-green-600">Clique em "Ver Documento" para acessar</p>
+                      <p className="font-medium text-yellow-800">Documento gerado</p>
+                      <p className="text-sm text-yellow-600">Recarregue a página para ver o link de acesso</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={contrato.url_documento} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4 mr-2" />
-                      Abrir
-                    </a>
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <div>
-                    <p className="font-medium text-yellow-800">Documento gerado</p>
-                    <p className="text-sm text-yellow-600">Recarregue a página para ver o link de acesso</p>
+                )}
+                {contrato.hash_documento && (
+                  <div className="text-xs text-muted-foreground">
+                    <p>Hash do documento: <code className="bg-muted px-1 rounded">{contrato.hash_documento.substring(0, 16)}...</code></p>
                   </div>
-                </div>
-              )}
-              
-              {contrato.hash_documento && (
-                <div className="text-xs text-muted-foreground">
-                  <p>Hash do documento: <code className="bg-muted px-1 rounded">{contrato.hash_documento.substring(0, 16)}...</code></p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Grids de informações */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
           {/* Dados do Contratante */}
-          <Card>
+          <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-slate-50/95 to-slate-100/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
@@ -294,7 +308,7 @@ const ContratoDetalhe = () => {
           </Card>
 
           {/* Dados do Contratado */}
-          <Card>
+          <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-slate-50/95 to-slate-100/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
@@ -330,11 +344,16 @@ const ContratoDetalhe = () => {
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Informações Financeiras e Técnicas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        >
+          <Card className="border-emerald-200/50 dark:border-emerald-700/50 bg-gradient-to-br from-emerald-50/95 to-emerald-100/95 dark:from-emerald-900/20 dark:to-emerald-800/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calculator className="h-5 w-5" />
@@ -355,7 +374,7 @@ const ContratoDetalhe = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/95 to-blue-100/95 dark:from-blue-900/20 dark:to-blue-800/20 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
@@ -379,60 +398,84 @@ const ContratoDetalhe = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Obra Vinculada */}
         {contrato.obras && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Obra Vinculada
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="font-semibold">{contrato.obras.nome}</p>
-              <p className="text-muted-foreground">
-                {contrato.obras.endereco}, {contrato.obras.cidade}/{contrato.obras.estado}
-              </p>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <Card className="border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-purple-50/95 to-purple-100/95 dark:from-purple-900/20 dark:to-purple-800/20 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Obra Vinculada
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold">{contrato.obras.nome}</p>
+                <p className="text-muted-foreground">
+                  {contrato.obras.endereco}, {contrato.obras.cidade}/{contrato.obras.estado}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {/* Descrição dos Serviços */}
         {contrato.descricao_servicos && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Descrição dos Serviços</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-wrap">{contrato.descricao_servicos}</p>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
+            <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-slate-50/95 to-slate-100/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Descrição dos Serviços</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-wrap">{contrato.descricao_servicos}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {/* Cláusulas Especiais */}
         {contrato.clausulas_especiais && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Cláusulas Especiais</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-wrap">{contrato.clausulas_especiais}</p>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-slate-50/95 to-slate-100/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Cláusulas Especiais</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-wrap">{contrato.clausulas_especiais}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {/* Observações */}
         {contrato.observacoes && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Observações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-wrap">{contrato.observacoes}</p>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-slate-50/95 to-slate-100/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle>Observações</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="whitespace-pre-wrap">{contrato.observacoes}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
       </motion.div>
     </DashboardLayout>

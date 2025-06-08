@@ -71,6 +71,8 @@
     /* Laranja alerta */
     --construction-danger: 0 72% 51%;
     /* Vermelho erro */
+    --gold: 45 85% 52%;
+    /* Dourado padrão ObrasAI */
   }
 
   .dark {

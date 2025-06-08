@@ -24,13 +24,6 @@ export const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
-    { href: "#features", label: "Funcionalidades" },
-    { href: "#benefits", label: "Benefícios" },
-    { href: "#pricing", label: "Preços" },
-    { href: "#faq", label: "FAQ" }
-  ];
-
   // Determinar qual logo usar baseado no tema
   const logoSrc = theme === "light" ? logoLightHorizon : logoDarkHorizon;
 
@@ -63,38 +56,15 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            <nav className="flex space-x-8">
-              {navItems.map((item, index) => (
-                <motion.a
-                  key={item.href}
-                  href={item.href}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * index, duration: 0.5 }}
-                  whileHover={{ y: -2 }}
-                  className="relative text-gray-300 hover:text-white transition-colors font-medium group"
-                >
-                  {item.label}
-                  {/* Hover underline effect */}
-                  <motion.div
-                    className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-construction-accent to-orange-400"
-                    initial={{ width: 0 }}
-                    whileHover={{ width: "100%" }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </motion.a>
-              ))}
-            </nav>
-
             <div className="flex items-center space-x-3">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <Button 
-                  variant="outline" 
+                  variant="outline"
                   onClick={() => navigate("/login")}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-construction-accent/50 transition-all duration-300"
+                  className="bg-transparent border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300"
                 >
                   Login
                 </Button>
@@ -106,7 +76,7 @@ export const Header = () => {
               >
                 <Button 
                   onClick={() => navigate("/register")}
-                  className="bg-gradient-to-r from-construction-accent to-orange-500 hover:from-construction-accent/90 hover:to-orange-500/90 text-white shadow-lg hover:shadow-construction-accent/25 transition-all duration-300"
+                  className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg transition-all duration-300"
                 >
                   Teste Grátis
                 </Button>
@@ -159,34 +129,13 @@ export const Header = () => {
             >
               <div className="py-6 bg-slate-800/95 backdrop-blur-md rounded-2xl mt-4 border border-gray-700/50">
                 <nav className="flex flex-col space-y-4 px-6">
-                  {navItems.map((item, index) => (
-                    <motion.a
-                      key={item.href}
-                      href={item.href}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 * index, duration: 0.3 }}
-                      className="text-gray-300 hover:text-construction-accent transition-colors px-2 py-3 rounded-lg hover:bg-slate-700/50 font-medium"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.label}
-                    </motion.a>
-                  ))}
-                </nav>
-                
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4, duration: 0.3 }}
-                  className="mt-8 px-6 flex flex-col space-y-3"
-                >
                   <Button 
-                    variant="outline" 
+                    variant="outline"
                     onClick={() => {
                       navigate("/login");
                       setIsMenuOpen(false);
                     }}
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white hover:border-construction-accent/50 transition-all duration-300"
+                    className="w-full bg-transparent border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300"
                   >
                     Login
                   </Button>
@@ -195,11 +144,11 @@ export const Header = () => {
                       navigate("/register");
                       setIsMenuOpen(false);
                     }}
-                    className="w-full bg-gradient-to-r from-construction-accent to-orange-500 hover:from-construction-accent/90 hover:to-orange-500/90 text-white shadow-lg"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg"
                   >
                     Teste Grátis
                   </Button>
-                </motion.div>
+                </nav>
               </div>
             </motion.div>
           )}

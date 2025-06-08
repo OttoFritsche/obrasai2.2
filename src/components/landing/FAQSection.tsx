@@ -71,10 +71,6 @@ export const FAQSection = () => {
       answer: "Sim! Temos integrações nativas com os principais ERPs do mercado, sistemas de contabilidade, ferramentas de projeto e muito mais. Nossa API permite integração com praticamente qualquer sistema. A migração de dados é gratuita e nossa equipe cuida de tudo para você."
     },
     {
-      question: "Meus dados estão seguros no ObrasAI?",
-      answer: "Totalmente! Utilizamos criptografia de ponta a ponta, servidores certificados ISO 27001 e fazemos backup em tempo real. Somos 100% conformes com a LGPD e você mantém total controle sobre seus dados. Oferecemos ainda a opção de instalação on-premise para empresas que precisam de segurança adicional."
-    },
-    {
       question: "Qual a diferença entre os planos?",
       answer: "A principal diferença está no número de obras simultâneas, usuários e recursos avançados de IA. O plano Essencial é perfeito para pequenas construtoras, o Profissional para empresas em crescimento, e o Enterprise para grandes construtoras que precisam de personalização total. Todos incluem nossa IA e você pode mudar de plano a qualquer momento."
     },

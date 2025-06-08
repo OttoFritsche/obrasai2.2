@@ -455,32 +455,6 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
               {isLeadCaptured && (
                 <CheckCircle className="h-4 w-4 text-green-400" />
               )}
-              
-              {/* Botão de reset para debug */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  if (import.meta.env.DEV) {
-                    console.log('🔄 Reset chat');
-                  }
-                  resetChat();
-                }}
-                className="text-white hover:bg-slate-600 h-6 w-6 p-0"
-                title="Reset Chat"
-              >
-                🔄
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="text-white hover:bg-slate-600 h-6 w-6 p-0"
-                aria-label="Fechar chat"
-              >
-                <X className="h-3 w-3" />
-              </Button>
             </div>
           </div>
 

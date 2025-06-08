@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, Users, Calculator, Calendar, Save, Eye } from "lucide-react";
@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,10 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useContratos, useTemplatesContratos } from "@/hooks/useContratos";
 import { useObras } from "@/hooks/useObras";
+import { supabase } from "@/integrations/supabase/client";
 
 const contratoSchema = z.object({
   titulo: z.string().min(5, "Título deve ter pelo menos 5 caracteres"),
@@ -85,6 +87,38 @@ const NovoContrato = () => {
     }
   });
 
+  // Preencher contratante ao selecionar obra
+  useEffect(() => {
+    const obraId = form.watch("obra_id");
+    if (!obraId) return;
+    const obraSelecionada = obras?.find((o) => o.id === obraId);
+    if (!obraSelecionada || !obraSelecionada.construtora_id) return;
+    // Buscar dados da construtora/autônomo
+    supabase
+      .from("construtoras")
+      .select("*")
+      .eq("id", obraSelecionada.construtora_id)
+      .single()
+      .then(({ data, error }) => {
+        if (data) {
+          if (data.tipo === "pj") {
+            form.setValue("contratante_nome", data.razao_social || "");
+            form.setValue("contratante_documento", data.cnpj || "");
+            form.setValue("contratante_endereco", `${data.endereco || ''}, ${data.numero || ''} ${data.complemento || ''} - ${data.bairro || ''}, ${data.cidade || ''} - ${data.estado || ''}`.trim());
+            form.setValue("contratante_email", data.email || "");
+            form.setValue("contratante_telefone", data.telefone || "");
+          } else {
+            form.setValue("contratante_nome", data.nome || "");
+            form.setValue("contratante_documento", data.cpf || "");
+            form.setValue("contratante_endereco", `${data.endereco || ''}, ${data.numero || ''} ${data.complemento || ''} - ${data.bairro || ''}, ${data.cidade || ''} - ${data.estado || ''}`.trim());
+            form.setValue("contratante_email", data.email || "");
+            form.setValue("contratante_telefone", data.telefone || "");
+          }
+        }
+      });
+    // eslint-disable-next-line
+  }, [form.watch("obra_id")]);
+
   const onSubmit = async (data: ContratoFormData) => {
     try {
       await createContrato.mutateAsync(data);
@@ -109,7 +143,7 @@ const NovoContrato = () => {
       animate={{ opacity: 1, x: 0 }}
       className="space-y-6"
     >
-      <Card>
+      <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/95 to-slate-100/95 dark:from-blue-900/20 dark:to-slate-800/20 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -206,7 +240,7 @@ const NovoContrato = () => {
       className="space-y-6"
     >
       {/* Dados do Contratante */}
-      <Card>
+      <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/95 to-slate-100/95 dark:from-blue-900/20 dark:to-slate-800/20 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Dados do Contratante</CardTitle>
         </CardHeader>
@@ -288,7 +322,7 @@ const NovoContrato = () => {
       </Card>
 
       {/* Dados do Contratado */}
-      <Card>
+      <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/95 to-slate-100/95 dark:from-blue-900/20 dark:to-slate-800/20 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Dados do Contratado</CardTitle>
         </CardHeader>
@@ -377,7 +411,7 @@ const NovoContrato = () => {
       animate={{ opacity: 1, x: 0 }}
       className="space-y-6"
     >
-      <Card>
+      <Card className="border-emerald-200/50 dark:border-emerald-700/50 bg-gradient-to-br from-emerald-50/95 to-emerald-100/95 dark:from-emerald-900/20 dark:to-emerald-800/20 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
@@ -475,7 +509,7 @@ const NovoContrato = () => {
       animate={{ opacity: 1, x: 0 }}
       className="space-y-6"
     >
-      <Card>
+      <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/95 to-slate-100/95 dark:from-blue-900/20 dark:to-slate-800/20 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -543,27 +577,85 @@ const NovoContrato = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/dashboard/contratos")}
-              className="flex items-center gap-2"
+      <div className="space-y-8">
+        {/* Header animado */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
+        >
+          <div className="flex items-center space-x-4">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
             >
-              <ArrowLeft className="h-4 w-4" />
-              Voltar
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">Novo Contrato</h1>
-              <p className="text-muted-foreground">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/dashboard/contratos")}
+                className="flex items-center space-x-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Voltar</span>
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#182b4d] to-blue-600 bg-clip-text text-transparent">
+                Novo Contrato Digital
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Crie um novo contrato digital especializado
               </p>
-            </div>
+            </motion.div>
           </div>
-        </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center space-x-2"
+          >
+            <Badge 
+              variant="secondary" 
+              className="flex items-center space-x-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
+            >
+              <FileText className="h-4 w-4" />
+              <span>Novo Contrato</span>
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className="flex items-center space-x-1 bg-[#182b4d]/10 dark:bg-[#182b4d]/30 text-[#182b4d] dark:text-[#daa916] border-[#182b4d]/30 dark:border-[#daa916]/50"
+            >
+              <Save className="h-4 w-4" />
+              <span>Digital</span>
+            </Badge>
+          </motion.div>
+        </motion.div>
+
+        {/* Card de introdução */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-br from-blue-50/50 to-[#182b4d]/10 dark:from-blue-900/10 dark:to-[#182b4d]/20 backdrop-blur-sm mb-4">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-blue-900 dark:text-blue-300">
+                <div className="h-8 w-8 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                </div>
+                <span>Contrato Digital Especializado</span>
+              </CardTitle>
+              <CardDescription className="text-blue-700 dark:text-blue-300">
+                Gere contratos digitais completos, com campos para partes, valores, prazos e detalhes técnicos.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </motion.div>
 
         {/* Steps */}
         <Card>

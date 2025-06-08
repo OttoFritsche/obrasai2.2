@@ -174,7 +174,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
       
-      navigate('/dashboard');
       return {};
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to login";

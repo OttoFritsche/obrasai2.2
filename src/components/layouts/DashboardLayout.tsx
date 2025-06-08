@@ -32,36 +32,12 @@ const menuItems = [
     hoverBg: "hover:bg-slate-600/20 dark:hover:bg-slate-400/20"
   },
   {
-    icon: Building,
-    label: "Obras",
-    path: "/dashboard/obras",
-    color: "text-blue-600 dark:text-blue-400",
-    bgColor: "bg-blue-600/10 dark:bg-blue-400/10",
-    hoverBg: "hover:bg-blue-600/20 dark:hover:bg-blue-400/20"
-  },
-  {
-    icon: Banknote,
-    label: "Despesas",
-    path: "/dashboard/despesas",
-    color: "text-orange-600 dark:text-orange-400",
-    bgColor: "bg-orange-600/10 dark:bg-orange-400/10",
-    hoverBg: "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-  },
-  {
-    icon: Calculator,
-    label: "Orçamentos IA",
-    path: "/dashboard/orcamentos",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bgColor: "bg-emerald-600/10 dark:bg-emerald-400/10",
-    hoverBg: "hover:bg-emerald-600/20 dark:hover:bg-emerald-400/20"
-  },
-  {
-    icon: FileText,
-    label: "Notas Fiscais",
-    path: "/dashboard/notas",
-    color: "text-indigo-600 dark:text-indigo-400",
-    bgColor: "bg-indigo-600/10 dark:bg-indigo-400/10",
-    hoverBg: "hover:bg-indigo-600/20 dark:hover:bg-indigo-400/20"
+    icon: Building2,
+    label: "Construtoras",
+    path: "/dashboard/construtoras",
+    color: "text-blue-700 dark:text-blue-300",
+    bgColor: "bg-blue-700/10 dark:bg-blue-300/10",
+    hoverBg: "hover:bg-blue-700/20 dark:hover:bg-blue-300/20"
   },
   {
     icon: Users,
@@ -72,6 +48,38 @@ const menuItems = [
     hoverBg: "hover:bg-teal-600/20 dark:hover:bg-teal-400/20"
   },
   {
+    icon: Building,
+    label: "Obras",
+    path: "/dashboard/obras",
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-600/10 dark:bg-blue-400/10",
+    hoverBg: "hover:bg-blue-600/20 dark:hover:bg-blue-400/20"
+  },
+  {
+    icon: Calculator,
+    label: "Orçamentos IA",
+    path: "/dashboard/orcamentos",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-600/10 dark:bg-emerald-400/10",
+    hoverBg: "hover:bg-emerald-600/20 dark:hover:bg-emerald-400/20"
+  },
+  {
+    icon: Banknote,
+    label: "Despesas",
+    path: "/dashboard/despesas",
+    color: "text-orange-600 dark:text-orange-400",
+    bgColor: "bg-orange-600/10 dark:bg-orange-400/10",
+    hoverBg: "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+  },
+  {
+    icon: FileText,
+    label: "Notas Fiscais",
+    path: "/dashboard/notas",
+    color: "text-indigo-600 dark:text-indigo-400",
+    bgColor: "bg-indigo-600/10 dark:bg-indigo-400/10",
+    hoverBg: "hover:bg-indigo-600/20 dark:hover:bg-indigo-400/20"
+  },
+  {
     icon: FileSignature,
     label: "Contratos",
     path: "/dashboard/contratos",
@@ -80,20 +88,20 @@ const menuItems = [
     hoverBg: "hover:bg-amber-600/20 dark:hover:bg-amber-400/20"
   },
   {
-    icon: Sparkles,
-    label: "Chat IA",
-    path: "/dashboard/chat",
-    color: "text-purple-600 dark:text-purple-400",
-    bgColor: "bg-purple-600/10 dark:bg-purple-400/10",
-    hoverBg: "hover:bg-purple-600/20 dark:hover:bg-purple-400/20"
-  },
-  {
     icon: Building2,
     label: "Plantas IA",
     path: "/dashboard/plantas",
     color: "text-cyan-600 dark:text-cyan-400",
     bgColor: "bg-cyan-600/10 dark:bg-cyan-400/10",
     hoverBg: "hover:bg-cyan-600/20 dark:hover:bg-cyan-400/20"
+  },
+  {
+    icon: Sparkles,
+    label: "Chat IA",
+    path: "/dashboard/chat",
+    color: "text-purple-600 dark:text-purple-400",
+    bgColor: "bg-purple-600/10 dark:bg-purple-400/10",
+    hoverBg: "hover:bg-purple-600/20 dark:hover:bg-purple-400/20"
   }
 ];
 

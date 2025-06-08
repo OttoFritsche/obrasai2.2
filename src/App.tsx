@@ -57,6 +57,11 @@ import ContratoComIA from "@/pages/dashboard/contratos/ContratoComIA";
 // Admin - Dashboard de Métricas (apenas para administradores do sistema)
 import MetricsDashboard from "@/pages/admin/MetricsDashboard";
 
+// Construtoras/Autônomos
+import ConstrutorasLista from "@/pages/dashboard/construtoras/ConstrutorasLista";
+import NovaConstrutora from "@/pages/dashboard/construtoras/NovaConstrutora";
+import EditarConstrutora from "@/pages/dashboard/construtoras/EditarConstrutora";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -241,6 +246,23 @@ const App = () => {
           <Route path="subscription" element={
             <ProtectedRoute>
               <Subscription />
+            </ProtectedRoute>
+          } />
+          
+          {/* Rotas de Construtoras/Autônomos */}
+          <Route path="dashboard/construtoras" element={
+            <ProtectedRoute>
+              <ConstrutorasLista />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/construtoras/nova" element={
+            <ProtectedRoute>
+              <NovaConstrutora />
+            </ProtectedRoute>
+          } />
+          <Route path="dashboard/construtoras/:id/editar" element={
+            <ProtectedRoute>
+              <EditarConstrutora />
             </ProtectedRoute>
           } />
           

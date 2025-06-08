@@ -43,7 +43,7 @@ export const CTASection = () => {
               { icon: Calculator, text: "15+ anos", desc: "Experiência da equipe" },
               { icon: Clock, text: "24h implementação", desc: "Setup completo" },
               { icon: Shield, text: "99.9% uptime", desc: "Disponibilidade garantida" },
-              { icon: CheckCircle, text: "30 dias grátis", desc: "Teste completo" }
+              { icon: CheckCircle, text: "7 dias grátis", desc: "Teste completo" }
             ].map((item, index) => (
               <motion.div
                 key={index}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -46,12 +46,18 @@ import {
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { toast } from "sonner";
 import { useCEP } from "@/hooks/useCEP";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth";
 
 const EditarObra = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
+  const { user } = useAuth();
+  const tenantId = user?.profile?.tenant_id;
+  const [construtoras, setConstrutoras] = useState<any[]>([]);
+  const [loadingConstrutoras, setLoadingConstrutoras] = useState(true);
   
   const form = useForm<ObraFormValues>({
     resolver: zodResolver(obraSchema),
@@ -87,6 +93,20 @@ const EditarObra = () => {
       });
     }
   }, [obra, form]);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    setLoadingConstrutoras(true);
+    supabase
+      .from("construtoras")
+      .select("id, tipo, nome_razao_social, nome, documento")
+      .eq("tenant_id", tenantId)
+      .order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        setConstrutoras(data || []);
+        setLoadingConstrutoras(false);
+      });
+  }, [tenantId]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (values: ObraFormValues) => obrasApi.update(id as string, values),
@@ -377,6 +397,40 @@ const EditarObra = () => {
                           </FormControl>
                           <FormDescription>
                             Nome que identificará a obra no sistema
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="construtora_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Construtora / Autônomo Responsável</FormLabel>
+                          <FormControl>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={loadingConstrutoras}
+                            >
+                              <SelectTrigger className="bg-background/50 focus:bg-background transition-colors">
+                                <SelectValue placeholder={loadingConstrutoras ? "Carregando..." : "Selecione a construtora/autônomo"} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {construtoras.map((c) => (
+                                  <SelectItem key={c.id} value={c.id}>
+                                    {c.tipo === "pj"
+                                      ? `${c.nome_razao_social} (CNPJ: ${c.documento})`
+                                      : `${c.nome} (CPF: ${c.documento})`}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormDescription>
+                            Selecione a construtora ou autônomo responsável pela obra
                           </FormDescription>
                           <FormMessage />
                         </FormItem>

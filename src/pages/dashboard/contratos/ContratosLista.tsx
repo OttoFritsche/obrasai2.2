@@ -18,6 +18,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
@@ -292,33 +293,38 @@ const ContratosLista = () => {
       >
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 260,
-                damping: 20
-              }}
-              className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg"
-            >
-              <FileText className="h-6 w-6 text-white" />
-            </motion.div>
-            <div>
-              <h2 className="text-2xl font-bold">Contratos</h2>
-              <p className="text-muted-foreground">Gerencie seus contratos de obra</p>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-3"
+          >
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+              <FileText className="h-6 w-6 text-blue-500 dark:text-blue-400" />
             </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button asChild>
+            <div>
+              <h1 className="text-2xl font-bold">Contratos</h1>
+              <p className="text-sm text-muted-foreground">Gerencie seus contratos de obra</p>
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex gap-2"
+          >
+            <Button 
+              asChild 
+              className={cn(
+                "bg-gradient-to-r from-blue-500 to-purple-600",
+                "hover:from-blue-600 hover:to-purple-700",
+                "text-white shadow-lg",
+                "transition-all duration-300"
+              )}
+            >
               <Link to="/dashboard/contratos/novo">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Contrato
               </Link>
             </Button>
-            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
@@ -330,7 +336,6 @@ const ContratosLista = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Criar com IA</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard/contratos/novo-ia">
                     <Bot className="mr-2 h-4 w-4" />
@@ -339,113 +344,137 @@ const ContratosLista = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Cards de métricas com dados reais */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-1 md:grid-cols-4 gap-4"
+        >
           <MetricCard
             title="Total de Contratos"
             value={totalContratos.toString()}
-            description="Todos os contratos"
             icon={FileText}
             iconColor="primary"
+            className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700"
           />
           <MetricCard
             title="Contratos Ativos"
             value={contratosAtivos.toString()}
-            description="Em execução"
             icon={CheckCircle}
             iconColor="success"
+            className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-700"
           />
           <MetricCard
             title="Aguardando Assinatura"
             value={contratosAguardando.toString()}
-            description="Pendentes de assinatura"
             icon={Clock}
             iconColor="warning"
+            className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border-yellow-200 dark:border-yellow-700"
           />
           <MetricCard
             title="Valor Total"
             value={formatCurrencyBR(valorTotalContratos)}
-            description="Soma de todos os contratos"
             icon={AlertCircle}
             iconColor="info"
+            className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700"
           />
-        </div>
+        </motion.div>
 
         {/* Filtros */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              Filtros
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Obra</label>
-                <Select value={selectedObraId} onValueChange={setSelectedObraId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todas as obras" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todas as obras</SelectItem>
-                    {obras?.map((obra) => (
-                      <SelectItem key={obra.id} value={obra.id}>
-                        {obra.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card className="border-indigo-200/50 dark:border-indigo-700/50 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-900/10 dark:to-purple-900/10 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <div className="h-8 w-8 rounded-lg bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center">
+                  <Filter className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
+                </div>
+                <span className="text-indigo-700 dark:text-indigo-300">Filtros</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
+                    Obra
+                  </label>
+                  <Select value={selectedObraId} onValueChange={setSelectedObraId}>
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
+                      <SelectValue placeholder="Todas as obras" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as obras</SelectItem>
+                      {obras?.map((obra) => (
+                        <SelectItem key={obra.id} value={obra.id}>
+                          {obra.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block text-slate-700 dark:text-slate-300">
+                    Status
+                  </label>
+                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
+                      <SelectValue placeholder="Todos os status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os status</SelectItem>
+                      <SelectItem value="RASCUNHO">Rascunho</SelectItem>
+                      <SelectItem value="AGUARDANDO_ASSINATURA">Aguardando Assinatura</SelectItem>
+                      <SelectItem value="ATIVO">Ativo</SelectItem>
+                      <SelectItem value="CONCLUIDO">Concluído</SelectItem>
+                      <SelectItem value="CANCELADO">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              
-              <div>
-                <label className="text-sm font-medium mb-2 block">Status</label>
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos os status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os status</SelectItem>
-                    <SelectItem value="RASCUNHO">Rascunho</SelectItem>
-                    <SelectItem value="AGUARDANDO_ASSINATURA">Aguardando Assinatura</SelectItem>
-                    <SelectItem value="ATIVO">Ativo</SelectItem>
-                    <SelectItem value="CONCLUIDO">Concluído</SelectItem>
-                    <SelectItem value="CANCELADO">Cancelado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Tabela */}
-        <Card>
-          <CardContent className="p-0">
-            <DataTable
-              columns={columns}
-              data={filteredContratos || []}
-              searchKey="titulo"
-              searchPlaceholder="Buscar por título..."
-            />
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
+            <CardContent className="p-0">
+              <DataTable
+                columns={columns}
+                data={filteredContratos || []}
+                searchKey="titulo"
+                searchPlaceholder="Buscar por título..."
+              />
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Dialog de confirmação de exclusão */}
+        {/* Modal de confirmação de exclusão */}
         <AlertDialog open={!!contratoToDelete} onOpenChange={() => setContratoToDelete(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
               <AlertDialogDescription>
-                Esta ação não pode ser desfeita. O contrato será permanentemente excluído,
-                incluindo todos os dados relacionados.
+                Tem certeza de que deseja excluir este contrato? Esta ação não pode ser desfeita.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive">
+              <AlertDialogAction 
+                onClick={handleDelete}
+                className="bg-red-500 hover:bg-red-600"
+              >
                 Excluir
               </AlertDialogAction>
             </AlertDialogFooter>

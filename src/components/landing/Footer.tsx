@@ -119,10 +119,6 @@ export const Footer = () => {
           >
             <div className="flex items-center justify-center gap-3">
               <Shield className="w-6 h-6 text-orange-400" />
-              <div>
-                <div className="font-semibold text-white">ISO 27001</div>
-                <div className="text-sm text-slate-400">Certificado</div>
-              </div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <Clock className="w-6 h-6 text-orange-400" />

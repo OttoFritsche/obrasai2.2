@@ -27,6 +27,7 @@ export default {
           warning: "hsl(var(--construction-warning))",
           danger: "hsl(var(--construction-danger))",
         },
+        gold: "hsl(var(--gold))", // Dourado padrão ObrasAI
         
         // Sistema de design base
         border: "hsl(var(--border))",
