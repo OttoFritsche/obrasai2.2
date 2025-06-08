@@ -47,6 +47,7 @@ interface ContratoAIResponse {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS"
 }
 
 try {
@@ -273,5 +274,8 @@ Responda de forma profissional, prática e adequada à construção civil brasil
   })
 } catch (fatalErr) {
   console.error('❌ Erro FATAL ao inicializar a função contrato-ai-assistant:', fatalErr)
-  // Não é possível retornar Response aqui, mas o log será capturado pelo Supabase
+  // Forçar log e CORS mesmo em erro fatal
+  addEventListener('fetch', (event) => {
+    event.respondWith(new Response(JSON.stringify({ erro: 'Erro FATAL ao inicializar a função contrato-ai-assistant', detalhes: String(fatalErr) }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }))
+  })
 } 

@@ -5,7 +5,8 @@
 O **ObrasAI** é uma plataforma web completa para gestão de obras na construção
 civil, desenvolvida com tecnologias modernas e inteligência artificial
 especializada. O sistema oferece controle total de projetos, custos,
-fornecedores e recursos, com automação de processos e insights inteligentes.
+fornecedores, contratos, despesas, notas fiscais, leads e recursos, com
+automação de processos, integrações robustas e insights inteligentes.
 
 ## 🛠️ ARQUITETURA IMPLEMENTADA
 
@@ -15,29 +16,50 @@ fornecedores e recursos, com automação de processos e insights inteligentes.
 src/
 ├── components/          # Componentes reutilizáveis
 │   ├── ui/             # Sistema de design (Shadcn/UI)
-│   ├── dashboard/      # Componentes do dashboard
-│   └── landing/        # Landing page + Chatbot IA
+│   ├── dashboard/      # Componentes do dashboard (KPIs, relatórios, contratos, plantas, etc)
+│   ├── landing/        # Landing page + Chatbot IA
+│   ├── ai/             # Componentes de IA (chat, sugestões, insights)
+│   ├── construction/   # Componentes de obras
+│   ├── orcamento/      # Orçamento paramétrico
+│   ├── sinapi/         # Consulta SINAPI
+│   ├── settings/       # Configurações
+│   ├── layouts/        # Layouts e wrappers
+│   ├── auth/           # Autenticação
 ├── pages/              # Páginas principais
 │   ├── Dashboard.tsx   # Dashboard principal
 │   ├── Login.tsx       # Autenticação
-│   ├── admin/          # Páginas administrativas
-│   └── dashboard/      # Módulos do dashboard
-├── hooks/              # Custom hooks
-├── services/           # Serviços e APIs
-└── lib/                # Utilitários
+│   ├── admin/          # Páginas administrativas (analytics, sinapi, obras)
+│   └── dashboard/      # Módulos do dashboard (obras, contratos, fornecedores, despesas, notas, orçamentos, ai, etc)
+├── hooks/              # Custom hooks (contratos, IA, obras, fornecedores, despesas, sinapi, etc)
+├── services/           # Serviços e APIs (Supabase, IA, Stripe, analytics, orçamentos, sinapi)
+├── lib/                # Utilitários
+├── assets/             # Imagens e ícones
+├── config/             # Configurações globais
+├── providers/          # Providers de contexto
+├── integrations/       # Integrações externas (Google Sheets, n8n, etc)
+├── contexts/           # Contextos globais
 ```
 
 ### Backend (Supabase + Edge Functions)
 
 ```bash
 supabase/
-├── functions/          # 19 Edge Functions
+├── functions/          # 27+ Edge Functions
 │   ├── ai-chat/        # IA para chat interno
 │   ├── ai-landing-chat/# IA para chatbot landing
-│   ├── create-lead/    # Processamento de leads
-│   └── ...             # Outras funções especializadas
+│   ├── contrato-ai-assistant/ # IA contratos inteligentes
+│   ├── gerar-contrato-pdf/    # Geração de PDF
+│   ├── enviar-contrato-assinatura/ # Assinatura digital
+│   ├── ai-calculate-budget/   # Orçamento paramétrico
+│   ├── sinapi-semantic-search/# Busca semântica SINAPI
+│   ├── stripe-webhook/        # Webhooks Stripe
+│   ├── create-lead/           # Processamento de leads
+│   ├── ...                    # Outras funções especializadas
 └── migrations/         # Migrações do banco
-    └── 20241226_create_leads_table.sql
+    ├── 20241226_create_leads_table.sql
+    ├── 20250128_create_contratos_system.sql
+    ├── 20250129_create_ia_contratos_table.sql
+    ├── ...
 ```
 
 ### Automação (n8n Cloud)
@@ -74,6 +96,60 @@ CREATE TABLE leads (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Tabela de Contratos
+CREATE TABLE contratos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL,
+  obra_id UUID REFERENCES obras(id),
+  template_id UUID REFERENCES templates_contratos(id),
+  numero_contrato VARCHAR(50) UNIQUE,
+  titulo VARCHAR(255) NOT NULL,
+  contratante_nome VARCHAR(255) NOT NULL,
+  contratante_documento VARCHAR(20) NOT NULL,
+  contratante_endereco TEXT,
+  contratante_email VARCHAR(255),
+  contratante_telefone VARCHAR(20),
+  contratado_nome VARCHAR(255) NOT NULL,
+  contratado_documento VARCHAR(20) NOT NULL,
+  contratado_endereco TEXT,
+  contratado_email VARCHAR(255),
+  contratado_telefone VARCHAR(20),
+  valor_total DECIMAL(12,2) NOT NULL,
+  forma_pagamento VARCHAR(50) NOT NULL,
+  prazo_execucao INTEGER NOT NULL,
+  data_inicio DATE,
+  data_fim_prevista DATE,
+  descricao_servicos TEXT,
+  clausulas_especiais TEXT,
+  observacoes TEXT,
+  status VARCHAR(50) DEFAULT 'RASCUNHO',
+  progresso_execucao INTEGER DEFAULT 0,
+  hash_documento VARCHAR(255),
+  url_documento TEXT,
+  data_assinatura TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Tabela de Interações IA Contratos
+CREATE TABLE ia_contratos_interacoes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  contrato_id UUID REFERENCES contratos(id),
+  pergunta TEXT NOT NULL,
+  resposta TEXT NOT NULL,
+  contexto_contrato JSONB DEFAULT '{}'::jsonb,
+  sugestoes_geradas JSONB DEFAULT '[]'::jsonb,
+  qualidade_resposta INTEGER CHECK (1-5),
+  feedback_usuario INTEGER CHECK (1-5),
+  tempo_resposta_ms INTEGER DEFAULT 0,
+  modelo_ia VARCHAR(50) DEFAULT 'deepseek-chat',
+  confianca_resposta DECIMAL(3,2) DEFAULT 0.0,
+  fontes_referencia JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Outras tabelas do sistema principal
 - obras
 - fornecedores_pj
@@ -82,6 +158,9 @@ CREATE TABLE leads (
 - notas_fiscais
 - usuarios
 - subscriptions
+- templates_contratos
+- assinaturas_contratos
+- historico_contratos
 ```
 
 ### Row Level Security (RLS)
@@ -105,6 +184,7 @@ CREATE TABLE leads (
 - ✅ IA pós-captura para perguntas sobre o produto
 - ✅ Integração com webhook n8n
 - ✅ Design responsivo mobile-first
+- ✅ Backup automático em Google Sheets e Supabase
 
 **Fluxo de Dados:**
 
@@ -133,6 +213,7 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ Sugestões baseadas em dados históricos
 - ✅ Rate limiting (10 requests/minuto)
 - ✅ DeepSeek API integrada
+- ✅ Logging e analytics de uso
 
 ### IA Landing Page
 
@@ -144,6 +225,21 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ Contexto PRD completo
 - ✅ Rate limiting para visitantes (5 requests/5min)
 - ✅ Resposta em português brasileiro
+
+### IA Contratos Inteligentes
+
+**Edge Function**: `supabase/functions/contrato-ai-assistant/index.ts`
+
+**Recursos:**
+
+- ✅ Prompt técnico especializado (NBR, legislação, segurança, práticas do
+  setor)
+- ✅ Geração de sugestões inteligentes contextuais
+- ✅ Aplicação instantânea de sugestões ao formulário
+- ✅ Logging completo na tabela `ia_contratos_interacoes`
+- ✅ Score de confiança, referências normativas, feedback
+- ✅ Integração com templates, obras, fornecedores
+- ✅ Analytics de uso, rating, performance
 
 ## 🔗 INTEGRAÇÕES IMPLEMENTADAS
 
@@ -171,6 +267,19 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ 3 planos configurados
 - ✅ Webhooks ativos
 - ✅ Controle de limites por assinatura
+- ✅ Edge Functions para checkout, customer portal, webhooks
+
+### Supabase Storage
+
+- ✅ Upload de documentos (notas fiscais, contratos, PDFs)
+- ✅ CDN global
+- ✅ Integração com geração de PDF e assinatura digital
+
+### Gmail SMTP
+
+- ✅ Envio automático de notificações e contratos para assinatura
+- ✅ Design responsivo de email
+- ✅ Registro de IP, expiração de token, auditoria
 
 ## 🔒 SEGURANÇA E PERFORMANCE
 
@@ -181,6 +290,8 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ **Sanitização**: DOMPurify para inputs
 - ✅ **Rate Limiting**: IA e APIs protegidas
 - ✅ **CORS**: Headers de segurança configurados
+- ✅ **Hash SHA-256**: Integridade de documentos
+- ✅ **Auditoria**: Logging completo de ações
 
 ### Performance
 
@@ -189,6 +300,7 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ **Cache**: TanStack Query
 - ✅ **CDN**: Supabase Storage
 - ✅ **Edge Functions**: Latência reduzida
+- ✅ **Analytics**: Métricas de uso e performance
 
 ## 📱 INTERFACE RESPONSIVA
 
@@ -199,6 +311,7 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - **Ícones**: Lucide React
 - **Animações**: Framer Motion
 - **Tema**: Dark/Light mode
+- **Mobile-first**: 100% das telas adaptadas
 
 ### Páginas Implementadas
 
@@ -211,6 +324,8 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ **Orçamento IA**: Sistema paramétrico
 - ✅ **SINAPI**: Consulta inteligente
 - ✅ **Assinaturas**: Gestão de planos
+- ✅ **Contratos Inteligentes**: IA, PDF, assinatura digital
+- ✅ **Admin**: Analytics, manutenção SINAPI, gestão de obras
 
 ## 🚀 DEPLOYMENT E INFRAESTRUTURA
 

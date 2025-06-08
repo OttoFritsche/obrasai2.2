@@ -22,13 +22,15 @@ automação de processos e controle financeiro inteligente.
 - **Análise financeira** automática (orçamento vs gastos)
 - **Sugestões baseadas** em dados históricos reais
 - **Conhecimento especializado** em construção civil brasileira
+- **Edge Functions** dedicadas para IA, analytics e segurança
 
 ### 2. Sistema Completo de Captura de Leads
 
-- **Chatbot conversacional** na landing page
+- **Chatbot conversacional** na landing page (React + Framer Motion)
 - **Fluxo estruturado**: Nome → Email → Telefone → Empresa → Cargo → Interesse
 - **Automação n8n**: Google Sheets + Supabase + Email automático
 - **IA pós-captura** para qualificação inteligente de prospects
+- **Validação em tempo real** e integração com analytics
 
 ### 3. Orçamento Paramétrico com IA
 
@@ -36,6 +38,7 @@ automação de processos e controle financeiro inteligente.
 - **Base SINAPI** integrada e atualizada
 - **Cobertura nacional** com dados regionais
 - **Precisão até 95%** em estimativas
+- **Edge Functions** para geração, análise e relatórios
 
 ### 4. Gestão Técnica Avançada
 
@@ -43,19 +46,21 @@ automação de processos e controle financeiro inteligente.
 - **150+ insumos** categorizados da construção civil
 - **Sistema SINAPI** com busca semântica
 - **Multi-tenant** com isolamento total de dados
+- **Relatórios e dashboards** integrados
 
 ### 5. Sistema de Contratos Inteligentes COM IA
 
 - **Assistente IA especializado** em contratos de construção civil brasileira
 - **Interface split-screen** com chat IA em tempo real
 - **Sugestões inteligentes** aplicáveis instantaneamente aos campos
-- **Templates especializados** por tipo de serviço
-- **Geração automática** de documentos profissionais
-- **Assinatura digital** com tokens únicos e seguros
-- **Gestão completa** do ciclo de vida contratual
-- **Analytics de IA** para melhoria contínua
+- **Templates especializados** por tipo de serviço (Estrutura, Acabamento,
+  Instalações)
+- **Geração automática** de documentos profissionais (HTML/PDF, hash SHA-256)
+- **Assinatura digital** com tokens únicos e seguros, registro de IP e expiração
+- **Gestão completa** do ciclo de vida contratual (status, histórico, auditoria)
+- **Analytics de IA** para melhoria contínua, feedback e métricas
 - **Conhecimento técnico** em NBR, legislação e normas de segurança
-- **Integração total** com obras e fornecedores existentes
+- **Integração total** com obras, fornecedores, relatórios e dashboards
 
 ## 💰 MODELO DE NEGÓCIO IMPLEMENTADO
 
@@ -109,6 +114,7 @@ automação de processos e controle financeiro inteligente.
    - **Descrições técnicas** padronizadas
    - **Cláusulas de segurança** obrigatórias
    - **Observações sobre materiais** e qualidade
+   - **Score de confiança** e justificativas técnicas
 
 2. **Aplicação Instantânea**:
    - Botões de aplicação direta aos campos
@@ -127,6 +133,8 @@ automação de processos e controle financeiro inteligente.
 2. **Métricas de Performance**: Tempo de resposta, confiança, taxa de aplicação
 3. **Sistema de Feedback**: Rating 1-5 estrelas por resposta da IA
 4. **Análise de Uso**: Tipos de perguntas mais comuns para melhoria contínua
+5. **Dashboard de analytics**: Filtros avançados, exportação, histórico por
+   contrato
 
 ### Geração de Documento
 
@@ -153,30 +161,6 @@ automação de processos e controle financeiro inteligente.
 - **Histórico**: Auditoria completa de ações
 - **Alertas**: Notificações de vencimentos
 
-## 🎯 MERCADO E OPORTUNIDADE
-
-### Tamanho do Mercado
-
-- **Construção Civil Brasil**: R$ 400+ bilhões/ano
-- **Digitalização do Setor**: <5% digitalizado
-- **Mercado Endereçável**: R$ 2 bilhões potencial
-- **Crescimento Anual**: 15% (digitalização acelerada)
-
-### Público-Alvo Primário
-
-1. **Construtores e Empreiteiros** (60% do market share)
-2. **Engenheiros Civis** (25% do market share)
-3. **Arquitetos** (15% do market share)
-
-### Positioning Competitivo
-
-- **Único** com IA contextual real funcionando
-- **Primeiro** com orçamento paramétrico nacional
-- **Líder** em usabilidade e interface moderna
-- **Pioneiro** em automação de captura de leads
-- **Exclusivo** com sistema de contratos inteligentes especializados
-- **Inovador** em assinatura digital para construção civil
-
 ## 🛠️ ARQUITETURA TECNOLÓGICA
 
 ### Stack Principal
@@ -185,7 +169,7 @@ automação de processos e controle financeiro inteligente.
 {
    "frontend": "React 18 + TypeScript + Tailwind",
    "backend": "Supabase (PostgreSQL + Edge Functions)",
-   "ia": "DeepSeek API + 19 Edge Functions",
+   "ia": "DeepSeek API + 27+ Edge Functions",
    "payments": "Stripe (checkout + webhooks)",
    "automation": "n8n Cloud (lead capture)",
    "security": "Row Level Security (RLS) multi-tenant"
@@ -195,9 +179,11 @@ automação de processos e controle financeiro inteligente.
 ### Infraestrutura Escalável
 
 - **Multi-tenant**: Isolamento total de dados por cliente
-- **Edge Functions**: 19 funções especializadas
+- **Edge Functions**: 27+ funções especializadas
 - **Performance**: <2s carregamento, 99.9% uptime
 - **Segurança**: Zero vulnerabilidades conhecidas
+- **Supabase Storage**: Upload e distribuição global
+- **Gmail SMTP**: Notificações e assinatura digital
 
 ## 📈 SISTEMA DE CAPTURA E CONVERSÃO
 
@@ -207,6 +193,7 @@ automação de processos e controle financeiro inteligente.
 - **Conversão otimizada** com fluxo estruturado
 - **Design responsivo** mobile-first
 - **Taxa de conversão meta**: >15%
+- **Validação e backup**: Google Sheets + Supabase
 
 ### Automação de Marketing (n8n)
 
@@ -236,6 +223,11 @@ Fluxo de Lead:
 - ✅ **Notas Fiscais**: Upload e processamento automático
 - ✅ **Dashboard**: Métricas em tempo real
 - ✅ **Contratos Digitais com IA**: Sistema completo implementado
+- ✅ **Orçamento Paramétrico com IA**: Geração automática, integração SINAPI
+- ✅ **Relatórios e Analytics**: Exportação, filtros, dashboards
+- ✅ **Assinaturas**: Stripe integrado, controle de limites, webhooks
+- ✅ **Automação n8n**: Leads, Google Sheets, Email
+- ✅ **Edge Functions**: 27+ funções para IA, PDF, assinatura, analytics
 
 ### Contratos com IA Features (100% Implementados)
 
@@ -312,7 +304,7 @@ Fluxo de Lead:
 
 - [ ] **Marketing Digital**: Google Ads + SEO
 - [ ] **Content Marketing**: Blog técnico + tutoriais
-- [ ] [ ] **Parcerias**: Sindicatos e associações
+- [ ] **Parcerias**: Sindicatos e associações
 - [ ] **Meta**: 100 usuários pagantes
 
 ### Q2 2025 - Expansão de Features
