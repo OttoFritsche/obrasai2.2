@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Configuração da IA
-const DEEPSEEK_API_KEY = "sk-dd3c62196e5246b4902f20c7aec36864"
+const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API')!
 const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
 
 // Tipos
@@ -57,6 +57,15 @@ serve(async (req: Request) => {
 
   try {
     const startTime = Date.now()
+
+    // DEBUG: Logar início da função
+    console.log('🟢 Início da função contrato-ai-assistant')
+    // DEBUG: Logar variáveis de ambiente essenciais
+    console.log('🔑 SUPABASE_URL:', Deno.env.get('SUPABASE_URL'))
+    console.log('🔑 SUPABASE_SERVICE_ROLE_KEY:', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))
+    console.log('🔑 DEEPSEEK_API:', Deno.env.get('DEEPSEEK_API') ? 'OK' : 'NÃO DEFINIDA')
+    // DEBUG: Logar headers recebidos
+    console.log('📦 Headers recebidos:', JSON.stringify([...req.headers]))
 
     // Verificar autenticação
     const authHeader = req.headers.get('Authorization')
