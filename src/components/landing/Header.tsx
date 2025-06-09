@@ -69,18 +69,6 @@ export const Header = () => {
                   Login
                 </Button>
               </motion.div>
-              
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button 
-                  onClick={() => navigate("/register")}
-                  className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg transition-all duration-300"
-                >
-                  Teste Grátis
-                </Button>
-              </motion.div>
             </div>
           </div>
 

@@ -408,6 +408,8 @@ export type Database = {
         | "MARKETING_VENDAS"
         | "CUSTOS_FINANCEIROS"
         | "SEGURANCA_TRABALHO"
+        | "AQUISICAO_TERRENO_AREA"
+        | "AQUISICAO_IMOVEL_REFORMA_LEILAO"
         | "OUTROS"
       etapa_enum:
         | "PLANEJAMENTO"
@@ -717,6 +719,8 @@ export const Constants = {
         "MARKETING_VENDAS",
         "CUSTOS_FINANCEIROS",
         "SEGURANCA_TRABALHO",
+        "AQUISICAO_TERRENO_AREA",
+        "AQUISICAO_IMOVEL_REFORMA_LEILAO",
         "OUTROS",
       ],
       etapa_enum: [
@@ -897,4 +901,4 @@ export const Constants = {
       ],
     },
   },
-} as const 
+} as const

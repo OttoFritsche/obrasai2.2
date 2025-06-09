@@ -142,8 +142,7 @@ export const HeroSection = () => {
           >
             {[
               { icon: Shield, text: "7 dias grátis" },
-              { icon: CheckCircle, text: "Setup em 24h" },
-              { icon: Calculator, text: "ROI em 3 meses" }
+              { icon: CheckCircle, text: "Setup Imediato" },
             ].map((item, index) => (
               <motion.div
                 key={index}
