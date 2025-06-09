@@ -8,6 +8,19 @@ interface EnviarAssinaturaRequest {
   mensagem_personalizada?: string;
 }
 
+interface AssinaturaContrato {
+  id: string;
+  contrato_id: string;
+  tipo_assinatura: string;
+  nome_assinante: string;
+  documento_assinante: string;
+  email_assinante: string;
+  token_assinatura: string;
+  data_expiracao: string;
+  status: string;
+  tenant_id: string | null;
+}
+
 Deno.serve(async (req: Request) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -91,7 +104,7 @@ Deno.serve(async (req: Request) => {
       .single()
 
     let token: string
-    let assinatura: any
+    let assinatura: AssinaturaContrato
 
     if (assinaturaExistente) {
       // Atualizar assinatura existente
@@ -280,4 +293,4 @@ Deno.serve(async (req: Request) => {
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
-}) 
+})

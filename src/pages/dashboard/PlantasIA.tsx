@@ -191,7 +191,7 @@ export function PlantasIA() {
         variant: "default"
       })
 
-    } catch (error: any) {
+    } catch (error: Error & { message?: string }) {
       console.error('Erro na análise:', error)
       toast({
         title: "Erro na análise",
@@ -246,7 +246,7 @@ export function PlantasIA() {
         variant: "default"
       })
 
-    } catch (error: any) {
+    } catch (error: Error & { message?: string }) {
       console.error('Erro ao excluir todas as análises:', error)
       toast({
         title: "Erro ao excluir",
@@ -669,4 +669,4 @@ export function PlantasIA() {
       </motion.div>
     </DashboardLayout>
   )
-}  
+}

@@ -5,7 +5,7 @@
  * usando IA e dados técnicos da construção civil.
  * 
  * @author ObrasAI Team
- * @version 2.0.0 - Integração com IA v9.0.0 Composição Detalhada
+ * @version 2.0.0 - Orçamento Paramétrico
  */
 
 import React, { useState } from "react";
@@ -93,7 +93,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                 Orçamento Criado com Sucesso!
               </CardTitle>
               <CardDescription className="text-emerald-700 dark:text-emerald-300">
-                IA v9.0.0 está processando sua composição detalhada
+IA está processando seu orçamento paramétrico
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -118,7 +118,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                 >
                   <div className="flex items-center justify-center space-x-2 text-xs text-emerald-600 dark:text-emerald-400">
                     <Layers className="h-3 w-3" />
-                    <span>Composição detalhada por etapas</span>
+                    <span>Composição paramétrica por etapas</span>
                   </div>
                   <div className="flex items-center justify-center space-x-2 text-xs text-emerald-600 dark:text-emerald-400">
                     <Users className="h-3 w-3" />
@@ -137,7 +137,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                   className="text-sm text-emerald-600 dark:text-emerald-400"
                 >
                   Você será redirecionado automaticamente para visualizar
-                  os resultados detalhados da nova IA.
+                  os resultados da IA paramétrica.
                 </motion.p>
               </div>
             </CardContent>
@@ -182,7 +182,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                 Novo Orçamento Paramétrico
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Crie estimativas precisas com IA v9.0.0 - Composição Detalhada
+                Crie estimativas precisas com IA - Orçamento Paramétrico
               </p>
             </motion.div>
           </div>
@@ -198,14 +198,14 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
               className="flex items-center space-x-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"
             >
               <Sparkles className="h-4 w-4" />
-              <span>IA v9.0.0</span>
+              <span>IA Paramétrica</span>
             </Badge>
             <Badge 
               variant="outline" 
                               className="flex items-center space-x-1 bg-[#182b4d]/10 dark:bg-[#182b4d]/30 text-[#182b4d] dark:text-[#daa916] border-[#182b4d]/30 dark:border-[#daa916]/50"
             >
               <Layers className="h-4 w-4" />
-              <span>Composição Detalhada</span>
+              <span>Composição Paramétrica</span>
             </Badge>
           </motion.div>
         </motion.div>
@@ -222,7 +222,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                 <div className="h-8 w-8 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
                   <Calculator className="h-5 w-5 text-blue-500 dark:text-blue-400" />
                 </div>
-                <span>Sistema Inteligente v9.0.0 - Composição Detalhada</span>
+                <span>Sistema Inteligente - Orçamento Paramétrico</span>
               </CardTitle>
               <CardDescription className="text-blue-700 dark:text-blue-300">
                 Nossa nova IA gera orçamentos com mais de 35 itens organizados em 11 etapas completas da construção
@@ -230,7 +230,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Funcionalidades principais v9.0.0 */}
+                {/* Funcionalidades principais - Orçamento Paramétrico */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -286,7 +286,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                     </li>
                     <li className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-[#182b4d] dark:text-[#daa916]" />
-                      <span>Horas detalhadas por função</span>
+                      <span>Horas estimadas por função</span>
                     </li>
                     <li className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-[#182b4d] dark:text-[#daa916]" />
@@ -305,7 +305,7 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
                     <div className="h-8 w-8 rounded-lg bg-[#daa916]/10 dark:bg-[#daa916]/20 flex items-center justify-center">
                       <Hammer className="h-5 w-5 text-[#daa916] dark:text-[#daa916]" />
                     </div>
-                    <h3 className="font-semibold text-[#daa916] dark:text-[#daa916]">Materiais Detalhados</h3>
+                    <h3 className="font-semibold text-[#daa916] dark:text-[#daa916]">Materiais Estimados</h3>
                   </div>
                   <ul className="space-y-2 text-sm text-[#daa916] dark:text-[#daa916]">
                                           <li className="flex items-center space-x-2">
@@ -339,16 +339,16 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
               >
                 <div className="flex items-center space-x-2 mb-3">
                   <Badge className="bg-green-600 hover:bg-green-700 text-white">
-                    NOVIDADE v9.0.0
+                    ORÇAMENTO PARAMÉTRICO
                   </Badge>
                   <span className="text-sm font-medium text-green-800 dark:text-green-300">
-                    Composição Profissional Completa
+                    Composição Paramétrica Completa
                   </span>
                 </div>
                 <p className="text-sm text-green-700 dark:text-green-300 leading-relaxed">
                   Agora nossa IA gera orçamentos com a mesma qualidade de um engenheiro experiente: 
                   <strong> etapas organizadas</strong>, <strong>mão de obra realística</strong> e 
-                  <strong> materiais detalhados</strong> com quantidades técnicas precisas.
+                  <strong> materiais estimados</strong> com quantidades técnicas precisas.
                 </p>
               </motion.div>
             </CardContent>
@@ -371,4 +371,4 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
   );
 };
 
-export default NovoOrcamento; 
+export default NovoOrcamento;

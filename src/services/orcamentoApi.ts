@@ -217,7 +217,7 @@ export const orcamentosParametricosApi = {
       const sanitizedData = sanitizeFormData(orcamentoData);
 
       // Preparar dados para atualização (apenas campos fornecidos)
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (sanitizedData.nome_orcamento !== undefined) updateData.nome_orcamento = sanitizedData.nome_orcamento;
       if (sanitizedData.descricao !== undefined) updateData.descricao = sanitizedData.descricao;
@@ -348,7 +348,7 @@ export const calculoOrcamentoApi = {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('📡 Tentando Edge Function v9.0.0 (composição detalhada)...');
+      console.log('📡 Tentando Edge Function (orçamento paramétrico)...');
 
       // TENTATIVA 1: Usar ai-calculate-budget-v9 (composição detalhada) - PRIORIDADE MÁXIMA
       try {
@@ -363,11 +363,8 @@ export const calculoOrcamentoApi = {
         });
 
         if (!error && data && data.success) {
-          console.log('✅ Cálculo v9.0.0 concluído com sucesso!');
+          console.log('✅ Cálculo paramétrico concluído com sucesso!');
           console.log(`💰 Custo: R$ ${data.custo_estimado.toLocaleString('pt-BR')}`);
-          console.log(`📋 Itens: ${data.itens_inseridos}`);
-          console.log(`🏗️ Etapas: ${data.composicao_detalhada?.resumo_etapas?.length || 0}`);
-          console.log(`👷 Mão de obra: ${data.composicao_detalhada?.percentual_mao_obra}%`);
           
           // 📊 Track orçamento gerado
           await analytics.trackAIUsage('orcamento', {
@@ -391,19 +388,19 @@ export const calculoOrcamentoApi = {
             tempo_calculo_ms: data.estatisticas?.tempo_calculo_ms || 0,
             estatisticas: {
               ...data.debug,
-              fonte_dados: "composicao_detalhada_v9",
+              fonte_dados: "orcamento_parametrico",
               versao: "9.0.0",
               total_etapas: data.composicao_detalhada?.resumo_etapas?.length || 0,
-              percentual_mao_obra: data.composicao_detalhada?.percentual_mao_obra || 0,
-              percentual_material: data.composicao_detalhada?.percentual_material || 0,
-              composicao_detalhada: data.composicao_detalhada
+        percentual_mao_obra: data.composicao_detalhada?.percentual_mao_obra || 0,
+        percentual_material: data.composicao_detalhada?.percentual_material || 0,
+        composicao_detalhada: null // Funcionalidade removida
             }
           };
         }
 
-        console.warn('⚠️ Edge Function v9.0.0 falhou, tentando fallback...');
+        console.warn('⚠️ Edge Function falhou, tentando fallback...');
       } catch (v9Error) {
-        console.warn('⚠️ Edge Function v9.0.0 não disponível, usando fallback:', v9Error);
+        console.warn('⚠️ Edge Function não disponível, usando fallback:', v9Error);
       }
 
       // FALLBACK: Usar ai-calculate-budget (função estável)
@@ -477,7 +474,7 @@ export const calculoOrcamentoApi = {
 // ====================================
 
 /**
- * API para itens detalhados do orçamento
+ * API para itens do orçamento paramétrico
  */
 export const itensOrcamentoApi = {
   /**
@@ -817,4 +814,4 @@ export default {
   coeficientesTecnicosApi,
   comparacoesApi,
   orcamentoUtils
-}; 
+};

@@ -1,4 +1,4 @@
-    /**
+/**
      * 🧮 Edge Function: AI Calculate Budget v5.0.0 - DADOS CENTRALIZADOS
      * 
      * Versão otimizada que utiliza a tabela centralizada sinapi_dados_oficiais
@@ -16,9 +16,9 @@
       };
     }
 
-    // @ts-ignore - Deno module resolution
+    // @ts-expect-error - Deno module resolution
     import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-    // @ts-ignore - Deno module resolution
+    // @ts-expect-error - Deno module resolution
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
     // ====================================
@@ -30,11 +30,28 @@
       forcar_recalculo?: boolean;
     }
 
+    interface OrcamentoCalculado {
+      id: string;
+      custo_estimado: number;
+      custo_m2: number;
+      area_total: number;
+      estado: string;
+      dados_sinapi_utilizados: number;
+      itens_inseridos: number;
+    }
+
+    interface DebugInfo {
+      version: string;
+      fonte_dados?: string;
+      timestamp: string;
+      itens_processados?: number;
+    }
+
     interface CalculoBudgetResponse {
       success: boolean;
-      orcamento?: any;
+      orcamento?: OrcamentoCalculado;
       error?: string;
-      debug_info?: any;
+      debug_info?: DebugInfo;
     }
 
     // ====================================

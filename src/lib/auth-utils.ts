@@ -9,14 +9,17 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { secureLogger } from './secure-logger';
 
 /**
  * Limpa todos os dados de autenticação corrompidos do localStorage
  * e força uma nova inicialização da sessão
  */
+const logger = secureLogger;
+
 export const clearCorruptedAuthData = async (): Promise<void> => {
   try {
-    console.log('🧹 Limpando dados de autenticação corrompidos...');
+    logger.info('Iniciando limpeza de dados de autenticação corrompidos');
     
     // 1. Fazer signOut silencioso para limpar tokens no servidor
     await supabase.auth.signOut({ scope: 'local' });
@@ -33,16 +36,18 @@ export const clearCorruptedAuthData = async (): Promise<void> => {
     
     // 3. Limpar todos os itens que começam com 'sb-'
     const allKeys = Object.keys(localStorage);
-    allKeys.forEach(key => {
+    const removedCount = allKeys.filter(key => {
       if (key.startsWith('sb-') && key.includes('auth')) {
         localStorage.removeItem(key);
+        return true;
       }
-    });
+      return false;
+    }).length;
     
-    console.log('✅ Dados de autenticação limpos com sucesso');
+    logger.info('Dados de autenticação limpos com sucesso', { removedKeysCount: removedCount });
     
   } catch (error) {
-    console.error('❌ Erro ao limpar dados de autenticação:', error);
+    logger.error('Erro ao limpar dados de autenticação', error);
   }
 };
 
@@ -54,42 +59,43 @@ export const checkAndCleanRefreshToken = async (): Promise<boolean> => {
     const { data: { session }, error } = await supabase.auth.getSession();
     
     if (error) {
-      console.log('🔍 Token de refresh corrompido detectado:', error.message);
+      logger.info('Token de refresh corrompido detectado - iniciando limpeza');
       await clearCorruptedAuthData();
       return false;
     }
     
     return !!session;
   } catch (error) {
-    console.error('❌ Erro ao verificar token de refresh:', error);
+    logger.error('Erro ao verificar token de refresh - iniciando limpeza', error);
     await clearCorruptedAuthData();
     return false;
   }
 };
 
 /**
- * Debug da sessão de autenticação atual
+ * Debug da sessão de autenticação atual (modo seguro)
  */
 export const debugAuthSession = async (): Promise<void> => {
   try {
-    console.group('🔍 Debug de Autenticação');
-    
     const { data: { session }, error } = await supabase.auth.getSession();
     
-    console.log('Session Error:', error);
-    console.log('Session Data:', session);
-    console.log('User:', session?.user);
-    console.log('Access Token:', session?.access_token ? 'Presente' : 'Ausente');
-    console.log('Refresh Token:', session?.refresh_token ? 'Presente' : 'Ausente');
-    console.log('Expires At:', session?.expires_at ? new Date(session.expires_at * 1000) : 'N/A');
-    
-    // Verificar localStorage
     const authKeys = Object.keys(localStorage).filter(key => key.includes('auth') || key.startsWith('sb-'));
-    console.log('Auth Keys no localStorage:', authKeys);
     
-    console.groupEnd();
+    const debugInfo = {
+      hasError: !!error,
+      hasSession: !!session,
+      hasUserId: !!session?.user?.id,
+      hasUserEmail: !!session?.user?.email,
+      hasAccessToken: !!session?.access_token,
+      hasRefreshToken: !!session?.refresh_token,
+      hasExpiresAt: !!session?.expires_at,
+      authKeysCount: authKeys.length
+    };
+    
+    logger.info('Debug de sessão de autenticação', debugInfo);
+    
   } catch (error) {
-    console.error('❌ Erro no debug de autenticação:', error);
+    logger.error('Erro no debug de autenticação', error);
   }
 };
 
@@ -106,4 +112,4 @@ export const initAuthIntegrityCheck = (): void => {
   setInterval(() => {
     checkAndCleanRefreshToken();
   }, 5 * 60 * 1000);
-}; 
+};

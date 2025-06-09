@@ -30,7 +30,7 @@ interface SearchResult {
   preco_referencia?: number;
   similarity_score: number;
   tipo: 'insumo' | 'composicao';
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface SearchResponse {
@@ -61,7 +61,7 @@ interface ContextoItem {
   conteudo: string;
   relevancia: number;
   fonte: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface ChatResponse {
@@ -138,7 +138,7 @@ export function useAIFeatures() {
    */
   const callEdgeFunction = useCallback(async (
     functionName: string, 
-    payload: any,
+    payload: Record<string, unknown>,
     signal?: AbortSignal
   ) => {
     const response = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
@@ -218,7 +218,7 @@ export function useAIFeatures() {
         throw new Error(response.error || 'Erro na busca semântica');
       }
 
-    } catch (error: any) {
+    } catch (error: Error & { name?: string }) {
       if (error.name === 'AbortError') {
         console.log('🚫 Busca cancelada pelo usuário');
         return [];
@@ -303,7 +303,7 @@ export function useAIFeatures() {
         throw new Error(response.error || 'Erro no chat IA');
       }
 
-    } catch (error: any) {
+    } catch (error: Error & { name?: string }) {
       if (error.name === 'AbortError') {
         console.log('🚫 Chat cancelado pelo usuário');
         return '';
@@ -500,4 +500,4 @@ export function useAIFeatures() {
     hasResults: state.searchResults.length > 0 || state.conversationHistory.length > 0,
     hasError: !!state.lastError
   };
-} 
+}

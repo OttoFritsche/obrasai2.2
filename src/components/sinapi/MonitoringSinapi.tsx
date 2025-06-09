@@ -45,6 +45,14 @@ import { cn } from "@/lib/utils";
 // 🎯 TIPOS E INTERFACES
 // ====================================
 
+interface Notificacao {
+  titulo: string;
+  mensagem: string;
+  tipo?: 'info' | 'warning' | 'error' | 'success';
+  data?: string;
+  lida?: boolean;
+}
+
 interface MetricaPerformance {
   funcao: string;
   total_chamadas: number;
@@ -360,7 +368,7 @@ export const MonitoringSinapi: React.FC = () => {
           </p>
         ) : (
           <div className="space-y-2">
-            {notificacoes?.slice(0, 5).map((notif: any, index: number) => (
+            {notificacoes?.slice(0, 5).map((notif: Notificacao, index: number) => (
               <div 
                 key={index}
                 className="flex items-start justify-between p-3 border rounded-lg"
@@ -440,4 +448,4 @@ export const MonitoringSinapi: React.FC = () => {
       </Tabs>
     </div>
   );
-}; 
+};

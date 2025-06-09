@@ -138,7 +138,16 @@ export const buscarSinapiUnificado = async (
     }
 
     // Processar resultados para formato unificado
-    const itensProcessados: SinapiItem[] = (data || []).map((item: any) => ({
+    const itensProcessados: SinapiItem[] = (data || []).map((item: {
+      id: string;
+      codigo_sinapi: string | number;
+      descricao_insumo: string;
+      tipo_insumo?: string;
+      mes_referencia?: string;
+      ativo?: boolean;
+      updated_at?: string;
+      created_at?: string;
+    }) => ({
       id: item.id,
       codigo_sinapi: parseInt(item.codigo_sinapi),
       descricao: item.descricao_insumo,
@@ -373,4 +382,4 @@ export const sinapiManutencoes = {
   obterEstatisticas: obterEstatisticasManutencoes
 };
 
-export default sinapiManutencoes; 
+export default sinapiManutencoes;

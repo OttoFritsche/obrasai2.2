@@ -5,7 +5,7 @@
  * criados com IA e dados técnicos da construção civil.
  * 
  * @author ObrasAI Team
- * @version 2.0.0 - Indicadores IA v9.0.0 Composição Detalhada
+ * @version 2.0.0 - Orçamento Paramétrico
  */
 
 import React, { useState, useMemo } from "react";
@@ -117,15 +117,15 @@ const OrcamentosLista: React.FC = () => {
 
   const orcamentos = response?.data || [];
 
-  // Query para verificar itens dos orçamentos (para detectar v9.0.0)
+  // Query para verificar itens dos orçamentos (orçamento paramétrico)
   const { data: orcamentosComItens } = useQuery({
     queryKey: ['orcamentos-com-itens'],
     queryFn: async () => {
       const promises = orcamentos.map(async (orc) => {
         try {
           const itens = await itensOrcamentoApi.getByOrcamento(orc.id);
-          const temComposicaoDetalhada = itens.length > 20 || 
-            itens.some(item => item.observacoes?.includes('v9.0.0'));
+          // Funcionalidade de composição detalhada removida - apenas orçamento paramétrico
+          const temComposicaoDetalhada = false;
           return { ...orc, temComposicaoDetalhada, totalItens: itens.length };
         } catch {
           return { ...orc, temComposicaoDetalhada: false, totalItens: 0 };
@@ -194,25 +194,11 @@ const OrcamentosLista: React.FC = () => {
   /**
    * Indicador de versão da IA
    */
-  const IndicadorVersaoIA: React.FC<{ orcamento: any }> = ({ orcamento }) => {
-    if (orcamento.temComposicaoDetalhada) {
-      return (
-        <div className="flex items-center gap-1">
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs px-2 py-0.5">
-            <Sparkles className="h-3 w-3 mr-1" />
-            v9.0.0
-          </Badge>
-          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-2 py-0.5">
-            <Layers className="h-3 w-3 mr-1" />
-            {orcamento.totalItens} itens
-          </Badge>
-        </div>
-      );
-    }
-    
+  const IndicadorVersaoIA: React.FC<{ orcamento: { versao_ia?: boolean; id: string } }> = ({ orcamento }) => {
     return (
-      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200 text-xs px-2 py-0.5">
-        Padrão
+      <Badge variant="outline" className="bg-[#daa916]/20 text-[#daa916] border-[#daa916]/30 text-xs px-2 py-0.5">
+        <Sparkles className="h-3 w-3 mr-1" />
+        Paramétrico
       </Badge>
     );
   };
@@ -225,7 +211,8 @@ const OrcamentosLista: React.FC = () => {
     const valorTotal = orcamentosEnriquecidos.reduce((sum, orc) => sum + orc.custo_estimado, 0);
     const concluidos = orcamentosEnriquecidos.filter(orc => orc.status === 'CONCLUIDO').length;
     const rascunhos = orcamentosEnriquecidos.filter(orc => orc.status === 'RASCUNHO').length;
-    const comComposicaoDetalhada = orcamentosEnriquecidos.filter(orc => orc.temComposicaoDetalhada).length;
+    // Funcionalidade de composição detalhada removida
+    const comComposicaoDetalhada = 0;
 
     return { total, valorTotal, concluidos, rascunhos, comComposicaoDetalhada };
   }, [orcamentosEnriquecidos]);
@@ -315,7 +302,7 @@ const OrcamentosLista: React.FC = () => {
               )}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Novo Orçamento v9.0.0
+              Novo Orçamento Paramétrico
             </Button>
           </motion.div>
         </div>
@@ -408,16 +395,16 @@ const OrcamentosLista: React.FC = () => {
           <Card className="bg-gradient-to-br from-[#182b4d]/10 to-[#daa916]/10 dark:from-[#182b4d]/20 dark:to-[#daa916]/20 border-[#182b4d]/30 dark:border-[#daa916]/50 backdrop-blur-sm">
             <CardHeader className="pb-2">
                               <CardTitle className="text-sm font-medium text-[#182b4d] dark:text-[#daa916]">
-                v9.0.0 Detalhados
+                Paramétricos
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
                                   <Sparkles className="h-5 w-5 text-[#182b4d] dark:text-[#daa916]" />
                 <div>
-                                      <div className="text-2xl font-bold text-[#182b4d] dark:text-[#daa916]">{estatisticas.comComposicaoDetalhada}</div>
-                    <p className="text-xs text-[#182b4d] dark:text-[#daa916] mt-1">
-                    Com IA avançada
+                                      <div className="text-2xl font-bold text-[#182b4d] dark:text-[#daa916]">-</div>
+                  <p className="text-xs text-[#182b4d] dark:text-[#daa916] mt-1">
+                    Funcionalidade Removida
                   </p>
                 </div>
               </div>
@@ -534,11 +521,7 @@ const OrcamentosLista: React.FC = () => {
               <CardTitle>Lista de Orçamentos ({orcamentosEnriquecidos.length})</CardTitle>
               <CardDescription>
                 Visualize e gerencie todos os seus orçamentos paramétricos
-                {estatisticas.comComposicaoDetalhada > 0 && (
-                  <span className="text-[#182b4d] dark:text-[#daa916] ml-2">
-                    • {estatisticas.comComposicaoDetalhada} com composição detalhada v9.0.0
-                  </span>
-                )}
+                {/* Funcionalidade de composição detalhada removida */}
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -554,7 +537,7 @@ const OrcamentosLista: React.FC = () => {
                     className="bg-gradient-to-r from-blue-600 to-[#182b4d] hover:from-blue-700 hover:to-[#182b4d]/90"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Criar Primeiro Orçamento v9.0.0
+                    Criar Primeiro Orçamento Paramétrico
                   </Button>
                 </div>
               ) : (
@@ -714,4 +697,4 @@ const OrcamentosLista: React.FC = () => {
   );
 };
 
-export default OrcamentosLista; 
+export default OrcamentosLista;

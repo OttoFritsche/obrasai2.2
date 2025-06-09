@@ -22,6 +22,13 @@ interface ValidacaoRequest {
   incluir_historico?: boolean;
 }
 
+interface HistoricoAlteracao {
+  data: string;
+  tipo: string;
+  descricao?: string;
+  usuario?: string;
+}
+
 interface CodigoValidacao {
   codigo: number;
   status: 'ativo' | 'desativado' | 'alterado' | 'nao_encontrado';
@@ -31,7 +38,7 @@ interface CodigoValidacao {
   alternativas?: number[];
   detalhes?: {
     tipo_manutencao?: string;
-    historico_alteracoes?: any[];
+    historico_alteracoes?: HistoricoAlteracao[];
   };
 }
 
@@ -285,4 +292,4 @@ serve(async (req) => {
       { status: 500, headers: corsHeaders }
     );
   }
-}); 
+});

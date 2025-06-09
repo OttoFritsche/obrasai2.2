@@ -7,7 +7,7 @@ export interface AnalyticsEvent {
   user_id?: string
   session_id?: string
   page?: string
-  properties?: Record<string, any>
+  properties?: Record<string, unknown>
   timestamp?: string
 }
 
@@ -89,7 +89,7 @@ class AnalyticsService {
   }
 
   // 👤 TRACKING DE USUÁRIOS
-  async trackUserAction(action: string, properties?: Record<string, any>) {
+  async trackUserAction(action: string, properties?: Record<string, unknown>) {
     const user = await supabase.auth.getUser()
     
     await this.trackEvent({
@@ -103,7 +103,7 @@ class AnalyticsService {
   }
 
   // 🤖 TRACKING DE IA
-  async trackAIUsage(type: 'chat' | 'orcamento' | 'sinapi', properties?: Record<string, any>) {
+  async trackAIUsage(type: 'chat' | 'orcamento' | 'sinapi', properties?: Record<string, unknown>) {
     const user = await supabase.auth.getUser()
     
     await this.trackEvent({
@@ -118,7 +118,7 @@ class AnalyticsService {
   }
 
   // 💰 TRACKING DE CONVERSÕES
-  async trackConversion(type: 'signup' | 'subscription' | 'upgrade', properties?: Record<string, any>) {
+  async trackConversion(type: 'signup' | 'subscription' | 'upgrade', properties?: Record<string, unknown>) {
     const user = await supabase.auth.getUser()
     
     await this.trackEvent({
@@ -159,7 +159,7 @@ class AnalyticsService {
       const conversion_rate = total_leads > 0 ? (usersData?.length || 0) / total_leads * 100 : 0
 
       // Top sources
-      const sources = (leadsData || []).reduce((acc: Record<string, number>, lead: any) => {
+      const sources = (leadsData || []).reduce((acc: Record<string, number>, lead: { origem?: string }) => {
         const source = lead.origem || 'unknown'
         acc[source] = (acc[source] || 0) + 1
         return acc
@@ -321,13 +321,13 @@ class AnalyticsService {
         'enterprise': 497
       }
 
-      const subscription_breakdown = subscriptions?.reduce((acc: Record<string, number>, sub: any) => {
+      const subscription_breakdown = subscriptions?.reduce((acc: Record<string, number>, sub: { plan_name?: string }) => {
         const plan = sub.plan_name || 'basic'
         acc[plan] = (acc[plan] || 0) + 1
         return acc
       }, {}) || {}
 
-      const mrr = subscriptions?.reduce((total: number, sub: any) => {
+      const mrr = subscriptions?.reduce((total: number, sub: { plan_name?: string }) => {
         const plan = sub.plan_name || 'basic'
         return total + (planPrices[plan as keyof typeof planPrices] || 0)
       }, 0) || 0
@@ -367,21 +367,21 @@ class AnalyticsService {
     return sessionId
   }
 
-  private countRecordsToday(records: any[]): number {
+  private countRecordsToday(records: { created_at: string }[]): number {
     const today = new Date().toDateString()
     return records.filter(record => 
       new Date(record.created_at).toDateString() === today
     ).length
   }
 
-  private countRecordsThisWeek(records: any[]): number {
+  private countRecordsThisWeek(records: { created_at: string }[]): number {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     return records.filter(record => 
       new Date(record.created_at) >= weekAgo
     ).length
   }
 
-  private countRecordsThisMonth(records: any[]): number {
+  private countRecordsThisMonth(records: { created_at: string }[]): number {
     const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     return records.filter(record => 
       new Date(record.created_at) >= monthAgo
@@ -418,4 +418,4 @@ export const useAnalytics = () => {
     trackAIUsage: analytics.trackAIUsage.bind(analytics),
     trackConversion: analytics.trackConversion.bind(analytics)
   }
-} 
+}

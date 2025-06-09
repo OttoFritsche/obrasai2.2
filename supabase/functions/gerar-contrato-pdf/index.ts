@@ -22,7 +22,7 @@ interface ContratoData {
   clausulas_especiais?: string;
   observacoes?: string;
   obras?: { nome: string; endereco: string; cidade: string; estado: string };
-  templates_contratos?: { template_html: string; clausulas_obrigatorias: any[] };
+  templates_contratos?: { template_html: string; clausulas_obrigatorias: string[] };
 }
 
 Deno.serve(async (req: Request) => {
@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
       data_inicio: contratoTyped.data_inicio ? 
         new Date(contratoTyped.data_inicio).toLocaleDateString('pt-BR') : '',
       prazo_execucao: contratoTyped.prazo_execucao,
-      local_execucao: `${contratoTyped.obras?.cidade}/${contratoTyped.obras?.estado}` || '',
+      local_execucao: contratoTyped.obras ? `${contratoTyped.obras.cidade}/${contratoTyped.obras.estado}` : '',
       data_atual: new Date().toLocaleDateString('pt-BR'),
       obra_nome: contratoTyped.obras?.nome || '',
       obra_endereco: contratoTyped.obras ? 
@@ -370,4 +370,4 @@ async function gerarPDFSimples(htmlContent: string, contrato: ContratoData): Pro
   
   // Retornar como Uint8Array
   return new Uint8Array(doc.output('arraybuffer'))
-} 
+}

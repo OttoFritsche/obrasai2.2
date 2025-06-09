@@ -29,7 +29,7 @@ interface ContextoItem {
   conteudo: string;
   relevancia: number;
   fonte: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface ChatResponse {
@@ -126,10 +126,10 @@ async function buscarContextoObra(obraId: string): Promise<ContextoItem[]> {
       .limit(10);
 
     const totalDespesas = despesas?.reduce((sum, d) => sum + Number(d.custo), 0) || 0;
-    const despesasPorCategoria = despesas?.reduce((acc: any, d) => {
+    const despesasPorCategoria = despesas?.reduce((acc: Record<string, number>, d) => {
       acc[d.categoria] = (acc[d.categoria] || 0) + Number(d.custo);
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     if (despesas && despesas.length > 0) {
       contextos.push({
@@ -409,7 +409,7 @@ Deno.serve(async (req: Request) => {
     console.log(`🤖 Processando pergunta: "${pergunta}"`);
 
     // Coletar contextos relevantes
-    let contextos: ContextoItem[] = [];
+    const contextos: ContextoItem[] = [];
 
     // Contexto da obra específica
     if (obra_id && (incluir_orcamento || incluir_despesas)) {
@@ -505,4 +505,4 @@ Deno.serve(async (req: Request) => {
       }
     );
   }
-}); 
+});

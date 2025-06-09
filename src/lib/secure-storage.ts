@@ -5,11 +5,28 @@ import CryptoJS from 'crypto-js';
  * Substitui o localStorage padrão para dados sensíveis
  */
 
-// Chave de criptografia derivada (em produção, usar uma chave mais robusta)
+// Chave de criptografia derivada de forma segura
 const getEncryptionKey = (): string => {
-  // Em produção, esta chave deve vir de variáveis de ambiente seguras
-  const key = import.meta.env.VITE_ENCRYPTION_KEY || 'default-dev-key-change-in-prod';
-  return CryptoJS.SHA256(key + window.location.origin).toString();
+  // Verificar se a chave de ambiente está definida
+  const envKey = import.meta.env.VITE_ENCRYPTION_KEY;
+  
+  if (!envKey) {
+    throw new Error('VITE_ENCRYPTION_KEY não está definida. Configure uma chave de criptografia segura.');
+  }
+  
+  // Validar comprimento mínimo da chave
+  if (envKey.length < 32) {
+    throw new Error('VITE_ENCRYPTION_KEY deve ter pelo menos 32 caracteres.');
+  }
+  
+  // Derivar chave usando PBKDF2 para maior segurança
+  const salt = CryptoJS.SHA256(window.location.origin).toString();
+  const key = CryptoJS.PBKDF2(envKey, salt, {
+    keySize: 256/32,
+    iterations: 10000
+  });
+  
+  return key.toString();
 };
 
 /**
@@ -40,7 +57,7 @@ const decrypt = (encryptedData: string): string => {
     
     return decrypted;
   } catch (error) {
-    console.error('Decryption failed');
+    console.warn('Decryption failed - data may be corrupted or from different key');
     throw new Error('Failed to decrypt data');
   }
 };
@@ -56,7 +73,14 @@ export const createSecureStorage = () => ({
       
       // Verificar se os dados já estão criptografados
       if (encryptedData.startsWith('encrypted:')) {
-        return decrypt(encryptedData.substring(10));
+        try {
+          return decrypt(encryptedData.substring(10));
+        } catch (decryptError) {
+          // Dados corrompidos ou chave diferente - limpar e retornar null
+          console.warn(`Removing corrupted encrypted data for key: ${key}`);
+          localStorage.removeItem(key);
+          return null;
+        }
       }
       
       // Dados legados não criptografados (migração)
@@ -94,4 +118,4 @@ export const encryptData = (data: string): string => {
 
 export const decryptData = (encryptedData: string): string => {
   return decrypt(encryptedData);
-}; 
+};

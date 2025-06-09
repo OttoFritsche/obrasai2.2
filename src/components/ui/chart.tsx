@@ -65,6 +65,18 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "Chart"
 
+// Função para sanitizar valores CSS
+const sanitizeCSSValue = (value: string): string => {
+  // Remove caracteres perigosos e mantém apenas valores CSS válidos
+  return value.replace(/[^a-zA-Z0-9#().,\s%-]/g, '').trim();
+};
+
+// Função para sanitizar seletores CSS
+const sanitizeCSSSelector = (selector: string): string => {
+  // Remove caracteres perigosos de seletores CSS
+  return selector.replace(/[^a-zA-Z0-9\s[]=-_.:]/g, '').trim();
+};
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([_, config]) => config.theme || config.color
@@ -74,25 +86,33 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // Sanitizar o ID do chart
+  const sanitizedId = sanitizeCSSSelector(id);
+
+  const cssContent = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const sanitizedPrefix = sanitizeCSSSelector(prefix);
+      const colorRules = colorConfig
+        .map(([key, itemConfig]) => {
+          const sanitizedKey = sanitizeCSSSelector(key);
+          const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+          
+          if (!color) return null;
+          
+          const sanitizedColor = sanitizeCSSValue(color);
+          return sanitizedColor ? `  --color-${sanitizedKey}: ${sanitizedColor};` : null;
+        })
+        .filter(Boolean)
+        .join("\n");
+      
+      return `${sanitizedPrefix} [data-chart="${sanitizedId}"] {\n${colorRules}\n}`;
+    })
+    .join("\n");
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
+        __html: cssContent,
       }}
     />
   )

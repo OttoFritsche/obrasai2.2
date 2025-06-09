@@ -18,8 +18,21 @@ import { useAIFeatures } from '@/hooks/useAIFeatures';
  * @author Pharma.AI Team
  */
 
+// Interfaces para tipagem
+interface SearchResult {
+  id: string;
+  tipo: 'insumo' | 'composicao';
+  codigo_sinapi: string;
+  descricao: string;
+  unidade: string;
+  categoria?: string;
+  preco_referencia?: number;
+  similarity_score: number;
+  explanation?: string;
+}
+
 interface SemanticSearchProps {
-  onResultSelect?: (result: any) => void;
+  onResultSelect?: (result: SearchResult) => void;
   defaultQuery?: string;
   showFilters?: boolean;
   maxResults?: number;
@@ -62,7 +75,7 @@ export function SemanticSearch({
     threshold: 0.7
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const [explainLoading, setExplainLoading] = useState(false);
 
   // Estados brasileiros para filtro
@@ -100,7 +113,7 @@ export function SemanticSearch({
   }, [searchBySuggestion, filters.estado]);
 
   // Explicar resultado
-  const handleExplainResult = useCallback(async (result: any) => {
+  const handleExplainResult = useCallback(async (result: SearchResult) => {
     setExplainLoading(true);
     try {
       const explanation = await explainSinapiResult(result);
@@ -113,7 +126,7 @@ export function SemanticSearch({
   }, [explainSinapiResult]);
 
   // Selecionar resultado
-  const handleResultSelect = useCallback((result: any) => {
+  const handleResultSelect = useCallback((result: SearchResult) => {
     if (onResultSelect) {
       onResultSelect(result);
     }
@@ -227,7 +240,7 @@ export function SemanticSearch({
 
               <Select
                 value={filters.tipo_busca}
-                onValueChange={(value: any) => setFilters(prev => ({ ...prev, tipo_busca: value }))}
+                onValueChange={(value: 'ambos' | 'insumos' | 'composicoes') => setFilters(prev => ({ ...prev, tipo_busca: value }))}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -514,4 +527,4 @@ export function SemanticSearch({
       )}
     </div>
   );
-} 
+}

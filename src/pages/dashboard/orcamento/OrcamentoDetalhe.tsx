@@ -5,7 +5,7 @@
  * todos os detalhes técnicos e análises da IA.
  * 
  * @author ObrasAI Team
- * @version 2.0.0 - Integração com Composição Detalhada v9.0.0
+ * @version 2.0.0 - Orçamento Paramétrico
  */
 
 import React, { useState } from "react";
@@ -53,7 +53,7 @@ import {
 } from "@/components/ui/table";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import ComposicaoDetalhada from "@/components/orcamento/ComposicaoDetalhada";
+// Removido: import ComposicaoDetalhada - funcionalidade desabilitada
 import { orcamentosParametricosApi, itensOrcamentoApi, calculoOrcamentoApi, orcamentoUtils } from "@/services/orcamentoApi";
 import { 
   OrcamentoParametrico,
@@ -74,7 +74,7 @@ const OrcamentoDetalhe: React.FC = () => {
   
   // Estados locais
   const [recalculando, setRecalculando] = useState(false);
-  const [ultimoCalculo, setUltimoCalculo] = useState<any>(null);
+  const [ultimoCalculo, setUltimoCalculo] = useState<{ data: string; valor_total: number } | null>(null);
 
   // Validação do UUID - evita tentar buscar IDs inválidos como 'novo'
   const isValidUUID = (str: string) => {
@@ -99,40 +99,47 @@ const OrcamentoDetalhe: React.FC = () => {
   const { 
     data: itens = [], 
     isLoading: itensLoading,
-    refetch: refetchItens
+    refetch: refetchItens,
+    error: itensError
   } = useQuery({
     queryKey: ['itens-orcamento', id],
-    queryFn: () => itensOrcamentoApi.getByOrcamento(id!),
+    queryFn: async () => {
+      const result = await itensOrcamentoApi.getByOrcamento(id!);
+      return result;
+    },
     enabled: !!isValidId
   });
+
+
+
+  // Verificar se o orçamento precisa ser recalculado (não tem itens)
+  const precisaRecalcular = orcamento && (!itens || itens.length === 0);
 
   // ====================================
   // 🎯 HANDLERS DE EVENTOS
   // ====================================
 
   /**
-   * Recalcular orçamento com IA (v9.0.0 prioritária)
+   * Recalcular orçamento com IA paramétrica
    */
   const handleRecalcular = async () => {
     if (!id) return;
 
     try {
       setRecalculando(true);
-      toast.info("🤖 Recalculando orçamento com IA v9.0.0...");
+      toast.info("🤖 Recalculando orçamento com IA paramétrica...");
 
       const resultado = await calculoOrcamentoApi.recalcular(id);
       
       if (resultado.success) {
         setUltimoCalculo(resultado);
         
-        // Mostrar informações detalhadas do cálculo
+        // Mostrar informações do cálculo
         const stats = resultado.estatisticas;
-        if (stats?.composicao_detalhada) {
+        if (stats) {
           toast.success(
             `✨ Orçamento recalculado com sucesso!\n` +
-            `💰 ${orcamentoUtils.formatarValor(resultado.orcamento.custo_estimado)}\n` +
-            `🏗️ ${stats.composicao_detalhada.total_itens} itens em ${stats.composicao_detalhada.resumo_etapas?.length || 0} etapas\n` +
-            `👷 ${stats.composicao_detalhada.percentual_mao_obra}% mão de obra`,
+            `💰 ${orcamentoUtils.formatarValor(resultado.orcamento.custo_estimado)}`,
             { duration: 5000 }
           );
         } else {
@@ -145,7 +152,7 @@ const OrcamentoDetalhe: React.FC = () => {
           refetchItens()
         ]);
       }
-    } catch (error: any) {
+    } catch (error: Error & { message?: string }) {
       console.error("Erro ao recalcular:", error);
       toast.error(`❌ Erro ao recalcular orçamento: ${error.message}`);
     } finally {
@@ -387,10 +394,8 @@ const OrcamentoDetalhe: React.FC = () => {
     );
   }
 
-  // Verificar se tem composição detalhada v9.0.0
-  const temComposicaoDetalhada = itens.length > 20 || 
-    (ultimoCalculo?.estatisticas?.composicao_detalhada) ||
-    itens.some(item => item.observacoes?.includes('v9.0.0'));
+  // Funcionalidade de composição detalhada removida - apenas orçamento paramétrico
+  const temComposicaoDetalhada = false;
 
   return (
     <DashboardLayout>
@@ -434,12 +439,6 @@ const OrcamentoDetalhe: React.FC = () => {
                   <span className="text-xs text-muted-foreground">{orcamento.cidade}/{orcamento.estado}</span>
                 </div>
                 <StatusBadge status={orcamento.status} />
-                {temComposicaoDetalhada && (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
-                    <Sparkles className="h-3 w-3 mr-1" />
-                    v9.0.0
-                  </Badge>
-                )}
               </div>
             </div>
           </motion.div>
@@ -460,7 +459,7 @@ const OrcamentoDetalhe: React.FC = () => {
               )}
             >
               <RefreshCcw className={`h-4 w-4 mr-2 ${recalculando ? 'animate-spin' : ''}`} />
-              {recalculando ? 'Recalculando...' : 'Recalcular IA v9.0.0'}
+              {recalculando ? 'Recalculando...' : 'Recalcular Orçamento'}
             </Button>
             
             <Button
@@ -497,31 +496,15 @@ const OrcamentoDetalhe: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Tabs defaultValue={temComposicaoDetalhada ? "composicao" : "resumo"} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6">
-              {temComposicaoDetalhada && (
-                <TabsTrigger value="composicao" className="flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  Composição v9.0.0
-                </TabsTrigger>
-              )}
+          <Tabs defaultValue="resumo" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
-              <TabsTrigger value="itens">Itens Detalhados</TabsTrigger>
               <TabsTrigger value="analise">Análise IA</TabsTrigger>
               <TabsTrigger value="dados">Dados Técnicos</TabsTrigger>
               <TabsTrigger value="historico">Histórico</TabsTrigger>
             </TabsList>
 
-            {/* Aba Composição Detalhada v9.0.0 */}
-            {temComposicaoDetalhada && (
-              <TabsContent value="composicao">
-                <ComposicaoDetalhada 
-                  itens={itens}
-                  composicao={ultimoCalculo?.estatisticas?.composicao_detalhada}
-                  custoTotal={orcamento.custo_estimado}
-                />
-              </TabsContent>
-            )}
+            {/* Aba Composição Detalhada removida - apenas orçamento paramétrico */}
 
             {/* Aba Resumo */}
             <TabsContent value="resumo">
@@ -533,14 +516,7 @@ const OrcamentoDetalhe: React.FC = () => {
                       Composição de Custos
                     </CardTitle>
                     <CardDescription>
-                      {temComposicaoDetalhada ? (
-                        <span className="text-[#182b4d] dark:text-[#daa916] flex items-center gap-1">
-                          <Sparkles className="h-3 w-3" />
-                          Análise detalhada disponível na aba "Composição v9.0.0"
-                        </span>
-                      ) : (
-                        "Resumo básico dos custos por categoria"
-                      )}
+                      Resumo dos custos por categoria - Orçamento Paramétrico
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -572,16 +548,9 @@ const OrcamentoDetalhe: React.FC = () => {
                         <p className="font-semibold">{orcamento.cep || 'Não informado'}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Versão IA</p>
-                        <p className="font-semibold flex items-center gap-1">
-                          {temComposicaoDetalhada ? (
-                            <>
-                              <Sparkles className="h-3 w-3 text-green-600" />
-                              v9.0.0 Detalhada
-                            </>
-                          ) : (
-                            'Padrão'
-                          )}
+                        <p className="text-sm font-medium text-muted-foreground">Tipo</p>
+                        <p className="font-semibold">
+                          Orçamento Paramétrico
                         </p>
                       </div>
                     </div>
@@ -597,85 +566,7 @@ const OrcamentoDetalhe: React.FC = () => {
               </div>
             </TabsContent>
 
-            {/* Aba Itens Detalhados */}
-            <TabsContent value="itens">
-              <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>Itens do Orçamento</CardTitle>
-                  <CardDescription>
-                    {itens.length} itens encontrados • Total: {orcamentoUtils.formatarValor(
-                      itens.reduce((sum, item) => sum + (item.valor_unitario_base * item.quantidade_estimada), 0)
-                    )}
-                    {temComposicaoDetalhada && (
-                      <span className="ml-2 text-[#182b4d] dark:text-[#daa916]">
-                        • Composição detalhada v9.0.0 ativa
-                      </span>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  {itens.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Calculator className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Nenhum item encontrado</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Os itens serão gerados automaticamente pela IA durante o cálculo.
-                      </p>
-                      <Button onClick={handleRecalcular} disabled={recalculando}>
-                        <RefreshCcw className="h-4 w-4 mr-2" />
-                        Calcular com IA v9.0.0
-                      </Button>
-                    </div>
-                  ) : (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Categoria</TableHead>
-                          <TableHead>Etapa</TableHead>
-                          <TableHead>Insumo</TableHead>
-                          <TableHead>Quantidade</TableHead>
-                          <TableHead>Unidade</TableHead>
-                          <TableHead>Valor Unitário</TableHead>
-                          <TableHead className="text-right">Total</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {itens.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell>
-                              <Badge variant="outline" className="bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300">
-                                {item.categoria.replace(/_/g, ' ')}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {item.etapa.replace(/_/g, ' ')}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              {item.insumo}
-                              {item.observacoes?.includes('v9.0.0') && (
-                                <Badge variant="outline" className="ml-2 text-xs bg-green-50 text-green-700 border-green-200">
-                                  v9.0.0
-                                </Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>{item.quantidade_estimada.toFixed(2)}</TableCell>
-                            <TableCell>{item.unidade_medida}</TableCell>
-                            <TableCell>
-                              {orcamentoUtils.formatarValor(item.valor_unitario_base)}
-                            </TableCell>
-                            <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">
-                              {orcamentoUtils.formatarValor(
-                                item.valor_unitario_base * item.quantidade_estimada
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+            {/* Aba Itens Detalhados removida - apenas orçamento paramétrico */}
 
             {/* Aba Análise IA */}
             <TabsContent value="analise">
@@ -686,12 +577,9 @@ const OrcamentoDetalhe: React.FC = () => {
                       <Sparkles className="h-5 w-5" />
                       Sugestões da IA
                     </CardTitle>
-                    {temComposicaoDetalhada && (
-                      <CardDescription className="text-[#182b4d] dark:text-[#daa916] flex items-center gap-1">
-                        <Sparkles className="h-3 w-3" />
-                        Análise avançada v9.0.0 com composição detalhada
-                      </CardDescription>
-                    )}
+                    <CardDescription>
+                      Análise baseada no orçamento paramétrico
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {(orcamento.sugestoes_ia && orcamento.sugestoes_ia.length === 0) || !orcamento.sugestoes_ia ? (
@@ -739,12 +627,9 @@ const OrcamentoDetalhe: React.FC = () => {
               <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Parâmetros Técnicos</CardTitle>
-                  {temComposicaoDetalhada && (
-                    <CardDescription className="text-[#182b4d] dark:text-[#daa916] flex items-center gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      Dados gerados com IA v9.0.0 - Composição Detalhada
-                    </CardDescription>
-                  )}
+                  <CardDescription>
+                    Parâmetros do orçamento paramétrico
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -808,14 +693,9 @@ const OrcamentoDetalhe: React.FC = () => {
                       <div className="flex items-center gap-4 p-3 bg-muted rounded-md">
                         <div className="h-2 w-2 bg-blue-600 rounded-full"></div>
                         <div className="flex-1">
-                          <p className="font-medium flex items-center gap-1">
-                            Último cálculo da IA
-                            {temComposicaoDetalhada && (
-                              <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                                v9.0.0
-                              </Badge>
-                            )}
-                          </p>
+                          <p className="font-medium">
+                          Último cálculo da IA
+                        </p>
                           <p className="text-sm text-muted-foreground">
                             {new Date(orcamento.data_calculo).toLocaleString('pt-BR')}
                           </p>
@@ -843,4 +723,4 @@ const OrcamentoDetalhe: React.FC = () => {
   );
 };
 
-export default OrcamentoDetalhe; 
+export default OrcamentoDetalhe;

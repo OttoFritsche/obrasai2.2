@@ -56,7 +56,7 @@ const EditarObra = () => {
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   const { user } = useAuth();
   const tenantId = user?.profile?.tenant_id;
-  const [construtoras, setConstrutoras] = useState<any[]>([]);
+  const [construtoras, setConstrutoras] = useState<{ id: string; nome: string; cnpj?: string; email?: string; telefone?: string; endereco?: string }[]>([]);
   const [loadingConstrutoras, setLoadingConstrutoras] = useState(true);
   
   const form = useForm<ObraFormValues>({

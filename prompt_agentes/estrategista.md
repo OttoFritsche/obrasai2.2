@@ -1,0 +1,2 @@
+Agente Estrategista, vamos adicionar um módulo de 'Diário de Obra'. Quebre essa funcionalidade em User Stories, defina os Critérios de Aceite para cada uma e desenhe o esquema do banco de dados (tabelas e relacionamentos) em Mermaid."
+"Preciso de uma nova funcionalidade para controle de estoque de materiais. Liste os principais desafios técnicos, sugira a melhor abordagem de implementação e crie um plano de tarefas para o desenvolvimento.

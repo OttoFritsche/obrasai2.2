@@ -79,80 +79,18 @@ interface ErrorWithCode extends Error {
   code?: string;
 }
 
-// ✅ Rate limiting storage
-const rateLimiter = new Map<string, number[]>();
+import { getSecureCorsHeaders, getPreflightHeaders, validateCSRFToken, checkRateLimit } from '../_shared/cors.ts';
+import { validateObject, VALIDATION_SCHEMAS } from '../_shared/input-validation.ts';
 
-// ✅ Headers de segurança aprimorados
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-csrf-token, origin',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-};
+// ✅ Headers de segurança aprimorados - agora usando configuração centralizada
 
 // 🤖 Configuração da API DeepSeek
 const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API');
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
-/**
- * ✅ Implementa rate limiting
- */
-const checkRateLimit = (clientId: string): boolean => {
-  const now = Date.now();
-  const requests = rateLimiter.get(clientId) || [];
-  
-  // Remove requests mais antigos que 1 minuto
-  const recentRequests = requests.filter(time => now - time < 60000);
-  
-  // Limite: 10 requests por minuto
-  if (recentRequests.length >= 10) {
-    return false;
-  }
-  
-  recentRequests.push(now);
-  rateLimiter.set(clientId, recentRequests);
-  
-  // Cleanup periódico do map
-  if (rateLimiter.size > 1000) {
-    const oldEntries = Array.from(rateLimiter.entries())
-      .filter(([_, times]) => times.every(time => now - time > 300000)); // 5 min
-    oldEntries.forEach(([key]) => rateLimiter.delete(key));
-  }
-  
-  return true;
-};
+// Rate limiting agora é gerenciado pela configuração centralizada
 
-/**
- * ✅ Valida token CSRF (básico)
- */
-const validateCSRFToken = (token: string | null, origin: string | null): boolean => {
-  // Para desenvolvimento, ser mais flexível
-  if (!token && !origin) return false;
-  
-  // Permitir origins de desenvolvimento e produção
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:8080',
-    'http://localhost:8081',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:8080', 
-    'http://127.0.0.1:8081',
-    'https://yourdomain.com'
-  ];
-  
-  // Se tem origin e é permitido, aceitar
-  if (origin && allowedOrigins.includes(origin)) {
-    return true;
-  }
-  
-  // Se tem token (mesmo básico), aceitar para desenvolvimento
-  if (token && token.length > 0) {
-    return true;
-  }
-  
-  return false;
-};
+// Validação CSRF agora é gerenciada pela configuração centralizada
 
 /**
  * 🧠 Busca contexto completo da obra para a IA
@@ -303,12 +241,14 @@ DIRETRIZES:
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
   const startTime = Date.now();
+  const origin = req.headers.get('origin');
+  const corsHeaders = getSecureCorsHeaders(origin);
+  
+  // ✅ Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: getPreflightHeaders(origin) });
+  }
 
   try {
     // ✅ Verificação de método HTTP
@@ -324,7 +264,7 @@ serve(async (req) => {
                      req.headers.get('x-real-ip') || 
                      'unknown';
     
-    if (!checkRateLimit(clientIP)) {
+    if (!checkRateLimit(clientIP, 10, 60000)) { // 10 requests por minuto
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -333,11 +273,10 @@ serve(async (req) => {
 
     // ✅ Verificação CSRF
     const csrfToken = req.headers.get('x-csrf-token');
-    const origin = req.headers.get('origin');
     
     if (!validateCSRFToken(csrfToken, origin)) {
       return new Response(
-        JSON.stringify({ error: 'Invalid CSRF token' }),
+        JSON.stringify({ error: 'Invalid CSRF token or unauthorized origin' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -354,40 +293,27 @@ serve(async (req) => {
     const requestBody = await req.json() as ChatRequest;
     const { message, obra_id, user_id } = requestBody;
 
-    // ✅ Validação rigorosa de inputs
-    if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'Mensagem é obrigatória' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (!user_id || typeof user_id !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'ID do usuário é obrigatório' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // ✅ Sanitização de inputs
-    const sanitizedMessage = message.trim().slice(0, 1000); // Limite de caracteres
+    // Validação robusta de entrada
+    const validation = validateObject({ message, obra_id, user_id: user?.id }, VALIDATION_SCHEMAS.aiChat);
     
-    // ✅ Verificação de padrões maliciosos
-    const maliciousPatterns = [
-      /<script/i,
-      /javascript:/i,
-      /on\w+\s*=/i,
-      /SELECT.*FROM/i,
-      /INSERT.*INTO/i,
-      /DELETE.*FROM/i,
-    ];
-    
-    if (maliciousPatterns.some(pattern => pattern.test(sanitizedMessage))) {
+    if (!validation.isValid) {
       return new Response(
-        JSON.stringify({ error: 'Invalid input detected' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'Dados de entrada inválidos',
+          details: validation.errors
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       );
     }
+    
+    // Usar dados sanitizados
+    const sanitizedData = validation.sanitizedObject;
+    const sanitizedMessage = sanitizedData.message;
+    const sanitizedObraId = sanitizedData.obra_id;
+    const sanitizedUserId = sanitizedData.user_id;
 
     // Verificar se a API key do DeepSeek está configurada
     if (!DEEPSEEK_API_KEY) {

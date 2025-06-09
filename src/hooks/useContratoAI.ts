@@ -49,7 +49,7 @@ interface InteracaoIA {
   contrato_id?: string;
   pergunta: string;
   resposta: string;
-  contexto_contrato: any;
+  contexto_contrato: Record<string, unknown>;
   sugestoes_geradas: AISuggestion[];
   qualidade_resposta?: number;
   feedback_usuario?: number;
@@ -134,7 +134,7 @@ export function useContratoAI() {
 
       toast.success(`Resposta gerada em ${response.tempo_resposta_ms}ms com ${response.confianca * 100}% de confiança`);
     },
-    onError: (error: any) => {
+    onError: (error: Error & { name?: string }) => {
       if (error.name === 'AbortError') {
         console.log('🚫 Requisição cancelada pelo usuário');
         return;
@@ -333,4 +333,4 @@ export function useContratoAIForContract(contratoId: string) {
     ...hook,
     contractInteractions,
   };
-} 
+}

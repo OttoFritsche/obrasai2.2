@@ -78,7 +78,7 @@ const validateLead = (lead: LeadData): { isValid: boolean; errors: string[] } =>
   }
 
   // Validações opcionais mas quando presentes devem ser válidas
-  if (lead.telefone && !/^[\d\s\-\(\)\+]{10,}$/.test(lead.telefone.replace(/\s/g, ''))) {
+  if (lead.telefone && !/^[\d\s\-()+]{10,}$/.test(lead.telefone.replace(/\s/g, ''))) {
     errors.push('Telefone inválido');
   }
 
@@ -309,4 +309,4 @@ serve(async (req) => {
       }
     );
   }
-}); 
+});

@@ -84,7 +84,7 @@ export const obrasApi = {
             }
           }
           if (typeof date === 'number' || (typeof date === 'object' && date !== null)) {
-            const dateObj = new Date(date as any);
+            const dateObj = new Date(date as string | number | Date);
             if (!isNaN(dateObj.getTime())) {
               return dateObj.toISOString().split('T')[0];
             }
@@ -154,7 +154,7 @@ export const obrasApi = {
           
           // Se for objeto que pode ser convertido para Date (timestamp, etc)
           if (typeof date === 'number' || (typeof date === 'object' && date !== null)) {
-            const dateObj = new Date(date as any);
+            const dateObj = new Date(date as string | number | Date);
             if (!isNaN(dateObj.getTime())) {
               return dateObj.toISOString().split('T')[0];
             }

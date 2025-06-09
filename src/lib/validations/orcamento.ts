@@ -169,8 +169,8 @@ export const OrcamentoParametricoInputSchema = z.object({
   area_detalhada: z.record(z.string(), z.number().positive()).optional(),
   
   // Especificações técnicas  
-  especificacoes: z.record(z.any()).optional(),
-  parametros_entrada: z.record(z.any()).optional(),
+  especificacoes: z.record(z.unknown()).optional(),
+  parametros_entrada: z.record(z.unknown()).optional(),
   
   // Relacionamento opcional com obra existente
   obra_id: z.string().uuid().optional()
@@ -195,7 +195,7 @@ export const OrcamentoParametricoSchema = OrcamentoParametricoInputSchema.extend
     .default(80),
   
   // Dados da IA
-  parametros_ia: z.record(z.any()).optional(),
+  parametros_ia: z.record(z.unknown()).optional(),
   sugestoes_ia: z.array(z.string()).default([]),
   alertas_ia: z.array(z.string()).default([]),
   
@@ -423,8 +423,8 @@ export const WizardEtapa3Schema = z.object({
  * Schema para Etapa 4: Especificações técnicas
  */
 export const WizardEtapa4Schema = z.object({
-  especificacoes: z.record(z.any()).optional(),
-  parametros_entrada: z.record(z.any()).optional()
+  especificacoes: z.record(z.unknown()).optional(),
+  parametros_entrada: z.record(z.unknown()).optional()
 });
 
 /**
@@ -597,4 +597,4 @@ export const ESTADOS_BRASILEIROS = [
   { sigla: "SP", nome: "São Paulo" },
   { sigla: "SE", nome: "Sergipe" },
   { sigla: "TO", nome: "Tocantins" }
-]; 
+];

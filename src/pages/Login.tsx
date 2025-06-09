@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -34,10 +34,17 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, user, session } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // ✅ Redirecionar automaticamente quando o usuário estiver autenticado
+  useEffect(() => {
+    if (user && session) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, session, navigate]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -59,7 +66,8 @@ const Login = () => {
       }
       
       toast.success(t("messages.loginSuccess"));
-      navigate("/dashboard");
+      // ✅ Redirecionamento será feito automaticamente pelo useEffect
+      // quando o estado de autenticação for atualizado
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t("messages.generalError");
       toast.error(errorMessage);

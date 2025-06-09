@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, SupabaseClient, User } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  let user: any = null
-  let supabaseClient: any = null
+  let user: User | null = null
+  let supabaseClient: SupabaseClient | null = null
 
   try {
     console.log('🚀 Iniciando análise de planta baixa...')
@@ -542,4 +542,4 @@ Se não conseguir ler a planta claramente, estime valores razoáveis para uma re
   }
 }
 
-// Função de dados mockados REMOVIDA - nunca mais mentir para o cliente! 
+// Função de dados mockados REMOVIDA - nunca mais mentir para o cliente!

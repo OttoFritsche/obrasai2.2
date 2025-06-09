@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.29.0';
+import { getSecureCorsHeaders, getPreflightHeaders, checkRateLimit } from '../_shared/cors.ts';
 
 // Interfaces para dados do Stripe
 interface StripeEventData {
@@ -35,18 +36,26 @@ interface SubscriptionData {
   metadata: Record<string, string>;
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
-};
+// Headers CORS seguros agora gerenciados pela configuração centralizada
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getSecureCorsHeaders(origin);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getPreflightHeaders(origin) });
   }
 
   try {
+    // Rate limiting para webhooks
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(clientIP, 50, 60000)) { // 50 requests por minuto para webhooks
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     // Verificar se é uma requisição POST
     if (req.method !== 'POST') {
       return new Response(
@@ -270,4 +279,4 @@ async function handlePaymentFailed(supabase: SupabaseClient, event: StripeEvent)
   } catch (error) {
     console.error('❌ Erro no handlePaymentFailed:', error);
   }
-} 
+}

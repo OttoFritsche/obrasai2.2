@@ -11,6 +11,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { ChevronLeft, ChevronRight, Calculator, Building, MapPin, Ruler, Settings, Sparkles, CheckCircle, Search, Database } from "lucide-react";
 import { toast } from "sonner";
 
@@ -85,7 +86,7 @@ interface EtapaInfo {
   titulo: string;
   descricao: string;
   icone: React.ReactNode;
-  schema: any;
+  schema: z.ZodSchema;
 }
 
 // ====================================
@@ -145,7 +146,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
   const [carregando, setCarregando] = useState(false);
   const [calculandoIA, setCalculandoIA] = useState(false);
   const [codigosSinapiSelecionados, setCodigosSinapiSelecionados] = useState<CodigoSinapiSelecionado[]>([]);
-  const [dadosObra, setDadosObra] = useState<any>(null);
+  const [dadosObra, setDadosObra] = useState<WizardCompleto | null>(null);
   const [carregandoObra, setCarregandoObra] = useState(false);
 
   // Hook do CEP
@@ -899,7 +900,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
                   <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Gerar itens detalhados</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Gerar orçamento paramétrico</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Por categoria e etapa</p>
                 </div>
               </div>
@@ -1119,4 +1120,4 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
       </div>
     </div>
   );
-}; 
+};

@@ -43,6 +43,29 @@ interface ImpactoOrcamento {
   urgencia: 'baixa' | 'media' | 'alta';
 }
 
+interface Notificacao {
+  id: string;
+  tipo: string;
+  titulo: string;
+  mensagem: string;
+  data_criacao: string;
+  lida: boolean;
+  dados_extras?: Record<string, unknown>;
+}
+
+interface CodigoSinapi {
+  codigo: number;
+  descricao?: string;
+}
+
+interface NotificacaoEnvio {
+  usuario_id: string;
+  tipo: string;
+  titulo: string;
+  mensagem: string;
+  dados_extras?: Record<string, unknown>;
+}
+
 interface NotificacaoResponse {
   sucesso: boolean;
   tipo_resposta: string;
@@ -50,7 +73,7 @@ interface NotificacaoResponse {
     impactos_encontrados?: ImpactoOrcamento[];
     notificacoes_enviadas?: number;
     preferencias_salvas?: boolean;
-    notificacoes?: any[];
+    notificacoes?: Notificacao[];
   };
   mensagem?: string;
 }
@@ -140,7 +163,7 @@ serve(async (req) => {
 
 async function processarWebhook(
   body: NotificacaoRequest,
-  supabase: any,
+  supabase: SupabaseClient,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   console.log('Processando webhook de alterações SINAPI');
@@ -166,14 +189,14 @@ async function processarWebhook(
     .not('parametros_entrada', 'is', null);
 
   const impactos: ImpactoOrcamento[] = [];
-  const notificacoesParaEnviar: any[] = [];
+  const notificacoesParaEnviar: NotificacaoEnvio[] = [];
 
   for (const orcamento of orcamentosImpactados || []) {
     const parametros = orcamento.parametros_entrada || {};
     const codigosSinapi = parametros.codigos_sinapi || [];
     
     const codigosImpactados = codigosSinapi
-      .map((c: any) => c.codigo)
+      .map((c: CodigoSinapi) => c.codigo)
       .filter((codigo: number) => codigosAlterados.includes(codigo));
 
     if (codigosImpactados.length > 0) {
@@ -242,8 +265,8 @@ async function processarWebhook(
 
 async function verificarImpactos(
   body: NotificacaoRequest,
-  user: any,
-  supabase: any,
+  user: { id: string; email?: string },
+  supabase: SupabaseClient,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   // Buscar orçamentos do usuário
@@ -271,7 +294,7 @@ async function verificarImpactos(
     const codigosSinapi = parametros.codigos_sinapi || [];
     
     const codigosImpactados = codigosSinapi
-      .map((c: any) => c.codigo)
+      .map((c: CodigoSinapi) => c.codigo)
       .filter((codigo: number) => codigosAlteradosIds.includes(codigo));
 
     if (codigosImpactados.length > 0) {
@@ -305,8 +328,8 @@ async function verificarImpactos(
 
 async function configurarPreferencias(
   body: NotificacaoRequest,
-  user: any,
-  supabase: any,
+  user: { id: string; email?: string },
+  supabase: SupabaseClient,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   const preferencias = body.dados?.preferencias;
@@ -351,8 +374,8 @@ async function configurarPreferencias(
 
 async function listarNotificacoes(
   body: NotificacaoRequest,
-  user: any,
-  supabase: any,
+  user: { id: string; email?: string },
+  supabase: SupabaseClient,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   const filtros = body.dados?.filtros || {};
@@ -393,4 +416,4 @@ async function listarNotificacoes(
     JSON.stringify(response),
     { headers: corsHeaders }
   );
-} 
+}

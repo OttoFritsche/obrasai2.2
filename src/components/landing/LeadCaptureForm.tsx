@@ -364,7 +364,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
                   <Building2 className="h-4 w-4" />
                   Tipo de Empresa
                 </Label>
-                <Select onValueChange={(value) => setValue('tipo_empresa', value as any)}>
+                <Select onValueChange={(value) => setValue('tipo_empresa', value as 'construtora' | 'engenharia' | 'arquitetura' | 'individual' | 'outro')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
@@ -383,7 +383,7 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
                   <Users className="h-4 w-4" />
                   Porte da Empresa
                 </Label>
-                <Select onValueChange={(value) => setValue('porte_empresa', value as any)}>
+                <Select onValueChange={(value) => setValue('porte_empresa', value as 'micro' | 'pequena' | 'media' | 'grande')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o porte" />
                   </SelectTrigger>
@@ -535,4 +535,4 @@ const LeadCaptureForm: React.FC<LeadCaptureFormProps> = ({
   );
 };
 
-export default LeadCaptureForm; 
+export default LeadCaptureForm;

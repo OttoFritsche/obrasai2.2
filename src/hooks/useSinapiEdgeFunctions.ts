@@ -32,7 +32,11 @@ interface CodigoValidacao {
   alternativas?: number[];
   detalhes?: {
     tipo_manutencao?: string;
-    historico_alteracoes?: any[];
+    historico_alteracoes?: {
+      data: string;
+      tipo: string;
+      descricao: string;
+    }[];
   };
 }
 
@@ -50,7 +54,7 @@ interface ValidacaoBatchResponse {
 
 interface NotificacaoRequest {
   tipo: 'webhook' | 'verificar_impactos' | 'configurar_preferencias' | 'listar_notificacoes';
-  dados?: any;
+  dados?: Record<string, unknown>;
 }
 
 interface ImpactoOrcamento {
@@ -74,7 +78,7 @@ export const useSinapiEdgeFunctions = () => {
 
   const chamarEdgeFunction = useCallback(async <T>(
     functionName: string, 
-    payload: any
+    payload: Record<string, unknown>
   ): Promise<T> => {
     const { data: session } = await supabase.auth.getSession();
     
@@ -155,7 +159,7 @@ export const useSinapiEdgeFunctions = () => {
   const notificacaoMutation = useMutation({
     mutationFn: (request: NotificacaoRequest) => 
       chamarEdgeFunction('sinapi-notifications', request),
-    onSuccess: (data: any) => {
+    onSuccess: (data: { sucesso?: boolean; tipo_resposta?: string }) => {
       if (data.sucesso && data.tipo_resposta === 'preferencias_configuradas') {
         toast.success('✅ Preferências de notificação salvas!');
       }
@@ -286,4 +290,4 @@ export type {
   CodigoValidacao, 
   ValidacaoBatchResponse, 
   ImpactoOrcamento 
-}; 
+};

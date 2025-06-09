@@ -62,11 +62,23 @@ import { cn } from "@/lib/utils";
 // 🎯 TIPOS E INTERFACES
 // ====================================
 
+interface SinapiItemConsulta {
+  id: string;
+  codigo_sinapi: number;
+  descricao: string;
+  tipo: string;
+  status_atual: 'ativo' | 'desativado' | 'alterado';
+  alteracoes_recentes?: boolean;
+  data_alteracao?: string;
+  fonte?: 'normal' | 'manutencao';
+  tipo_manutencao?: string;
+}
+
 interface ConsultaAvancadaProps {
   /**
    * Callback quando um código é selecionado
    */
-  onCodigoSelecionado?: (codigo: number, item: any) => void;
+  onCodigoSelecionado?: (codigo: number, item: SinapiItemConsulta) => void;
   
   /**
    * Se deve mostrar opção de seleção
@@ -156,14 +168,14 @@ export const ConsultaAvancada: React.FC<ConsultaAvancadaProps> = ({
     limparBusca();
   }, [limparBusca]);
 
-  const handleFiltroChange = useCallback((chave: keyof FiltrosBuscaUnificada, valor: any) => {
+  const handleFiltroChange = useCallback((chave: keyof FiltrosBuscaUnificada, valor: unknown) => {
     setFiltrosAvancados(prev => ({
       ...prev,
       [chave]: valor
     }));
   }, []);
 
-  const handleCodigoClick = useCallback((codigo: number, item: any) => {
+  const handleCodigoClick = useCallback((codigo: number, item: SinapiItemConsulta) => {
     if (onCodigoSelecionado) {
       onCodigoSelecionado(codigo, item);
     }
@@ -193,7 +205,7 @@ export const ConsultaAvancada: React.FC<ConsultaAvancadaProps> = ({
               <div key={opcao.value} className="flex items-center space-x-2">
                 <Checkbox
                   id={`status-${opcao.value}`}
-                  checked={filtrosAvancados.status?.includes(opcao.value as any)}
+                  checked={filtrosAvancados.status?.includes(opcao.value as 'ativo' | 'desativado' | 'alterado')}
                   onCheckedChange={(checked) => {
                     const statusAtual = filtrosAvancados.status || [];
                     const novoStatus = checked 
@@ -566,4 +578,4 @@ export const ConsultaAvancada: React.FC<ConsultaAvancadaProps> = ({
   );
 };
 
-export default ConsultaAvancada; 
+export default ConsultaAvancada;

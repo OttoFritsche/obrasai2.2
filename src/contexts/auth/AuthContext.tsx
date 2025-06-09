@@ -21,32 +21,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadingRef = useRef(false);
 
   // ✅ Função para carregar dados do usuário com tratamento de erro
-  const loadUserData = useCallback(async (userId: string, authUser: any) => {
+  const loadUserData = useCallback(async (userId: string, authUser: unknown) => {
     if (loadingRef.current) return;
     loadingRef.current = true;
 
     try {
       const userProfile = await fetchUserProfile(userId, authUser);
-      if (userProfile) {
-        setUser(userProfile);
-        // ✅ Carregar subscription em paralelo
-        const userSubscription = await fetchUserSubscription(userId);
-        if (userSubscription) {
-          setSubscription(userSubscription);
-        }
-      }
+      setUser(userProfile);
+      
+      // ✅ Definir loading como false após carregar dados com sucesso
+      setLoading(false);
     } catch (error) {
-      console.error('Error loading user data:', error);
-      // ✅ Se houver erro ao carregar dados, pode ser token corrompido
-      if (error instanceof Error && error.message.includes('JWT')) {
-        if (import.meta.env.DEV) {
-          console.log('🔄 Token corrompido, limpando dados...');
-        }
-        await clearCorruptedAuthData();
-        setUser(null);
-        setSession(null);
-        setSubscription(null);
-      }
+      console.error('Error loading user profile:', error);
+      // ✅ Em caso de erro, limpar dados e definir loading como false
+      setUser(null);
+      setSession(null);
+      setLoading(false);
     } finally {
       loadingRef.current = false;
     }
@@ -171,17 +161,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         toast.error(error.message);
+        setLoading(false); // ✅ Só define loading como false em caso de erro
         return { error };
       }
       
+      // ✅ Não definir loading como false aqui - deixar o onAuthStateChange gerenciar
       return {};
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to login";
       secureLogger.error("Login failed", error, { hasEmail: !!email });
       toast.error(errorMessage);
+      setLoading(false); // ✅ Só define loading como false em caso de erro
       return { error };
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -198,17 +189,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         toast.error(error.message);
+        setLoading(false); // ✅ Só define loading como false em caso de erro
         return { error };
       }
       
+      // ✅ Não definir loading como false aqui - deixar o onAuthStateChange gerenciar
       return {};
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to login with Google";
       secureLogger.error("Google login failed", error);
       toast.error(errorMessage);
+      setLoading(false); // ✅ Só define loading como false em caso de erro
       return { error };
-    } finally {
-      setLoading(false);
     }
   };
 

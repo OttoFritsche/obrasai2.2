@@ -16,7 +16,7 @@ const ConstrutorasLista = () => {
   const tenantId = user?.profile?.tenant_id;
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
-  const [construtoras, setConstrutoras] = useState<any[]>([]);
+  const [construtoras, setConstrutoras] = useState<{ id: string; nome: string; cnpj?: string; email?: string; telefone?: string; endereco?: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch real das construtoras
@@ -163,4 +163,4 @@ const ConstrutorasLista = () => {
   );
 };
 
-export default ConstrutorasLista; 
+export default ConstrutorasLista;

@@ -38,17 +38,23 @@ function gerarComposicaoDetalhada(orcamentoId: string, area: number, estado: str
     quantidade_estimada: qtd,
     unidade_medida: unidade,
     valor_unitario_base: valorUnit,
+    valor_total: qtd * valorUnit, // Campo obrigatório que estava faltando
     fonte_preco: 'IA',
+    codigo_sinapi: null,
+    estado_referencia_preco: estado,
+    usa_preco_sinapi: false,
     observacoes: `v9.0.1 - ${obs}`,
     created_at: agora,
     updated_at: agora
   });
 
-  // DOCUMENTAÇÃO
+  // DOCUMENTAÇÃO E PROJETOS
   itens.push(
-    criarItem('SERVICOS_TERCEIRIZADOS', 'DOCUMENTACAO', 'PROJETO_ARQUITETONICO', 1, 'UN', area * 45.00, 'Projeto arquitetônico completo'),
-    criarItem('SERVICOS_TERCEIRIZADOS', 'DOCUMENTACAO', 'PROJETO_ESTRUTURAL', 1, 'UN', area * 35.00, 'Projeto estrutural detalhado'),
-    criarItem('SERVICOS_TERCEIRIZADOS', 'OUTROS', 'CONSULTORIA_ESPECIALIZADA', 4, 'UN', 450.00, 'Sondagem para fundação')
+    criarItem('SERVICOS_TERCEIRIZADOS', 'DOCUMENTACAO', 'PROJETO_ARQUITETONICO', 1, 'UN', area * 45.00, 'Projeto arquitetônico completo e detalhado'),
+    criarItem('SERVICOS_TERCEIRIZADOS', 'DOCUMENTACAO', 'PROJETO_ESTRUTURAL', 1, 'UN', area * 35.00, 'Projeto estrutural detalhado conforme normas'),
+    criarItem('SERVICOS_TERCEIRIZADOS', 'DOCUMENTACAO', 'PROJETO_HIDRAULICO', 1, 'UN', area * 25.00, 'Projeto hidrossanitário completo'),
+    criarItem('SERVICOS_TERCEIRIZADOS', 'DOCUMENTACAO', 'PROJETO_ELETRICO', 1, 'UN', area * 25.00, 'Projeto elétrico e de telecomunicações'),
+    criarItem('SERVICOS_TERCEIRIZADOS', 'OUTROS', 'CONSULTORIA_ESPECIALIZADA', 4, 'PONTO', 450.00, 'Sondagem SPT para fundação (até 4 pontos)')
   );
 
   // FUNDAÇÃO
@@ -262,7 +268,7 @@ serve(async (req: Request) => {
       }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('💥 Erro na Edge Function v9.0.1:', error);
     
     return new Response(
@@ -283,4 +289,4 @@ serve(async (req: Request) => {
       }
     );
   }
-}); 
+});

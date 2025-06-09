@@ -94,7 +94,7 @@ const ContratosLista = () => {
   const valorTotalContratos = contratos?.reduce((sum, c) => sum + c.valor_total, 0) || 0;
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { variant: any; label: string; icon?: any }> = {
+    const statusConfig: Record<string, { variant: string; label: string; icon?: React.ComponentType }> = {
       'RASCUNHO': { variant: 'secondary', label: 'Rascunho', icon: Edit },
       'AGUARDANDO_ASSINATURA': { variant: 'warning', label: 'Aguardando Assinatura', icon: Clock },
       'ATIVO': { variant: 'success', label: 'Ativo', icon: CheckCircle },
@@ -485,4 +485,4 @@ const ContratosLista = () => {
   );
 };
 
-export default ContratosLista; 
+export default ContratosLista;

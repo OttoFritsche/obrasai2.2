@@ -110,7 +110,7 @@ const ContratoComIA = () => {
   const obraSelecionada = Boolean(watchedValues.obra_id);
 
   const getContratoContext = async () => {
-    const context: any = {
+    const context: Record<string, unknown> = {
       tipo_servico: "CONSTRUCAO",
       valor_total: watchedValues.valor_total,
       prazo_execucao: watchedValues.prazo_execucao,
@@ -160,8 +160,8 @@ const ContratoComIA = () => {
     setInputMessage("");
   };
 
-  const handleApplySuggestion = (suggestion: any, field: string) => {
-    form.setValue(field as any, suggestion.conteudo);
+  const handleApplySuggestion = (suggestion: { conteudo: string }, field: string) => {
+    form.setValue(field as keyof ContratoFormData, suggestion.conteudo);
     applySuggestion(suggestion, field);
   };
 
@@ -347,7 +347,7 @@ const ContratoComIA = () => {
                 className="flex items-center space-x-1 bg-[#182b4d]/10 dark:bg-[#182b4d]/30 text-[#182b4d] dark:text-[#daa916] border-[#182b4d]/30 dark:border-[#daa916]/50"
               >
                 <Sparkles className="h-4 w-4" />
-                <span>v9.0.0</span>
+                <span>Paramétrico</span>
               </Badge>
               <Button
                 type="button"
@@ -767,4 +767,4 @@ const ContratoComIA = () => {
   );
 };
 
-export default ContratoComIA; 
+export default ContratoComIA;

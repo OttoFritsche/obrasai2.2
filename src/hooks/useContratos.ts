@@ -20,7 +20,11 @@ interface Contrato {
     id: string;
     nome: string;
     template_html: string;
-    clausulas_obrigatorias: any[];
+    clausulas_obrigatorias: {
+      id: string;
+      texto: string;
+      obrigatoria: boolean;
+    }[];
   };
   // Dados do contratante
   contratante_nome: string;
@@ -51,7 +55,7 @@ interface Contrato {
   // Documentos
   hash_documento?: string;
   url_documento?: string;
-  variaveis_template?: any;
+  variaveis_template?: Record<string, unknown>;
   // Metadados
   criado_por?: string;
   tenant_id?: string;
@@ -65,7 +69,11 @@ interface Template {
   categoria: string;
   descricao?: string;
   template_html: string;
-  clausulas_obrigatorias: any[];
+  clausulas_obrigatorias: {
+    id: string;
+    texto: string;
+    obrigatoria: boolean;
+  }[];
   ativo: boolean;
 }
 
@@ -204,7 +212,12 @@ export function useContrato(id: string) {
         throw error;
       }
 
-      return data as Contrato & { assinaturas_contratos: any[] };
+      return data as Contrato & { assinaturas_contratos: {
+        id: string;
+        assinado_em?: string;
+        assinado_por?: string;
+        status: string;
+      }[] };
     },
     enabled: !!user && !!id,
   });
@@ -300,4 +313,4 @@ export function useEnviarAssinatura(contratoId: string) {
       toast.error("Erro ao enviar contrato");
     },
   });
-} 
+}

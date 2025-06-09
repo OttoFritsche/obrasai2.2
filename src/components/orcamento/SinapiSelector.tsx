@@ -54,6 +54,14 @@ interface SinapiItem {
   data_alteracao?: string;
 }
 
+interface AlternativaSugerida {
+  codigo: string;
+  descricao: string;
+  unidade: string;
+  preco_referencia?: number;
+  similarity_score?: number;
+}
+
 interface CodigoSelecionado {
   codigo: number;
   descricao: string;
@@ -63,7 +71,7 @@ interface CodigoSelecionado {
     ativo: boolean;
     alteracoes_recentes: boolean;
     mensagem: string;
-    alternativas_sugeridas?: any[];
+    alternativas_sugeridas?: AlternativaSugerida[];
   };
 }
 
@@ -455,4 +463,4 @@ export const SinapiSelector: React.FC<SinapiSelectorProps> = ({
   );
 };
 
-export default SinapiSelector; 
+export default SinapiSelector;

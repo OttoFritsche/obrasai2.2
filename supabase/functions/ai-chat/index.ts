@@ -158,7 +158,7 @@ Não mencione que você é uma IA ou que tem limitações.
 })
 
 // 🤖 Função de fallback inteligente
-function generateSmartFallback(message: string, metrics: any): string {
+function generateSmartFallback(message: string, metrics: ChatRequest['metrics']): string {
   const msg = message.toLowerCase()
   
   // Análise de conversão
@@ -206,4 +206,4 @@ function generateSmartFallback(message: string, metrics: any): string {
 
   // Resposta genérica
   return `Com base nas suas métricas atuais: ${metrics.leads.total} leads, ${((metrics.leads.converted / metrics.leads.total) * 100).toFixed(1)}% de conversão, ${metrics.users.churn}% de churn e LTV/CAC de ${(metrics.revenue.ltv / metrics.revenue.cac).toFixed(1)}x. Posso ajudar com análises específicas sobre conversão, churn, receita ou uso do produto.`
-} 
+}

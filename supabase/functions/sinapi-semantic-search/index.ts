@@ -1,6 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { corsHeaders } from '../_shared/cors.ts';
+import { Database } from '../_shared/database.types.ts';
+import { validateObject, VALIDATION_SCHEMAS } from '../_shared/input-validation.ts';
 
 /**
  * 🔍 Edge Function: Busca Semântica SINAPI
@@ -21,8 +23,14 @@ interface SearchRequest {
   categoria?: string;
 }
 
+interface SearchMetadata {
+  fonte?: string;
+  estado_referencia?: string;
+  [key: string]: unknown;
+}
+
 interface SearchResult {
-  id: number;
+  id: string;
   codigo_sinapi: string;
   descricao: string;
   unidade: string;
@@ -30,7 +38,7 @@ interface SearchResult {
   preco_referencia?: number;
   similarity_score: number;
   tipo: 'insumo' | 'composicao';
-  metadata?: any;
+  metadata?: SearchMetadata;
 }
 
 interface SearchResponse {
@@ -84,7 +92,7 @@ async function searchInsumos(
   threshold: number,
   estado?: string
 ): Promise<SearchResult[]> {
-  let query = supabase
+  const query = supabase
     .from('sinapi_insumos')
     .select(`
       id,
@@ -107,7 +115,7 @@ async function searchInsumos(
   }
 
   // Simulação de score de similaridade (em produção seria calculado pelo pgvector)
-  return (data || []).map((item: any) => ({
+  return (data || []).map((item: Record<string, unknown>) => ({
     id: item.id,
     codigo_sinapi: item.codigo_do_insumo,
     descricao: item.descricao_do_insumo,
@@ -132,7 +140,7 @@ async function searchComposicoes(
   threshold: number,
   estado?: string
 ): Promise<SearchResult[]> {
-  let query = supabase
+  const query = supabase
     .from('sinapi_composicoes_mao_obra')
     .select(`
       id,
@@ -150,7 +158,7 @@ async function searchComposicoes(
     throw new Error(`Erro na busca de composições: ${error.message}`);
   }
 
-  return (data || []).map((item: any) => ({
+  return (data || []).map((item: Record<string, unknown>) => ({
     id: item.id,
     codigo_sinapi: item.codigo_composicao,
     descricao: item.descricao,
@@ -239,12 +247,15 @@ Deno.serve(async (req: Request) => {
     // Parse do body
     const body: SearchRequest = await req.json();
     
-    // Validação dos parâmetros
-    if (!body.query || body.query.trim().length === 0) {
+    // Validação robusta dos parâmetros usando o sistema de validação
+    const validation = validateObject(body, VALIDATION_SCHEMAS.sinapiSearch);
+    
+    if (!validation.isValid) {
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: 'Query é obrigatória' 
+          error: 'Dados de entrada inválidos',
+          details: validation.errors
         }),
         { 
           status: 400, 
@@ -252,15 +263,19 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+    
+    // Usar dados sanitizados
+    const sanitizedData = validation.sanitizedObject;
 
     const {
       query,
       limit = 20,
       threshold = 0.7,
-      tipo_busca = 'ambos',
-      estado = 'SP',
-      categoria
-    } = body;
+      tipo_busca = 'ambos'
+    } = sanitizedData;
+    
+    // Propriedades adicionais do body original (não validadas no schema)
+    const { estado = 'SP', categoria } = body;
 
     console.log(`🔍 Iniciando busca semântica SINAPI: "${query}"`);
 
@@ -343,4 +358,4 @@ Deno.serve(async (req: Request) => {
       }
     );
   }
-}); 
+});

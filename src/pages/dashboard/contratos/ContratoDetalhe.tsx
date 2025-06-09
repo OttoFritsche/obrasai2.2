@@ -38,7 +38,7 @@ const ContratoDetalhe = () => {
   const [emailContratado, setEmailContratado] = useState("");
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { variant: any; label: string; icon: any }> = {
+    const statusConfig: Record<string, { variant: string; label: string; icon: React.ComponentType }> = {
       'RASCUNHO': { variant: 'secondary', label: 'Rascunho', icon: Edit },
       'AGUARDANDO_ASSINATURA': { variant: 'warning', label: 'Aguardando Assinatura', icon: Clock },
       'ATIVO': { variant: 'success', label: 'Ativo', icon: CheckCircle },
@@ -482,4 +482,4 @@ const ContratoDetalhe = () => {
   );
 };
 
-export default ContratoDetalhe; 
+export default ContratoDetalhe;

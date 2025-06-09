@@ -24,7 +24,7 @@ const initialState: ThemeProviderState = {
 }
 
 // Criar o contexto
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+export const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 // Provider do tema
 export function ThemeProvider({
@@ -42,15 +42,34 @@ export function ThemeProvider({
         if (storedTheme) {
           // Verificar se é um valor criptografado
           if (storedTheme.startsWith('encrypted:')) {
-            const decrypted = decryptData(storedTheme.substring(10));
-            return (decrypted as Theme) || defaultTheme;
+            try {
+              const decrypted = decryptData(storedTheme.substring(10));
+              // Validar se o tema descriptografado é válido
+              if (['light', 'dark', 'system'].includes(decrypted)) {
+                return (decrypted as Theme) || defaultTheme;
+              } else {
+                console.warn('Invalid theme value after decryption, removing corrupted data');
+                localStorage.removeItem(storageKey);
+                return defaultTheme;
+              }
+            } catch (decryptError) {
+              console.warn('Failed to decrypt theme preference, removing corrupted data');
+              localStorage.removeItem(storageKey);
+              return defaultTheme;
+            }
           }
-          // Valor legado não criptografado
-          return (storedTheme as Theme) || defaultTheme;
+          // Valor legado não criptografado - validar antes de usar
+          if (['light', 'dark', 'system'].includes(storedTheme)) {
+            return (storedTheme as Theme) || defaultTheme;
+          } else {
+            console.warn('Invalid legacy theme value, removing corrupted data');
+            localStorage.removeItem(storageKey);
+            return defaultTheme;
+          }
         }
         return defaultTheme;
       } catch (error) {
-        console.warn('Failed to decrypt theme preference, using default');
+        console.warn('Failed to retrieve theme preference, using default');
         return defaultTheme;
       }
     }
@@ -100,13 +119,3 @@ export function ThemeProvider({
     </ThemeProviderContext.Provider>
   )
 }
-
-// Hook para usar o tema
-export const useTheme = () => {
-  const context = useContext(ThemeProviderContext)
-
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider")
-
-  return context
-} 
