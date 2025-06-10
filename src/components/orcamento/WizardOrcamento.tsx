@@ -12,7 +12,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, ChevronRight, Calculator, Building, MapPin, Ruler, Settings, Sparkles, CheckCircle, Search, Database } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calculator, Building, MapPin, Ruler, Settings, Sparkles, CheckCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -41,23 +41,11 @@ import {
 
 import { orcamentosParametricosApi, calculoOrcamentoApi } from "@/services/orcamentoApi";
 import { useCEP } from "@/hooks/useCEP";
-import { SinapiSelector } from "./SinapiSelector";
 import { obrasApi } from "@/services/api";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES
 // ====================================
-
-interface CodigoSinapiSelecionado {
-  codigo: number;
-  descricao: string;
-  status: 'ativo' | 'desativado' | 'alterado';
-  validacao?: {
-    valido: boolean;
-    alertas: string[];
-    sugestoes?: number[];
-  };
-}
 
 interface WizardOrcamentoProps {
   /**
@@ -117,13 +105,6 @@ const ETAPAS: EtapaInfo[] = [
   },
   {
     numero: 4,
-    titulo: "SINAPI Manutenções",
-    descricao: "Validação de códigos SINAPI",
-    icone: <Database className="h-5 w-5" />,
-    schema: WizardEtapa3Schema // Usando mesmo schema por ora
-  },
-  {
-    numero: 5,
     titulo: "Especificações",
     descricao: "Detalhes técnicos e acabamentos",
     icone: <Settings className="h-5 w-5" />,
@@ -145,7 +126,6 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
   const [etapaAtual, setEtapaAtual] = useState(1);
   const [carregando, setCarregando] = useState(false);
   const [calculandoIA, setCalculandoIA] = useState(false);
-  const [codigosSinapiSelecionados, setCodigosSinapiSelecionados] = useState<CodigoSinapiSelecionado[]>([]);
   const [dadosObra, setDadosObra] = useState<WizardCompleto | null>(null);
   const [carregandoObra, setCarregandoObra] = useState(false);
 
@@ -291,21 +271,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
       // Validação final completa
       const dadosCompletos = form.getValues();
       
-      // Adicionar códigos SINAPI aos parâmetros de entrada
-      const dadosComSinapi = {
-        ...dadosCompletos,
-        parametros_entrada: {
-          ...dadosCompletos.parametros_entrada,
-          codigos_sinapi: codigosSinapiSelecionados.map(codigo => ({
-            codigo: codigo.codigo,
-            descricao: codigo.descricao,
-            status: codigo.status,
-            validacao: codigo.validacao
-          }))
-        }
-      };
-
-      const resultadoFinal = WizardCompletoSchema.safeParse(dadosComSinapi);
+      const resultadoFinal = WizardCompletoSchema.safeParse(dadosCompletos);
 
       if (!resultadoFinal.success) {
         toast.error("❌ Dados incompletos ou inválidos!");
@@ -313,15 +279,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
         return;
       }
 
-      // Mostrar informações dos códigos SINAPI se houver
-      if (codigosSinapiSelecionados.length > 0) {
-        const codigosComProblemas = codigosSinapiSelecionados.filter(c => !c.validacao?.valido);
-        if (codigosComProblemas.length > 0) {
-          toast.warning(`⚠️ ${codigosComProblemas.length} código(s) SINAPI com problemas foram incluídos`);
-        } else {
-          toast.success(`✅ ${codigosSinapiSelecionados.length} código(s) SINAPI validado(s) incluído(s)`);
-        }
-      }
+
 
       // Criar orçamento
       const novoOrcamento = await orcamentosParametricosApi.create(resultadoFinal.data);
@@ -340,7 +298,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
     } finally {
       setCarregando(false);
     }
-  }, [form, onOrcamentoCriado, codigosSinapiSelecionados]);
+  }, [form, onOrcamentoCriado]);
 
   /**
    * Calcula orçamento usando IA
@@ -749,82 +707,9 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
   );
 
   /**
-   * Etapa 4: SINAPI Manutenções
+   * Etapa 4: Especificações
    */
   const renderEtapa4 = () => (
-    <div className="space-y-8">
-      {/* Header da Etapa */}
-      <div className="text-center relative">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl shadow-lg mb-4">
-          <Database className="h-8 w-8 text-white" />
-        </div>
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Validação de Códigos SINAPI</h3>
-        <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-          Selecione e valide códigos SINAPI para o orçamento
-        </p>
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-      </div>
-
-      <div className="space-y-6">
-        {/* Card informativo sobre validação */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-800 shadow-sm">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-blue-500 rounded-lg">
-              <Database className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-              🔍 Validação Inteligente
-            </span>
-          </div>
-          <div className="space-y-3 text-blue-800 dark:text-blue-200">
-            <p className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              Selecione códigos SINAPI para complementar o orçamento
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              Sistema verifica automaticamente se estão ativos
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              Sugestões automáticas para códigos desativados
-            </p>
-          </div>
-        </div>
-
-        {/* Componente SinapiSelector com visual melhorado */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-          <SinapiSelector
-            codigosSelecionados={codigosSinapiSelecionados}
-            onCodigosChange={setCodigosSinapiSelecionados}
-            validacaoAutomatica={true}
-          />
-        </div>
-
-        {/* Resumo dos códigos selecionados */}
-        {codigosSinapiSelecionados.length > 0 && (
-          <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl p-6 border border-emerald-200 dark:border-emerald-800 shadow-sm">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="p-2 bg-emerald-500 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
-                📋 {codigosSinapiSelecionados.length} código(s) selecionado(s)
-              </span>
-            </div>
-            <p className="text-emerald-800 dark:text-emerald-200">
-              Os códigos selecionados serão validados e integrados ao orçamento final.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  /**
-   * Etapa 5: Especificações
-   */
-  const renderEtapa5 = () => (
     <div className="space-y-8">
       {/* Header da Etapa */}
       <div className="text-center relative">
@@ -919,17 +804,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
             </div>
           </div>
 
-          {/* Resumo dos códigos SINAPI se houver */}
-          {codigosSinapiSelecionados.length > 0 && (
-            <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg max-w-md mx-auto">
-              <div className="flex items-center justify-center gap-2">
-                <Database className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                  {codigosSinapiSelecionados.length} código(s) SINAPI validado(s)
-                </span>
-              </div>
-            </div>
-          )}
+
         </div>
       </div>
     </div>
@@ -1053,7 +928,6 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
                 {etapaAtual === 2 && renderEtapa2()}
                 {etapaAtual === 3 && renderEtapa3()}
                 {etapaAtual === 4 && renderEtapa4()}
-                {etapaAtual === 5 && renderEtapa5()}
               </div>
 
               {/* Separador com gradiente */}

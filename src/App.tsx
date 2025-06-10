@@ -39,6 +39,13 @@ import { NovoOrcamento } from "@/pages/dashboard/orcamento/NovoOrcamento";
 import OrcamentosLista from "@/pages/dashboard/orcamento/OrcamentosLista";
 import OrcamentoDetalhe from "@/pages/dashboard/orcamento/OrcamentoDetalhe";
 
+// Análise Integrada
+import AnaliseIntegrada from "@/pages/dashboard/AnaliseIntegrada";
+
+// Alertas de Desvio
+import AlertasDesvio from "@/pages/dashboard/AlertasDesvio";
+import AlertasAvancados from "@/pages/dashboard/AlertasAvancados";
+
 // SINAPI
 import ConsultaSinapi from "@/pages/admin/sinapi/ConsultaSinapi";
 
@@ -194,6 +201,27 @@ const App = () => {
           <Route path="dashboard/orcamentos/:id" element={
             <ProtectedRoute>
               <OrcamentoDetalhe />
+            </ProtectedRoute>
+          } />
+
+          {/* Rota de Análise Integrada */}
+          <Route path="dashboard/analise" element={
+            <ProtectedRoute>
+              <AnaliseIntegrada />
+            </ProtectedRoute>
+          } />
+
+          {/* Rota de Alertas de Desvio */}
+          <Route path="dashboard/alertas" element={
+            <ProtectedRoute>
+              <AlertasDesvio />
+            </ProtectedRoute>
+          } />
+          
+          {/* Rota de Alertas Avançados */}
+          <Route path="dashboard/alertas-avancados" element={
+            <ProtectedRoute>
+              <AlertasAvancados />
             </ProtectedRoute>
           } />
 

@@ -27,9 +27,9 @@ import {
   TrendingUp,
   Clock,
   Sparkles,
+  Layers,
   AlertCircle,
   CheckCircle,
-  Layers,
   Users,
   Hammer
 } from "lucide-react";
@@ -209,12 +209,15 @@ const OrcamentosLista: React.FC = () => {
   const estatisticas = useMemo(() => {
     const total = orcamentosEnriquecidos.length;
     const valorTotal = orcamentosEnriquecidos.reduce((sum, orc) => sum + orc.custo_estimado, 0);
+    const areaTotalConstruida = orcamentosEnriquecidos.reduce((sum, orc) => {
+      return sum + (orc.area_construida || orc.area_total || 0);
+    }, 0);
     const concluidos = orcamentosEnriquecidos.filter(orc => orc.status === 'CONCLUIDO').length;
     const rascunhos = orcamentosEnriquecidos.filter(orc => orc.status === 'RASCUNHO').length;
     // Funcionalidade de composição detalhada removida
     const comComposicaoDetalhada = 0;
 
-    return { total, valorTotal, concluidos, rascunhos, comComposicaoDetalhada };
+    return { total, valorTotal, areaTotalConstruida, concluidos, rascunhos, comComposicaoDetalhada };
   }, [orcamentosEnriquecidos]);
 
   // ====================================
@@ -392,19 +395,21 @@ const OrcamentosLista: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-[#182b4d]/10 to-[#daa916]/10 dark:from-[#182b4d]/20 dark:to-[#daa916]/20 border-[#182b4d]/30 dark:border-[#daa916]/50 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700 backdrop-blur-sm">
             <CardHeader className="pb-2">
-                              <CardTitle className="text-sm font-medium text-[#182b4d] dark:text-[#daa916]">
-                Paramétricos
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                Área Total Construída
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                                  <Sparkles className="h-5 w-5 text-[#182b4d] dark:text-[#daa916]" />
+                <Layers className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 <div>
-                                      <div className="text-2xl font-bold text-[#182b4d] dark:text-[#daa916]">-</div>
-                  <p className="text-xs text-[#182b4d] dark:text-[#daa916] mt-1">
-                    Funcionalidade Removida
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {estatisticas.areaTotalConstruida.toFixed(0)} m²
+                  </div>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                    Área construída total
                   </p>
                 </div>
               </div>
@@ -593,7 +598,10 @@ const OrcamentosLista: React.FC = () => {
                           <div className="flex items-center gap-1">
                             <Building className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm">
-                              {orcamento.area_total.toFixed(2)} m²
+                              {orcamento.area_construida ? orcamento.area_construida.toFixed(2) : orcamento.area_total.toFixed(2)} m²
+                            </span>
+                            <span className="text-xs text-muted-foreground ml-1">
+                              {orcamento.area_construida ? '(construída)' : '(total)'}
                             </span>
                           </div>
                         </TableCell>

@@ -32,7 +32,10 @@ import {
   PieChart,
   FileText,
   Eye,
-  Layers
+  Layers,
+  ArrowRight,
+  Building2,
+  AlertTriangle
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -51,10 +54,26 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-// Removido: import ComposicaoDetalhada - funcionalidade desabilitada
+import ItensDetalhados from "@/components/orcamento/ItensDetalhados";
 import { orcamentosParametricosApi, itensOrcamentoApi, calculoOrcamentoApi, orcamentoUtils } from "@/services/orcamentoApi";
+import { useObras } from "@/hooks/useObras";
 import { 
   OrcamentoParametrico,
   ItemOrcamento,
@@ -75,6 +94,9 @@ const OrcamentoDetalhe: React.FC = () => {
   // Estados locais
   const [recalculando, setRecalculando] = useState(false);
   const [ultimoCalculo, setUltimoCalculo] = useState<{ data: string; valor_total: number } | null>(null);
+  const [convertendoDespesas, setConvertendoDespesas] = useState(false);
+  const [obraSelecionada, setObraSelecionada] = useState<string>("");
+  const [mostrarModalConversao, setMostrarModalConversao] = useState(false);
 
   // Validação do UUID - evita tentar buscar IDs inválidos como 'novo'
   const isValidUUID = (str: string) => {
@@ -109,6 +131,9 @@ const OrcamentoDetalhe: React.FC = () => {
     },
     enabled: !!isValidId
   });
+
+  // Hook para obras (para seleção na conversão)
+  const { obras } = useObras();
 
 
 
@@ -157,6 +182,39 @@ const OrcamentoDetalhe: React.FC = () => {
       toast.error(`❌ Erro ao recalcular orçamento: ${error.message}`);
     } finally {
       setRecalculando(false);
+    }
+  };
+
+  /**
+   * Converte orçamento em despesas para uma obra
+   */
+  const handleConverterParaDespesas = async () => {
+    if (!id || !obraSelecionada) {
+      toast.error("Selecione uma obra para converter o orçamento");
+      return;
+    }
+
+    try {
+      setConvertendoDespesas(true);
+      toast.info("🔄 Convertendo orçamento em despesas...");
+
+      const resultado = await orcamentoUtils.converterParaDespesas(id, obraSelecionada);
+      
+      if (resultado.success) {
+        toast.success(`✅ ${resultado.message}`);
+        setMostrarModalConversao(false);
+        setObraSelecionada("");
+        
+        // Navegar para a obra com as despesas criadas
+        navigate(`/dashboard/obras/${obraSelecionada}?tab=despesas`);
+      } else {
+        toast.error(`❌ Erro na conversão: ${resultado.error}`);
+      }
+    } catch (error) {
+      console.error("Erro na conversão:", error);
+      toast.error("❌ Erro inesperado na conversão");
+    } finally {
+      setConvertendoDespesas(false);
     }
   };
 
@@ -242,7 +300,7 @@ const OrcamentoDetalhe: React.FC = () => {
                 <Card className="bg-gradient-to-br from-[#182b4d]/10 to-[#daa916]/10 dark:from-[#182b4d]/20 dark:to-[#daa916]/20 border-[#182b4d]/30 dark:border-[#daa916]/50 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-[#182b4d] dark:text-[#daa916]">
-            Área Total
+            Área {orcamento.area_construida ? 'Construída' : 'Total'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -250,10 +308,10 @@ const OrcamentoDetalhe: React.FC = () => {
             <Ruler className="h-5 w-5 text-[#182b4d] dark:text-[#daa916]" />
             <div>
               <div className="text-2xl font-bold text-[#182b4d] dark:text-[#daa916]">
-                {orcamento.area_total.toFixed(2)}
+                {orcamento.area_construida ? orcamento.area_construida.toFixed(2) : orcamento.area_total.toFixed(2)}
               </div>
               <p className="text-xs text-[#182b4d] dark:text-[#daa916] mt-1">
-                Metros quadrados
+                Metros quadrados {orcamento.area_construida ? '(construída)' : '(total)'}
               </p>
             </div>
           </div>
@@ -462,6 +520,20 @@ const OrcamentoDetalhe: React.FC = () => {
               {recalculando ? 'Recalculando...' : 'Recalcular Orçamento'}
             </Button>
             
+            {/* Botão de Conversão para Despesas */}
+                {orcamento && orcamentosParametricosApi.podeConverterEmObra(orcamento) && itens.length > 0 && (
+                  <Button
+                    onClick={() => setMostrarModalConversao(true)}
+                    disabled={convertendoDespesas}
+                    variant="default"
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Converter em Despesas
+                  </Button>
+                )}
+            
             <Button
               variant="outline"
               onClick={handleDuplicar}
@@ -497,8 +569,9 @@ const OrcamentoDetalhe: React.FC = () => {
           transition={{ delay: 0.4 }}
         >
           <Tabs defaultValue="resumo" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="resumo">Resumo</TabsTrigger>
+              <TabsTrigger value="itens">Itens Detalhados</TabsTrigger>
               <TabsTrigger value="analise">Análise IA</TabsTrigger>
               <TabsTrigger value="dados">Dados Técnicos</TabsTrigger>
               <TabsTrigger value="historico">Histórico</TabsTrigger>
@@ -566,7 +639,10 @@ const OrcamentoDetalhe: React.FC = () => {
               </div>
             </TabsContent>
 
-            {/* Aba Itens Detalhados removida - apenas orçamento paramétrico */}
+            {/* Aba Itens Detalhados */}
+            <TabsContent value="itens">
+              <ItensDetalhados itens={itens} />
+            </TabsContent>
 
             {/* Aba Análise IA */}
             <TabsContent value="analise">
@@ -719,6 +795,88 @@ const OrcamentoDetalhe: React.FC = () => {
           </Tabs>
         </motion.div>
       </motion.div>
+
+      {/* Modal de Conversão para Despesas */}
+      <Dialog open={mostrarModalConversao} onOpenChange={setMostrarModalConversao}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-green-600" />
+              Converter Orçamento em Despesas
+            </DialogTitle>
+            <DialogDescription>
+              Selecione a obra onde as despesas serão criadas a partir deste orçamento paramétrico.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Obra de Destino
+              </label>
+              <Select value={obraSelecionada} onValueChange={setObraSelecionada}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma obra..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {obras?.map((obra) => (
+                    <SelectItem key={obra.id} value={obra.id}>
+                      {obra.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {orcamento && (
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Informações da Conversão:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>• {itens.length} itens serão convertidos em despesas</li>
+                      <li>• Valor total: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(orcamento.custo_estimado)}</li>
+                      <li>• As despesas serão marcadas como não pagas</li>
+                      <li>• Você poderá editar as despesas após a conversão</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setMostrarModalConversao(false);
+                setObraSelecionada("");
+              }}
+              disabled={convertendoDespesas}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConverterParaDespesas}
+              disabled={!obraSelecionada || convertendoDespesas}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {convertendoDespesas ? (
+                <>
+                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                  Convertendo...
+                </>
+              ) : (
+                <>
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Converter
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };

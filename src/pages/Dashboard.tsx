@@ -46,7 +46,13 @@ const Dashboard = () => {
   const despesasPendentes = despesas?.filter(d => !d.pago).length || 0;
 
   const totalNotas = notasFiscais?.length || 0;
-  const valorNotas = notasFiscais?.reduce((sum, nota) => sum + nota.valor_total, 0) || 0;
+  const valorNotas = notasFiscais?.reduce((sum, nota) => {
+    // Verificação de tipo para garantir que nota tem a propriedade valor_total
+    if (nota && typeof nota === 'object' && 'valor_total' in nota && typeof nota.valor_total === 'number') {
+      return sum + nota.valor_total;
+    }
+    return sum;
+  }, 0) || 0;
 
   const orcamentoTotal = obras?.reduce((sum, obra) => sum + obra.orcamento, 0) || 0;
   const percentualGasto = orcamentoTotal > 0 ? (totalDespesas / orcamentoTotal * 100) : 0;
@@ -386,12 +392,13 @@ const Dashboard = () => {
                     <span className="font-medium">Plantas IA</span>
                   </Link>
                 </Button>
-                <Button
-                  onClick={() => navigate('/dashboard/construtoras/nova')}
-                  className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
-                >
-                  <Building2 className="h-4 w-4 mr-2" />
-                  Nova Construtora
+                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" asChild>
+                  <Link to="/dashboard/construtoras/nova">
+                    <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                      <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <span className="font-medium">Nova Construtora</span>
+                  </Link>
                 </Button>
               </div>
             </CardContent>

@@ -326,6 +326,22 @@ export const orcamentosParametricosApi = {
       secureLogger.error("Error in orcamentosParametricosApi.getByObra", error, { obraId });
       throw error;
     }
+  },
+
+  /**
+   * Valida se orçamento pode ser convertido em obra
+   */
+  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
+    // Validações básicas
+    if (!orcamento) return false;
+    if (!orcamento.id) return false;
+    if (orcamento.status === 'RASCUNHO') return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
+    
+    // Deve ter pelo menos um item
+    // Nota: Esta validação será feita no componente que tem acesso aos itens
+    
+    return true;
   }
 };
 
@@ -466,6 +482,22 @@ export const calculoOrcamentoApi = {
       secureLogger.error("Error in calculoOrcamentoApi.recalcular", error, { orcamentoId });
       throw error;
     }
+  },
+
+  /**
+   * Valida se orçamento pode ser convertido em obra
+   */
+  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
+    // Validações básicas
+    if (!orcamento) return false;
+    if (!orcamento.id) return false;
+    if (orcamento.status === 'RASCUNHO') return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
+    
+    // Deve ter pelo menos um item
+    // Nota: Esta validação será feita no componente que tem acesso aos itens
+    
+    return true;
   }
 };
 
@@ -595,6 +627,22 @@ export const itensOrcamentoApi = {
       secureLogger.error("Error in itensOrcamentoApi.delete", error, { itemId: id });
       throw error;
     }
+  },
+
+  /**
+   * Valida se orçamento pode ser convertido em obra
+   */
+  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
+    // Validações básicas
+    if (!orcamento) return false;
+    if (!orcamento.id) return false;
+    if (orcamento.status === 'RASCUNHO') return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
+    
+    // Deve ter pelo menos um item
+    // Nota: Esta validação será feita no componente que tem acesso aos itens
+    
+    return true;
   }
 };
 
@@ -665,6 +713,22 @@ export const baseCustosRegionaisApi = {
       secureLogger.error("Error in baseCustosRegionaisApi.getAll", error);
       throw error;
     }
+  },
+
+  /**
+   * Valida se orçamento pode ser convertido em obra
+   */
+  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
+    // Validações básicas
+    if (!orcamento) return false;
+    if (!orcamento.id) return false;
+    if (orcamento.status === 'RASCUNHO') return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
+    
+    // Deve ter pelo menos um item
+    // Nota: Esta validação será feita no componente que tem acesso aos itens
+    
+    return true;
   }
 };
 
@@ -706,6 +770,22 @@ export const coeficientesTecnicosApi = {
       });
       throw error;
     }
+  },
+
+  /**
+   * Valida se orçamento pode ser convertido em obra
+   */
+  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
+    // Validações básicas
+    if (!orcamento) return false;
+    if (!orcamento.id) return false;
+    if (orcamento.status === 'RASCUNHO') return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
+    
+    // Deve ter pelo menos um item
+    // Nota: Esta validação será feita no componente que tem acesso aos itens
+    
+    return true;
   }
 };
 
@@ -763,6 +843,22 @@ export const comparacoesApi = {
       secureLogger.error("Error in comparacoesApi.getByObra", error, { obraId });
       throw error;
     }
+  },
+
+  /**
+   * Valida se orçamento pode ser convertido em obra
+   */
+  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
+    // Validações básicas
+    if (!orcamento) return false;
+    if (!orcamento.id) return false;
+    if (orcamento.status === 'RASCUNHO') return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
+    
+    // Deve ter pelo menos um item
+    // Nota: Esta validação será feita no componente que tem acesso aos itens
+    
+    return true;
   }
 };
 
@@ -793,14 +889,277 @@ export const orcamentoUtils = {
   },
 
   /**
-   * Valida se orçamento pode ser convertido em obra
+   * Converte um orçamento paramétrico em despesas para uma obra
    */
-  podeConverterEmObra: (orcamento: OrcamentoParametrico): boolean => {
-    return orcamento.status === "CONCLUIDO" && 
-           orcamento.custo_estimado > 0 && 
-           !orcamento.obra_id;
+  converterParaDespesas: async (orcamentoId: string, obraId: string, configuracao?: any): Promise<ApiResponse<any>> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      // Obter tenant_id do perfil
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("tenant_id")
+        .eq("id", user.id)
+        .single();
+
+      if (!profile?.tenant_id) {
+        throw new Error("Tenant não encontrado");
+      }
+
+      // Verificar se o orçamento existe e pode ser convertido
+      const orcamento = await orcamentosParametricosApi.getById(orcamentoId);
+      if (!orcamentosParametricosApi.podeConverterEmObra(orcamento)) {
+        throw new Error("Orçamento não pode ser convertido. Verifique se está concluído e tem custo estimado.");
+      }
+
+      // Criar registro de conversão
+      const { data: conversao, error: conversaoError } = await supabase
+        .from("conversoes_orcamento_despesa")
+        .insert({
+          orcamento_id: orcamentoId,
+          obra_id: obraId,
+          usuario_id: user.id,
+          tenant_id: profile.tenant_id,
+          status: "PROCESSANDO",
+          configuracao_mapeamento: configuracao || {},
+          valor_total_orcamento: orcamento.custo_estimado
+        })
+        .select()
+        .single();
+
+      if (conversaoError) {
+        throw conversaoError;
+      }
+
+      // Buscar itens do orçamento
+      const itens = await itensOrcamentoApi.getByOrcamento(orcamentoId);
+      
+      if (!itens || itens.length === 0) {
+        throw new Error("Nenhum item encontrado no orçamento");
+      }
+
+      // Converter itens em despesas
+      const despesasCriadas = [];
+      const erros = [];
+
+      for (const item of itens) {
+        try {
+          // Mapear categoria do orçamento para categoria de despesa
+          const categoriaMapeada = mapearCategoriaOrcamentoParaDespesa(item.categoria);
+          const etapaMapeada = mapearEtapaOrcamentoParaDespesa(item.etapa);
+          const insumoMapeado = mapearInsumoOrcamentoParaDespesa(item.insumo);
+
+          const despesaData = {
+            obra_id: obraId,
+            usuario_id: user.id,
+            tenant_id: profile.tenant_id,
+            descricao: `${item.descricao} (Convertido do orçamento)`,
+            data_despesa: new Date().toISOString().split('T')[0],
+            categoria: categoriaMapeada,
+            etapa: etapaMapeada,
+            insumo: insumoMapeado,
+            unidade: item.unidade_medida,
+            quantidade: item.quantidade_estimada,
+            valor_unitario: item.valor_unitario_base,
+            custo: item.quantidade_estimada * item.valor_unitario_base,
+            pago: false,
+            observacoes: `Convertido do orçamento paramétrico. Item original: ${item.id}`
+          };
+
+          const { data: despesa, error: despesaError } = await supabase
+            .from("despesas")
+            .insert(despesaData)
+            .select()
+            .single();
+
+          if (despesaError) {
+            erros.push({
+              item_id: item.id,
+              erro: despesaError.message,
+              item_descricao: item.descricao
+            });
+          } else {
+            despesasCriadas.push(despesa);
+          }
+        } catch (error) {
+          erros.push({
+            item_id: item.id,
+            erro: error instanceof Error ? error.message : 'Erro desconhecido',
+            item_descricao: item.descricao
+          });
+        }
+      }
+
+      // Atualizar registro de conversão
+      const valorTotalDespesas = despesasCriadas.reduce((total, despesa) => total + despesa.custo, 0);
+      
+      const { error: updateError } = await supabase
+        .from("conversoes_orcamento_despesa")
+        .update({
+          status: erros.length === 0 ? "CONCLUIDA" : "ERRO",
+          total_itens_orcamento: itens.length,
+          total_despesas_criadas: despesasCriadas.length,
+          valor_total_despesas: valorTotalDespesas,
+          erros_processamento: erros
+        })
+        .eq("id", conversao.id);
+
+      if (updateError) {
+        secureLogger.error("Erro ao atualizar conversão", updateError);
+      }
+
+      // Log da operação
+      secureLogger.info("Conversão de orçamento para despesas", {
+        orcamento_id: orcamentoId,
+        obra_id: obraId,
+        itens_processados: itens.length,
+        despesas_criadas: despesasCriadas.length,
+        erros: erros.length
+      });
+
+      return {
+        success: true,
+        data: {
+          conversao_id: conversao.id,
+          despesas_criadas: despesasCriadas.length,
+          total_itens: itens.length,
+          valor_total: valorTotalDespesas,
+          erros: erros
+        },
+        message: `Conversão concluída: ${despesasCriadas.length}/${itens.length} itens convertidos`
+      };
+
+    } catch (error) {
+      secureLogger.error("Erro na conversão de orçamento para despesas", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Erro desconhecido na conversão"
+      };
+    }
+  },
+
+  /**
+   * Lista conversões de orçamento para despesas
+   */
+  listarConversoes: async (filtros: { obra_id?: string; status?: string } = {}): Promise<ApiResponse<any[]>> => {
+    try {
+      let query = supabase
+        .from("conversoes_orcamento_despesa")
+        .select(`
+          *,
+          orcamentos_parametricos(nome_orcamento, custo_estimado),
+          obras(nome)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (filtros.obra_id) {
+        query = query.eq("obra_id", filtros.obra_id);
+      }
+
+      if (filtros.status) {
+        query = query.eq("status", filtros.status);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        success: true,
+        data: data || []
+      };
+
+    } catch (error) {
+      secureLogger.error("Erro ao listar conversões", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Erro ao listar conversões"
+      };
+    }
   }
 };
+
+// ====================================
+// 🔄 FUNÇÕES DE CONVERSÃO
+// ====================================
+
+// ====================================
+// 🔄 FUNÇÕES AUXILIARES DE MAPEAMENTO
+// ====================================
+
+/**
+ * Mapeia categoria do orçamento para categoria de despesa
+ */
+function mapearCategoriaOrcamentoParaDespesa(categoriaOrcamento: string): string {
+  const mapeamento: Record<string, string> = {
+    'MATERIAL_CONSTRUCAO': 'material',
+    'MAO_DE_OBRA': 'mao_de_obra',
+    'ALUGUEL_EQUIPAMENTOS': 'equipamento',
+    'TRANSPORTE_FRETE': 'servico',
+    'TAXAS_LICENCAS': 'servico',
+    'SERVICOS_TERCEIRIZADOS': 'servico',
+    'ADMINISTRATIVO': 'outros',
+    'IMPREVISTOS': 'outros',
+    'OUTROS': 'outros'
+  };
+  
+  return mapeamento[categoriaOrcamento] || 'outros';
+}
+
+/**
+ * Mapeia etapa do orçamento para etapa de despesa
+ */
+function mapearEtapaOrcamentoParaDespesa(etapaOrcamento: string): string {
+  const mapeamento: Record<string, string> = {
+    'PLANEJAMENTO': 'outros',
+    'DEMOLICAO': 'outros',
+    'TERRAPLANAGEM': 'fundacao',
+    'FUNDACAO': 'fundacao',
+    'ESTRUTURA': 'estrutura',
+    'ALVENARIA': 'alvenaria',
+    'COBERTURA': 'cobertura',
+    'INSTALACOES_ELETRICAS': 'instalacoes',
+    'INSTALACOES_HIDRAULICAS': 'instalacoes',
+    'REVESTIMENTOS_INTERNOS': 'acabamento',
+    'REVESTIMENTOS_EXTERNOS': 'acabamento',
+    'PINTURA': 'acabamento',
+    'ACABAMENTOS': 'acabamento',
+    'PAISAGISMO': 'outros',
+    'LIMPEZA_POS_OBRA': 'outros',
+    'ENTREGA_VISTORIA': 'outros',
+    'DOCUMENTACAO': 'outros',
+    'OUTROS': 'outros'
+  };
+  
+  return mapeamento[etapaOrcamento] || 'outros';
+}
+
+/**
+ * Mapeia insumo do orçamento para insumo de despesa
+ */
+function mapearInsumoOrcamentoParaDespesa(insumoOrcamento: string): string {
+  // Como o campo insumo no orçamento é string livre e na despesa é enum,
+  // vamos fazer um mapeamento básico por palavras-chave
+  const insumoLower = insumoOrcamento.toLowerCase();
+  
+  if (insumoLower.includes('cimento')) return 'cimento';
+  if (insumoLower.includes('areia')) return 'areia';
+  if (insumoLower.includes('brita')) return 'brita';
+  if (insumoLower.includes('ferro') || insumoLower.includes('aço')) return 'ferro';
+  if (insumoLower.includes('madeira')) return 'madeira';
+  if (insumoLower.includes('ceramica') || insumoLower.includes('azulejo')) return 'ceramica';
+  if (insumoLower.includes('tinta')) return 'tinta';
+  if (insumoLower.includes('eletric') || insumoLower.includes('fio') || insumoLower.includes('cabo')) return 'eletrico';
+  if (insumoLower.includes('hidraulic') || insumoLower.includes('cano') || insumoLower.includes('tubo')) return 'hidraulico';
+  
+  return 'outros';
+}
 
 // ====================================
 // 📤 EXPORT DEFAULT

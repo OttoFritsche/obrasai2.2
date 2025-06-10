@@ -14,7 +14,7 @@ interface ItemOrcamento {
   quantidade_estimada: number;
   unidade_medida: string;
   valor_unitario_base: number;
-  valor_total: number;
+  // valor_total é calculado automaticamente pelo banco (quantidade_estimada * valor_unitario_base)
   valor_total_estimado?: number;
   fonte_preco: string;
   codigo_sinapi?: string;
@@ -38,7 +38,7 @@ function gerarComposicaoDetalhada(orcamentoId: string, area: number, estado: str
     quantidade_estimada: qtd,
     unidade_medida: unidade,
     valor_unitario_base: valorUnit,
-    valor_total: qtd * valorUnit, // Campo obrigatório que estava faltando
+    // Removido valor_total - será calculado automaticamente pelo banco
     fonte_preco: 'IA',
     codigo_sinapi: null,
     estado_referencia_preco: estado,
@@ -147,9 +147,22 @@ serve(async (req: Request) => {
   try {
     console.log('🚀 AI-Calculate-Budget v9.0.1 - INTERFACE CORRIGIDA');
 
+    // Cliente Supabase com service_role key para contornar RLS
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+
+    // Cliente regular para operações que precisam de RLS
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
     const { orcamento_id, forcar_recalculo } = await req.json();
@@ -158,8 +171,8 @@ serve(async (req: Request) => {
       throw new Error('orcamento_id é obrigatório');
     }
 
-    // Buscar dados do orçamento
-    const { data: orcamento, error: orcamentoError } = await supabase
+    // Buscar dados do orçamento (usando admin para contornar RLS)
+    const { data: orcamento, error: orcamentoError } = await supabaseAdmin
       .from('orcamentos_parametricos')
       .select('*')
       .eq('id', orcamento_id)
@@ -171,13 +184,17 @@ serve(async (req: Request) => {
 
     console.log(`✅ Orçamento encontrado: ${orcamento.nome_orcamento}`);
 
-    // Limpar itens existentes se necessário
+    // Limpar itens existentes se necessário (usando admin para contornar RLS)
     if (forcar_recalculo) {
       console.log('🗑️ Removendo itens existentes...');
-      await supabase
+      const { error: deleteError } = await supabaseAdmin
         .from('itens_orcamento')
         .delete()
         .eq('orcamento_id', orcamento_id);
+      
+      if (deleteError) {
+        console.error('❌ Erro ao remover itens existentes:', deleteError);
+      }
     }
 
     // Gerar composição detalhada com interface CORRIGIDA
@@ -195,9 +212,10 @@ serve(async (req: Request) => {
     let insertError = null;
 
     if (itensDetalhados.length > 0) {
-      console.log('💾 Inserindo itens com interface CORRIGIDA...');
+      console.log('💾 Inserindo itens com interface CORRIGIDA usando service_role...');
       
-      const { data: itensInseridosData, error: insertErr } = await supabase
+      // Usar supabaseAdmin para contornar RLS na inserção
+      const { data: itensInseridosData, error: insertErr } = await supabaseAdmin
         .from('itens_orcamento')
         .insert(itensDetalhados)
         .select('id');
@@ -207,12 +225,12 @@ serve(async (req: Request) => {
         insertError = insertErr.message;
       } else {
         itensInseridos = itensInseridosData?.length || 0;
-        console.log(`✅ ${itensInseridos} itens inseridos com SUCESSO!`);
+        console.log(`✅ ${itensInseridos} itens inseridos com SUCESSO usando service_role!`);
       }
     }
 
-    // Atualizar orçamento
-    await supabase
+    // Atualizar orçamento (usando admin para contornar RLS)
+    await supabaseAdmin
       .from('orcamentos_parametricos')
       .update({
         custo_estimado: custoTotal,

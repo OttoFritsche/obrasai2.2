@@ -7,7 +7,7 @@
 const MALICIOUS_PATTERNS = {
   // SQL Injection patterns
   sql: [
-    /('|(\-\-)|(;)|(\||\|)|(\*|\*))/i,
+    /('|(--)|(;)|(\|\|)|(\*|\*))/i,
     /(union|select|insert|delete|update|drop|create|alter|exec|execute)/i,
     /script|javascript|vbscript/i
   ],
@@ -39,11 +39,11 @@ const MALICIOUS_PATTERNS = {
 // Padrões permitidos para diferentes tipos de entrada
 const ALLOWED_PATTERNS = {
   email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-  phone: /^[\d\s\-\+\(\)]+$/,
+  phone: /^[\d\s\-()+]+$/,
   alphanumeric: /^[a-zA-Z0-9\s]+$/,
   numeric: /^[0-9]+$/,
   decimal: /^[0-9]+(\.[0-9]+)?$/,
-  url: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
+  url: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
   cpf: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
   cnpj: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
   cep: /^\d{5}-?\d{3}$/,
@@ -146,7 +146,7 @@ export function sanitizeInput(
     // Remove caracteres SQL perigosos
     .replace(/['"\\;]/g, '')
     // Remove caracteres de path traversal
-    .replace(/\.\.\/|\.\.\\\/g, '')
+    .replace(/\.\.\/|\.\.\\\\/g, '')
     // Remove caracteres de command injection
     .replace(/[;|&`$(){}]/g, '');
   
@@ -249,7 +249,7 @@ export const validateAlphanumeric = (value: string, required = false, maxLength 
  * Valida dados de requisição completos
  */
 export function validateRequestData(
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   schema: Record<string, {
     type: keyof typeof ALLOWED_PATTERNS;
     required?: boolean;

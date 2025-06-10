@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -12,7 +13,9 @@ import {
   FileText, 
   Plus,
   Loader2,
-  AlertTriangle
+  AlertTriangle,
+  Search,
+  Package
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -22,6 +25,10 @@ import { Constants } from "@/integrations/supabase/types";
 import { despesaSchema, DespesaFormValues, formasPagamento } from "@/lib/validations/despesa";
 import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
+import { useSinapiDespesas, SinapiItem } from "@/hooks/useSinapiDespesas";
+import { SinapiSelectorDespesas } from "@/components/SinapiSelectorDespesas";
+import { VariacaoSinapiIndicator } from "@/components/VariacaoSinapiIndicator";
+import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";
 import { formatDate } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
@@ -72,6 +79,12 @@ const NovaDespesa = () => {
       forma_pagamento: null,
     },
   });
+
+  // Estado para dados SINAPI
+  const [sinapiSelecionado, setSinapiSelecionado] = useState<SinapiItem | null>(null);
+  // Estado para controlar o tipo de insumo (SINAPI ou manual)
+  const [tipoInsumo, setTipoInsumo] = useState<'sinapi' | 'manual'>('sinapi');
+  const { calcularVariacao } = useSinapiDespesas();
 
   const { data: obras, isLoading: isLoadingObras } = useQuery({
     queryKey: ["obras"],
@@ -133,8 +146,35 @@ const NovaDespesa = () => {
       submissionData.data_pagamento = null;
       submissionData.forma_pagamento = null;
     }
+
+    // Adicionar dados SINAPI se selecionado
+    if (sinapiSelecionado) {
+      const valorReal = values.valor_unitario;
+      const valorSinapi = sinapiSelecionado.preco_unitario;
+      const variacao = calcularVariacao(valorReal, valorSinapi);
+
+      submissionData.codigo_sinapi = sinapiSelecionado.codigo;
+      submissionData.valor_referencia_sinapi = valorSinapi;
+      submissionData.variacao_sinapi = variacao;
+      submissionData.fonte_sinapi = sinapiSelecionado.fonte;
+      submissionData.estado_referencia = sinapiSelecionado.estado || 'SP';
+    }
     
     mutate(submissionData);
+  };
+
+  // Handler para seleção de item SINAPI
+  const handleSinapiSelect = (item: SinapiItem) => {
+    setSinapiSelecionado(item);
+    
+    // Preencher campos do formulário com dados do SINAPI
+    form.setValue('descricao', item.descricao);
+    form.setValue('unidade', item.unidade);
+    
+    // Sugerir valor unitário (usuário pode alterar)
+    if (item.preco_unitario > 0) {
+      form.setValue('valor_unitario', item.preco_unitario);
+    }
   };
 
   const isLoading = isLoadingObras || isLoadingPJ || isLoadingPF;
@@ -322,33 +362,96 @@ const NovaDespesa = () => {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="insumo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Insumo</FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value || ''}
-                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
-                              >
-                                <SelectTrigger className="bg-background/50">
-                                  <SelectValue placeholder="Selecione um insumo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Constants.public.Enums.insumo_enum.map((insumo) => (
-                                    <SelectItem key={insumo} value={insumo}>
-                                      {insumo.replace(/_/g, ' ')}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="insumo-sinapi"
+                            name="tipo-insumo"
+                            checked={tipoInsumo === 'sinapi'}
+                            onChange={() => setTipoInsumo('sinapi')}
+                            className="h-4 w-4"
+                          />
+                          <label htmlFor="insumo-sinapi" className="text-sm font-medium">
+                            Buscar no SINAPI
+                          </label>
+                          <input
+                            type="radio"
+                            id="insumo-manual"
+                            name="tipo-insumo"
+                            checked={tipoInsumo === 'manual'}
+                            onChange={() => setTipoInsumo('manual')}
+                            className="h-4 w-4 ml-4"
+                          />
+                          <label htmlFor="insumo-manual" className="text-sm font-medium">
+                            Inserir manualmente
+                          </label>
+                        </div>
+
+                        {tipoInsumo === 'sinapi' ? (
+                          <FormField
+                            control={form.control}
+                            name="insumo"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Insumo (SINAPI)</FormLabel>
+                                <FormControl>
+                                  <div className="space-y-2">
+                                    <SinapiSelectorDespesas
+                                      onSelect={(item) => {
+                                        field.onChange(item.descricao);
+                                        form.setValue('unidade', item.unidade);
+                                        form.setValue('sinapi_codigo', item.codigo);
+                                        form.setValue('sinapi_referencia_id', item.codigo);
+                                        form.setValue('insumo_customizado', null);
+                                        if (!form.getValues('valor_unitario')) {
+                                          form.setValue('valor_unitario', item.preco_unitario);
+                                        }
+                                        setSinapiSelecionado(item);
+                                      }}
+                                      placeholder="Buscar insumo no SINAPI (ex: cimento, areia, tijolo...)"
+                                      className="w-full"
+                                    />
+                                    {field.value && (
+                                      <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+                                        <strong>Insumo selecionado:</strong> {field.value}
+                                      </div>
+                                    )}
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        ) : (
+                          <FormField
+                            control={form.control}
+                            name="insumo_customizado"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Insumo (Manual)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Digite o nome do insumo (ex: Cimento Portland CP-II)"
+                                    {...field}
+                                    value={field.value ?? ''}
+                                    className="bg-background/50"
+                                    onChange={(e) => {
+                                      field.onChange(e.target.value);
+                                      // Limpar campos SINAPI quando inserir manual
+                                      form.setValue('insumo', null);
+                                      form.setValue('sinapi_codigo', null);
+                                      form.setValue('sinapi_referencia_id', null);
+                                      setSinapiSelecionado(null);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         )}
-                      />
+                      </div>
 
                       <FormField
                         control={form.control}
@@ -398,6 +501,70 @@ const NovaDespesa = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Seção SINAPI - apenas para insumos SINAPI */}
+                  {tipoInsumo === 'sinapi' && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
+                        <Search className="h-4 w-4" />
+                        Referência SINAPI (Opcional)
+                      </h3>
+                      <div className="space-y-4">
+                        <SinapiSelectorDespesas
+                          onSelect={handleSinapiSelect}
+                          selectedItem={sinapiSelecionado}
+                        />
+                        
+                        {sinapiSelecionado && (
+                          <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium">Item SINAPI Selecionado:</span>
+                              <button
+                                type="button"
+                                onClick={() => setSinapiSelecionado(null)}
+                                className="text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                Remover
+                              </button>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Código:</strong> {sinapiSelecionado.codigo}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Descrição:</strong> {sinapiSelecionado.descricao}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Preço Referência:</strong> R$ {sinapiSelecionado.preco_unitario.toFixed(2)} / {sinapiSelecionado.unidade}
+                            </p>
+                            <VariacaoSinapiIndicator
+                              valorReal={form.watch('valor_unitario') || 0}
+                              valorSinapi={sinapiSelecionado.preco_unitario}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Análise de Insumo Manual */}
+                  {tipoInsumo === 'manual' && form.watch('insumo_customizado') && (
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
+                        <Package className="h-4 w-4" />
+                        Análise do Insumo
+                      </h3>
+                      <InsumoAnalysisCard
+                        insumoCustomizado={form.watch('insumo_customizado')}
+                        valorUnitario={form.watch('valor_unitario') || 0}
+                        unidade={form.watch('unidade') || undefined}
+                        sinapiReferencia={sinapiSelecionado || undefined}
+                        onBuscarSinapi={() => {
+                          // Implementar busca automática de referência SINAPI
+                          // baseada no nome do insumo customizado
+                        }}
+                      />
+                    </div>
+                  )}
 
                   {/* Seção Financeira */}
                   <div className="space-y-4">
@@ -731,4 +898,4 @@ const NovaDespesa = () => {
   );
 };
 
-export default NovaDespesa; 
+export default NovaDespesa;

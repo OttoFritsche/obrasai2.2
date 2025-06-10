@@ -49,7 +49,7 @@ export const DashboardHeader = () => {
             >
               <h1 className="text-xl font-semibold">
                 {t("dashboard.welcome")}, 
-                <span className="ml-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                <span className="ml-2 text-orange-500">
                   {user?.profile?.first_name || "Usuário"}
                 </span>
               </h1>
@@ -117,7 +117,7 @@ export const DashboardHeader = () => {
               
               <Avatar className="h-9 w-9 ring-2 ring-primary/20 transition-all hover:ring-primary/40">
                 <AvatarFallback className={cn(
-                  "bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold"
+                  "bg-orange-500 text-white font-semibold"
                 )}>
                   {getInitials()}
                 </AvatarFallback>

@@ -386,7 +386,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      buscar_sinapi_por_codigo: {
+        Args: {
+          codigo_param: string
+        }
+        Returns: {
+          codigo: string
+          descricao: string
+          unidade: string
+          preco_unitario: number
+          categoria: string
+          fonte: string
+          estado: string
+        }[]
+      }
+      buscar_sinapi_unificado: {
+        Args: {
+          termo_busca?: string
+          limite?: number
+          offset_param?: number
+        }
+        Returns: {
+          codigo: string
+          descricao: string
+          unidade: string
+          preco_unitario: number
+          categoria: string
+          fonte: string
+          estado: string
+        }[]
+      }
     }
     Enums: {
       categoria_enum:

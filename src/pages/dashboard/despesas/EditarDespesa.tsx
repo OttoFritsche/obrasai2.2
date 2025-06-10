@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -20,6 +20,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 import { Constants } from "@/integrations/supabase/types";
+import { SinapiSelectorDespesas } from "@/components/SinapiSelectorDespesas";
+import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";
 import { despesaSchema, DespesaFormValues, formasPagamento } from "@/lib/validations/despesa";
 import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
@@ -33,6 +35,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -55,6 +58,9 @@ const EditarDespesa = () => {
   // Obter tenant_id corretamente
   const tenantId = user?.profile?.tenant_id;
   const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
+  
+  // Estado para controlar o tipo de insumo (SINAPI ou manual)
+  const [tipoInsumo, setTipoInsumo] = useState<'sinapi' | 'manual'>('sinapi');
   
   const form = useForm<DespesaFormValues>({
     resolver: zodResolver(despesaSchema),
@@ -109,11 +115,21 @@ const EditarDespesa = () => {
   // Preencher formulário quando dados carregarem
   useEffect(() => {
     if (despesa) {
+      // Determinar o tipo de insumo baseado nos dados carregados
+      if (despesa.insumo_customizado) {
+        setTipoInsumo('manual');
+      } else {
+        setTipoInsumo('sinapi');
+      }
+
       form.reset({
         obra_id: despesa.obra_id,
         descricao: despesa.descricao,
         categoria: despesa.categoria,
         insumo: despesa.insumo,
+        insumo_customizado: despesa.insumo_customizado || "",
+        sinapi_codigo: despesa.sinapi_codigo || "",
+        sinapi_referencia_id: despesa.sinapi_referencia_id || "",
         etapa: despesa.etapa,
         unidade: despesa.unidade || "",
         data_despesa: despesa.data_despesa ? new Date(despesa.data_despesa) : new Date(),
@@ -361,33 +377,91 @@ const EditarDespesa = () => {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="insumo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Insumo</FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value || ''}
-                                onValueChange={(value) => field.onChange(value === '' ? null : value)}
-                              >
-                                <SelectTrigger className="bg-background/50">
-                                  <SelectValue placeholder="Selecione um insumo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Constants.public.Enums.insumo_enum.map((insumo) => (
-                                    <SelectItem key={insumo} value={insumo}>
-                                      {insumo.replace(/_/g, ' ')}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            id="insumo-sinapi"
+                            name="tipo-insumo"
+                            checked={tipoInsumo === 'sinapi'}
+                            onChange={() => setTipoInsumo('sinapi')}
+                            className="h-4 w-4"
+                          />
+                          <label htmlFor="insumo-sinapi" className="text-sm font-medium">
+                            Buscar no SINAPI
+                          </label>
+                          <input
+                            type="radio"
+                            id="insumo-manual"
+                            name="tipo-insumo"
+                            checked={tipoInsumo === 'manual'}
+                            onChange={() => setTipoInsumo('manual')}
+                            className="h-4 w-4 ml-4"
+                          />
+                          <label htmlFor="insumo-manual" className="text-sm font-medium">
+                            Inserir manualmente
+                          </label>
+                        </div>
+
+                        {tipoInsumo === 'sinapi' ? (
+                          <FormField
+                            control={form.control}
+                            name="insumo"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Insumo (SINAPI)</FormLabel>
+                                <FormControl>
+                                  <Select
+                                    value={field.value || ''}
+                                    onValueChange={(value) => {
+                                      field.onChange(value === '' ? null : value);
+                                      form.setValue('insumo_customizado', null);
+                                    }}
+                                  >
+                                    <SelectTrigger className="bg-background/50">
+                                      <SelectValue placeholder="Selecione um insumo" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {Constants.public.Enums.insumo_enum.map((insumo) => (
+                                        <SelectItem key={insumo} value={insumo}>
+                                          {insumo.replace(/_/g, ' ')}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        ) : (
+                          <FormField
+                            control={form.control}
+                            name="insumo_customizado"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Insumo (Manual)</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Digite o nome do insumo (ex: Cimento Portland CP-II)"
+                                    {...field}
+                                    value={field.value ?? ''}
+                                    className="bg-background/50"
+                                    onChange={(e) => {
+                                      field.onChange(e.target.value);
+                                      form.setValue('insumo', null);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Insira o nome do insumo que não está disponível no SINAPI
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         )}
-                      />
+                      </div>
 
                       <FormField
                         control={form.control}
@@ -437,6 +511,18 @@ const EditarDespesa = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Análise de Insumo Manual */}
+                  {tipoInsumo === 'manual' && form.watch('insumo_customizado') && form.watch('valor_unitario') && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Análise de Insumo Manual</h3>
+                      <InsumoAnalysisCard
+                        insumoCustomizado={form.watch('insumo_customizado')}
+                        valorUnitario={form.watch('valor_unitario')}
+                        unidade={form.watch('unidade')}
+                      />
+                    </div>
+                  )}
 
                   {/* Seção Financeira */}
                   <div className="space-y-4">
@@ -770,4 +856,4 @@ const EditarDespesa = () => {
   );
 };
 
-export default EditarDespesa; 
+export default EditarDespesa;

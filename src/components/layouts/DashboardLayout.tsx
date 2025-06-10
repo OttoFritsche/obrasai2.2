@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon, Calculator, Building2, FileSignature } from "lucide-react";
+import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon, Calculator, Building2, FileSignature, BarChart3, AlertTriangle, Bell } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
@@ -102,6 +102,30 @@ const menuItems = [
     color: "text-purple-600 dark:text-purple-400",
     bgColor: "bg-purple-600/10 dark:bg-purple-400/10",
     hoverBg: "hover:bg-purple-600/20 dark:hover:bg-purple-400/20"
+  },
+  {
+    icon: BarChart3,
+    label: "Análise Integrada",
+    path: "/dashboard/analise",
+    color: "text-rose-600 dark:text-rose-400",
+    bgColor: "bg-rose-600/10 dark:bg-rose-400/10",
+    hoverBg: "hover:bg-rose-600/20 dark:hover:bg-rose-400/20"
+  },
+  {
+    icon: AlertTriangle,
+    label: "Alertas de Desvio",
+    path: "/dashboard/alertas",
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-600/10 dark:bg-red-400/10",
+    hoverBg: "hover:bg-red-600/20 dark:hover:bg-red-400/20"
+  },
+  {
+    icon: Bell,
+    label: "Alertas Avançados",
+    path: "/dashboard/alertas-avancados",
+    color: "text-violet-600 dark:text-violet-400",
+    bgColor: "bg-violet-600/10 dark:bg-violet-400/10",
+    hoverBg: "hover:bg-violet-600/20 dark:hover:bg-violet-400/20"
   }
 ];
 

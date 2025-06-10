@@ -34,6 +34,7 @@ const CategoriaEnum = z.enum([
   "MARKETING_VENDAS",
   "CUSTOS_FINANCEIROS",
   "SEGURANCA_TRABALHO",
+  "AQUISICAO_TERRENO_AREA",
   "OUTROS"
 ]);
 
@@ -226,6 +227,12 @@ export const despesaSchema = z.object({
   data_despesa: z.date({ required_error: t("messages.requiredField") }),
   // Insumo (opcional, baseado no enum)
   insumo: InsumoEnum.nullable().optional(),
+  // Insumo customizado (opcional, para insumos não-SINAPI)
+  insumo_customizado: z.string().nullable().optional(),
+  // Código SINAPI de referência (opcional, para comparação)
+  sinapi_codigo: z.string().nullable().optional(),
+  // ID de referência SINAPI (opcional, para vinculação)
+  sinapi_referencia_id: z.string().nullable().optional(),
   // Etapa (opcional, baseado no enum)
   etapa: EtapaEnum.nullable().optional(),
   // Categoria (obrigatório, baseado no enum - corrigido)
