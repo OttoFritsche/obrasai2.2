@@ -48,12 +48,18 @@ export function ThemeProvider({
               if (['light', 'dark', 'system'].includes(decrypted)) {
                 return (decrypted as Theme) || defaultTheme;
               } else {
-                console.warn('Invalid theme value after decryption, removing corrupted data');
+                // Log silencioso em desenvolvimento
+                if (import.meta.env?.DEV) {
+                  console.warn('Invalid theme value after decryption, removing corrupted data');
+                }
                 localStorage.removeItem(storageKey);
                 return defaultTheme;
               }
             } catch (decryptError) {
-              console.warn('Failed to decrypt theme preference, removing corrupted data');
+              // Log silencioso em desenvolvimento, remove dados corrompidos
+              if (import.meta.env?.DEV) {
+                console.warn('Failed to decrypt theme preference, removing corrupted data');
+              }
               localStorage.removeItem(storageKey);
               return defaultTheme;
             }
@@ -62,7 +68,10 @@ export function ThemeProvider({
           if (['light', 'dark', 'system'].includes(storedTheme)) {
             return (storedTheme as Theme) || defaultTheme;
           } else {
-            console.warn('Invalid legacy theme value, removing corrupted data');
+            // Log silencioso em desenvolvimento
+            if (import.meta.env?.DEV) {
+              console.warn('Invalid legacy theme value, removing corrupted data');
+            }
             localStorage.removeItem(storageKey);
             return defaultTheme;
           }

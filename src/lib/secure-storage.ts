@@ -11,11 +11,20 @@ const getEncryptionKey = (): string => {
   const envKey = import.meta.env.VITE_ENCRYPTION_KEY;
   
   if (!envKey) {
+    if (import.meta.env.DEV) {
+      console.warn('VITE_ENCRYPTION_KEY não está definida. Usando chave padrão para desenvolvimento.');
+      // Chave padrão apenas para desenvolvimento
+      return 'dev-key-not-for-production-use-only-32chars';
+    }
     throw new Error('VITE_ENCRYPTION_KEY não está definida. Configure uma chave de criptografia segura.');
   }
   
   // Validar comprimento mínimo da chave
   if (envKey.length < 32) {
+    if (import.meta.env.DEV) {
+      console.warn('VITE_ENCRYPTION_KEY deve ter pelo menos 32 caracteres. Usando chave padrão para desenvolvimento.');
+      return 'dev-key-not-for-production-use-only-32chars';
+    }
     throw new Error('VITE_ENCRYPTION_KEY deve ter pelo menos 32 caracteres.');
   }
   
@@ -57,7 +66,10 @@ const decrypt = (encryptedData: string): string => {
     
     return decrypted;
   } catch (error) {
-    console.warn('Decryption failed - data may be corrupted or from different key');
+    // Log mais silencioso para evitar spam no console
+    if (import.meta.env.DEV) {
+      console.warn('Decryption failed - data may be corrupted or from different key');
+    }
     throw new Error('Failed to decrypt data');
   }
 };
@@ -77,7 +89,9 @@ export const createSecureStorage = () => ({
           return decrypt(encryptedData.substring(10));
         } catch (decryptError) {
           // Dados corrompidos ou chave diferente - limpar e retornar null
-          console.warn(`Removing corrupted encrypted data for key: ${key}`);
+          if (import.meta.env.DEV) {
+            console.warn(`Removing corrupted encrypted data for key: ${key}`);
+          }
           localStorage.removeItem(key);
           return null;
         }

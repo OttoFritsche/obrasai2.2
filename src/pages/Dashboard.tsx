@@ -37,13 +37,13 @@ const Dashboard = () => {
   // Calcular métricas reais
   const totalObras = obras?.length || 0;
   const obrasAtivas = obras?.filter(obra => 
-    obra.data_inicio && !obra.data_prevista_termino || 
-    (obra.data_prevista_termino && new Date(obra.data_prevista_termino) > new Date())
+    obra.data_inicio && !obra.data_fim || 
+    (obra.data_fim && new Date(obra.data_fim) > new Date())
   ).length || 0;
 
-  const totalDespesas = despesas?.reduce((sum, despesa) => sum + despesa.custo, 0) || 0;
-  const despesasPagas = despesas?.filter(d => d.pago).length || 0;
-  const despesasPendentes = despesas?.filter(d => !d.pago).length || 0;
+  const totalDespesas = despesas?.reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
+  const totalDespesasCount = despesas?.length || 0;
+  const despesasPendentes = totalDespesasCount; // Todas as despesas são consideradas pendentes por padrão
 
   const totalNotas = notasFiscais?.length || 0;
   const valorNotas = notasFiscais?.reduce((sum, nota) => {
@@ -54,7 +54,7 @@ const Dashboard = () => {
     return sum;
   }, 0) || 0;
 
-  const orcamentoTotal = obras?.reduce((sum, obra) => sum + obra.orcamento, 0) || 0;
+  const orcamentoTotal = obras?.reduce((sum, obra) => sum + obra.orcamento_total, 0) || 0;
   const percentualGasto = orcamentoTotal > 0 ? (totalDespesas / orcamentoTotal * 100) : 0;
 
   // Métricas principais com dados reais
@@ -97,17 +97,17 @@ const Dashboard = () => {
   const recentProjects = obras?.slice(0, 3).map(obra => {
     // Calcular progresso real baseado em despesas vs orçamento
     const despesasObra = despesas?.filter(d => d.obra_id === obra.id) || [];
-    const totalGastoObra = despesasObra.reduce((sum, d) => sum + d.custo, 0);
-    const progressoReal = obra.orcamento > 0 ? Math.min(Math.round((totalGastoObra / obra.orcamento) * 100), 100) : 0;
+    const totalGastoObra = despesasObra.reduce((sum, d) => sum + d.valor, 0);
+    const progressoReal = obra.orcamento_total > 0 ? Math.min(Math.round((totalGastoObra / obra.orcamento_total) * 100), 100) : 0;
     
     return {
       id: obra.id,
       name: obra.nome,
       status: obra.data_inicio ? "em_andamento" : "planejamento",
       progress: progressoReal,
-      deadline: obra.data_prevista_termino ? formatDateBR(obra.data_prevista_termino) : "Não definido",
+      deadline: obra.data_fim ? formatDateBR(obra.data_fim) : "Não definido",
       priority: "média",
-      budget: obra.orcamento,
+      budget: obra.orcamento_total,
       city: obra.cidade,
       state: obra.estado
     };
@@ -398,6 +398,14 @@ const Dashboard = () => {
                       <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <span className="font-medium">Nova Construtora</span>
+                  </Link>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" asChild>
+                  <Link to="/dashboard/alertas">
+                    <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <span className="font-medium">Alertas de Desvio</span>
                   </Link>
                 </Button>
               </div>

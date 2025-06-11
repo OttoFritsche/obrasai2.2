@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Session } from "@supabase/supabase-js";
+import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserWithProfile, Subscription, AuthContextType } from "./types";
@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loadingRef = useRef(false);
 
   // ✅ Função para carregar dados do usuário com tratamento de erro
-  const loadUserData = useCallback(async (userId: string, authUser: unknown) => {
+  const loadUserData = useCallback(async (userId: string, authUser: User) => {
     if (loadingRef.current) return;
     loadingRef.current = true;
 
@@ -33,9 +33,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     } catch (error) {
       console.error('Error loading user profile:', error);
-      // ✅ Em caso de erro, limpar dados e definir loading como false
+      // ✅ Em caso de erro ao carregar o perfil, defina o usuário como nulo e loading como false.
+      // A sessão de autenticação do Supabase permanece válida.
       setUser(null);
-      setSession(null);
       setLoading(false);
     } finally {
       loadingRef.current = false;
@@ -53,45 +53,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth state changes FIRST
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // ✅ Log apenas eventos importantes em desenvolvimento
-        const isDev = import.meta.env.DEV;
-        if (isDev && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
-          console.log('🔄 Auth:', event);
-        }
+        // ✅ Log apenas eventos importantes em desenvolvimento (removido para reduzir ruído no console)
+        // const isDev = import.meta.env.DEV;
+        // if (isDev && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
+        //   console.log('🔄 Auth:', event);
+        // }
         
         // ✅ Lidar com refresh token inválido/expirado
-        if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-          // Se for TOKEN_REFRESHED mas sem session, significa que o refresh falhou
-          if (event === 'TOKEN_REFRESHED' && !session) {
-            if (import.meta.env.DEV) {
-              console.log('🔄 Token refresh failed');
-            }
-            await clearCorruptedAuthData();
-            setUser(null);
-            setSession(null);
-            setSubscription(null);
-            return;
+        if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+          if (import.meta.env.DEV && event === 'TOKEN_REFRESHED' && !session) {
+            console.log('🔄 Token refresh failed');
           }
-        }
-        
-        setSession(session);
-        
-        if (event === 'SIGNED_OUT') {
+          await clearCorruptedAuthData();
           setUser(null);
           setSession(null);
           setSubscription(null);
-          clearProfileCache();
-        } else if (session?.user) {
-          // ✅ Só carrega dados do perfil se for um evento específico e já inicializou
-          if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && isInitialized) {
+          setLoading(false); // Ensure loading is false on sign out or refresh failure
+          if (event === 'SIGNED_OUT') clearProfileCache();
+          return; // Early return for these cases
+        }
+
+        setSession(session);
+
+        if (session?.user) {
+          // Only load user data if it's a relevant event and initialization has occurred,
+          // or if it's the initial load.
+          if (((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && isInitialized) || !isInitialized) {
             // Use setTimeout to prevent potential deadlocks with Supabase client
+            // setLoading(true) will be handled by loadUserData or initializeAuth
             setTimeout(() => {
               loadUserData(session.user.id, session.user);
             }, 0);
-          } else if (!isInitialized) {
-            // ✅ Durante a inicialização, carregar dados será feito no initializeAuth
-            // Log removido para console limpo
+          } else {
+            // If initialized and not a specific event, ensure loading is false
+            setLoading(false);
           }
+        } else {
+          // No session/user, ensure loading is false
+          setUser(null); // Clear user if no session
+          setSubscription(null); // Clear subscription if no session
+          setLoading(false);
         }
       }
     );
@@ -111,8 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        
-        // ✅ Se houver erro na obtenção da sessão (ex: refresh token inválido)
+
         if (error) {
           console.warn('Auth session error:', error.message);
           await clearCorruptedAuthData();
@@ -120,28 +120,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(null);
           setSubscription(null);
           setLoading(false);
+          isInitialized = true; // Mark as initialized even on error to prevent loops
           return;
         }
-        
+
         setSession(currentSession);
-        
+
         if (currentSession?.user) {
-          // ✅ Carregar perfil sem log verboso
+          // setLoading(true) is implicitly handled by the flow leading to loadUserData
           await loadUserData(currentSession.user.id, currentSession.user);
+          // loadUserData will set loading to false
         } else {
           setUser(null);
+          setSubscription(null); // Clear subscription if no user
+          setLoading(false); // Ensure loading is false if no user
         }
         
-        isInitialized = true; // ✅ Marca como inicializado para evitar double loading
+        isInitialized = true;
       } catch (error) {
         console.error('Error initializing auth:', error);
-        // ✅ Em caso de erro na inicialização, limpar tudo
         await clearCorruptedAuthData();
         setUser(null);
         setSession(null);
         setSubscription(null);
+        setLoading(false); // Ensure loading is false on catch
       } finally {
-        setLoading(false);
+        // setLoading(false) is called in most paths, but ensure it's false if not already.
+        // However, if loadUserData is running, it will manage setLoading.
+        // This final setLoading(false) might be redundant if loadUserData always completes.
+        if (loadingRef.current === false) { // Only set if not already being handled by loadUserData
+            setLoading(false);
+        }
       }
     };
 
@@ -165,7 +174,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
       
-      // ✅ Não definir loading como false aqui - deixar o onAuthStateChange gerenciar
+      // ✅ Login bem-sucedido - o onAuthStateChange vai gerenciar o loading.
+      // O estado de loading será definido como false por loadUserData.
       return {};
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to login";

@@ -56,7 +56,7 @@ const EditarObra = () => {
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   const { user } = useAuth();
   const tenantId = user?.profile?.tenant_id;
-  const [construtoras, setConstrutoras] = useState<{ id: string; nome: string; cnpj?: string; email?: string; telefone?: string; endereco?: string }[]>([]);
+  const [construtoras, setConstrutoras] = useState<{ id: string; tipo: string; nome_razao_social: string; nome_fantasia?: string; documento: string }[]>([]);
   const [loadingConstrutoras, setLoadingConstrutoras] = useState(true);
   
   const form = useForm<ObraFormValues>({
@@ -99,10 +99,14 @@ const EditarObra = () => {
     setLoadingConstrutoras(true);
     supabase
       .from("construtoras")
-      .select("id, tipo, nome_razao_social, nome, documento")
+      .select("id, tipo, nome_razao_social, nome_fantasia, documento")
       .eq("tenant_id", tenantId)
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
+        if (error) {
+          console.error("Erro ao buscar construtoras:", error);
+          toast.error("Erro ao carregar construtoras");
+        }
         setConstrutoras(data || []);
         setLoadingConstrutoras(false);
       });
@@ -422,8 +426,8 @@ const EditarObra = () => {
                                 {construtoras.map((c) => (
                                   <SelectItem key={c.id} value={c.id}>
                                     {c.tipo === "pj"
-                                      ? `${c.nome_razao_social} (CNPJ: ${c.documento})`
-                                      : `${c.nome} (CPF: ${c.documento})`}
+                                      ? `${c.nome_fantasia || c.nome_razao_social} (CNPJ: ${c.documento})`
+                                      : `${c.nome_razao_social} (CPF: ${c.documento})`}
                                   </SelectItem>
                                 ))}
                               </SelectContent>

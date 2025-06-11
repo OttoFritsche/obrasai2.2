@@ -31,6 +31,7 @@ import { obrasApi } from "@/services/api";
 import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
 
+
 type Obra = {
   id: string;
   nome: string;
@@ -289,6 +290,8 @@ const ObrasLista = () => {
             transition={{ delay: 0.2 }}
             className="flex items-center gap-3"
           >
+
+            
             <Button 
               onClick={() => navigate('/dashboard/orcamentos/novo')}
               variant="outline"
@@ -422,6 +425,8 @@ const ObrasLista = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+
     </DashboardLayout>
   );
 };

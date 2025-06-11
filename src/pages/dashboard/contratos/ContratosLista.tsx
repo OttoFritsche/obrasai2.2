@@ -55,6 +55,7 @@ import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useContratos, useGerarPDF } from "@/hooks/useContratos";
 import { useObras } from "@/hooks/useObras";
 
+
 interface Contrato {
   id: string;
   numero_contrato: string;
@@ -481,6 +482,8 @@ const ContratosLista = () => {
           </AlertDialogContent>
         </AlertDialog>
       </motion.div>
+      
+
     </DashboardLayout>
   );
 };

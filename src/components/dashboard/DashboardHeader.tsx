@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { LogOut, Bell, Search } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -10,6 +11,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatDateBR } from "@/lib/i18n";
+
 
 export const DashboardHeader = () => {
   const { user, logout } = useAuth();
@@ -78,15 +80,20 @@ export const DashboardHeader = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.3 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
             >
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-9 w-9 rounded-lg hover:bg-accent"
+                className="h-9 w-9 rounded-lg relative hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <Bell className="h-4 w-4" />
-                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  3
+                </Badge>
               </Button>
             </motion.div>
             
@@ -94,7 +101,7 @@ export const DashboardHeader = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 0.3 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
             >
               <ThemeToggle />
             </motion.div>
@@ -103,7 +110,7 @@ export const DashboardHeader = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.3 }}
+              transition={{ delay: 0.6, duration: 0.3 }}
               className="flex items-center gap-3 ml-2"
             >
               <div className="hidden md:flex flex-col items-end">

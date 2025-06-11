@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import { UserWithProfile } from "./types";
+import { User } from "@supabase/supabase-js";
+import { UserWithProfile, Subscription } from "./types";
 
 // Cache simples para dados de perfil - usando unknown ao invés de any
 const profileCache = new Map<string, unknown>();
@@ -14,7 +15,7 @@ export const clearProfileCache = (userId?: string) => {
 };
 
 // Fetch user profile data with RLS recursion handling
-export const fetchUserProfile = async (userId: string, currentUser: UserWithProfile | null) => {
+export const fetchUserProfile = async (userId: string, currentUser: User) => {
   // Verificar cache primeiro
   if (profileCache.has(userId)) {
     const cachedProfile = profileCache.get(userId);
@@ -63,8 +64,8 @@ export const validateTenantId = (tenantId: unknown): string | null => {
   // Se for objeto, tenta converter para string se tiver propriedades válidas
   if (typeof tenantId === 'object' && tenantId !== null) {
     // Se for um objeto com id, usa o id
-    if (tenantId.id && typeof tenantId.id === 'string') {
-      return tenantId.id.trim();
+    if ('id' in tenantId && typeof (tenantId as any).id === 'string') {
+      return (tenantId as any).id.trim();
     }
     
     // Se for um objeto que pode ser serializado para UUID
@@ -88,11 +89,11 @@ export const validateTenantId = (tenantId: unknown): string | null => {
 };
 
 // Fetch user subscription data
-export const fetchUserSubscription = async (userId: string) => {
+export const fetchUserSubscription = async (userId: string): Promise<Subscription | null> => {
   try {
     const { data, error } = await supabase
       .from('subscriptions')
-      .select('*')
+      .select('id, status, product_id, price_id, current_period_end')
       .eq('user_id', userId)
       .eq('status', 'active')
       .limit(1);
@@ -106,8 +107,21 @@ export const fetchUserSubscription = async (userId: string) => {
       throw error;
     }
 
-    // Retornar o primeiro item se existir
-    const subscription = data?.[0] || null;
+    // Retornar o primeiro item se existir, garantindo que tenha a estrutura correta
+    const rawSubscription = data?.[0] as any;
+    
+    if (!rawSubscription) {
+      return null;
+    }
+
+    // Mapear os dados para o tipo Subscription esperado
+    const subscription: Subscription = {
+      id: rawSubscription.id as string,
+      status: (rawSubscription.status as string) || 'inactive',
+      product_id: rawSubscription.product_id as string | undefined,
+      price_id: rawSubscription.price_id as string | undefined,
+      current_period_end: rawSubscription.current_period_end ? new Date(rawSubscription.current_period_end) : undefined
+    };
     
     return subscription;
   } catch (error) {

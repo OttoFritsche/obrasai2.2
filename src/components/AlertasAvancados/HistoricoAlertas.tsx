@@ -70,11 +70,11 @@ export const HistoricoAlertas: React.FC<HistoricoAlertasProps> = ({
   const filtrarHistorico = () => {
     let historicoFiltrado = [...historico];
 
-    if (filtroTipo) {
+    if (filtroTipo && filtroTipo !== 'ALL_TYPES') {
       historicoFiltrado = historicoFiltrado.filter(h => h.tipo_alerta === filtroTipo);
     }
 
-    if (filtroAcao) {
+    if (filtroAcao && filtroAcao !== 'ALL_ACTIONS') {
       historicoFiltrado = historicoFiltrado.filter(h => h.acao === filtroAcao);
     }
 
@@ -212,7 +212,7 @@ export const HistoricoAlertas: React.FC<HistoricoAlertasProps> = ({
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="ALL_TYPES">Todos os tipos</SelectItem>
                   <SelectItem value="BAIXO">Baixo</SelectItem>
                   <SelectItem value="MEDIO">Médio</SelectItem>
                   <SelectItem value="ALTO">Alto</SelectItem>
@@ -228,7 +228,7 @@ export const HistoricoAlertas: React.FC<HistoricoAlertasProps> = ({
                   <SelectValue placeholder="Todas as ações" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as ações</SelectItem>
+                  <SelectItem value="ALL_ACTIONS">Todas as ações</SelectItem>
                   <SelectItem value="CRIADO">Criado</SelectItem>
                   <SelectItem value="VISUALIZADO">Visualizado</SelectItem>
                   <SelectItem value="RESOLVIDO">Resolvido</SelectItem>

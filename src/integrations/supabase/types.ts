@@ -50,94 +50,178 @@ export type Database = {
           },
         ]
       }
-      despesas: {
+      alertas_desvio: {
         Row: {
-          categoria: Database["public"]["Enums"]["categoria_enum"] | null
           created_at: string
-          custo: number
-          data_despesa: string
-          data_pagamento: string | null
-          descricao: string
-          etapa: Database["public"]["Enums"]["etapa_enum"] | null
-          forma_pagamento: string | null
-          fornecedor_pf_id: string | null
-          fornecedor_pj_id: string | null
+          data_alerta: string
+          desvio_percentual: number
           id: string
-          insumo: Database["public"]["Enums"]["insumo_enum"] | null
-          numero_nf: string | null
           obra_id: string
-          observacoes: string | null
-          pago: boolean
-          quantidade: number
+          status: string
           tenant_id: string | null
-          unidade: string | null
-          updated_at: string
-          usuario_id: string | null
-          valor_unitario: number
+          tipo_desvio: string
+          valor_atual: number
+          valor_orcado: number
         }
         Insert: {
-          categoria?: Database["public"]["Enums"]["categoria_enum"] | null
           created_at?: string
-          custo: number
-          data_despesa?: string
-          data_pagamento?: string | null
-          descricao: string
-          etapa?: Database["public"]["Enums"]["etapa_enum"] | null
-          forma_pagamento?: string | null
-          fornecedor_pf_id?: string | null
-          fornecedor_pj_id?: string | null
+          data_alerta?: string
+          desvio_percentual: number
           id?: string
-          insumo?: Database["public"]["Enums"]["insumo_enum"] | null
-          numero_nf?: string | null
           obra_id: string
-          observacoes?: string | null
-          pago?: boolean
-          quantidade?: number
+          status?: string
           tenant_id?: string | null
-          unidade?: string | null
-          updated_at?: string
-          usuario_id?: string | null
-          valor_unitario: number
+          tipo_desvio: string
+          valor_atual: number
+          valor_orcado: number
         }
         Update: {
-          categoria?: Database["public"]["Enums"]["categoria_enum"] | null
           created_at?: string
-          custo?: number
-          data_despesa?: string
-          data_pagamento?: string | null
-          descricao?: string
-          etapa?: Database["public"]["Enums"]["etapa_enum"] | null
-          forma_pagamento?: string | null
-          fornecedor_pf_id?: string | null
-          fornecedor_pj_id?: string | null
+          data_alerta?: string
+          desvio_percentual?: number
           id?: string
-          insumo?: Database["public"]["Enums"]["insumo_enum"] | null
-          numero_nf?: string | null
           obra_id?: string
-          observacoes?: string | null
-          pago?: boolean
-          quantidade?: number
+          status?: string
           tenant_id?: string | null
-          unidade?: string | null
-          updated_at?: string
-          usuario_id?: string | null
-          valor_unitario?: number
+          tipo_desvio?: string
+          valor_atual?: number
+          valor_orcado?: number
         }
         Relationships: [
           {
-            foreignKeyName: "despesas_fornecedor_pf_id_fkey"
-            columns: ["fornecedor_pf_id"]
+            foreignKeyName: "alertas_desvio_obra_id_fkey"
+            columns: ["obra_id"]
             isOneToOne: false
-            referencedRelation: "fornecedores_pf"
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      configuracoes_alerta_avancadas: {
+        Row: {
+          id: string
+          obra_id: string
+          usuario_id: string
+          tenant_id: string | null
+          threshold_baixo: number
+          threshold_medio: number
+          threshold_alto: number
+          threshold_critico: number
+          notificar_email: boolean
+          notificar_dashboard: boolean
+          notificar_webhook: boolean
+          webhook_url: string | null
+          alertas_por_categoria: boolean
+          alertas_por_etapa: boolean
+          frequencia_verificacao: number
+          ativo: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          obra_id: string
+          usuario_id: string
+          tenant_id?: string | null
+          threshold_baixo?: number
+          threshold_medio?: number
+          threshold_alto?: number
+          threshold_critico?: number
+          notificar_email?: boolean
+          notificar_dashboard?: boolean
+          notificar_webhook?: boolean
+          webhook_url?: string | null
+          alertas_por_categoria?: boolean
+          alertas_por_etapa?: boolean
+          frequencia_verificacao?: number
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          obra_id?: string
+          usuario_id?: string
+          tenant_id?: string | null
+          threshold_baixo?: number
+          threshold_medio?: number
+          threshold_alto?: number
+          threshold_critico?: number
+          notificar_email?: boolean
+          notificar_dashboard?: boolean
+          notificar_webhook?: boolean
+          webhook_url?: string | null
+          alertas_por_categoria?: boolean
+          alertas_por_etapa?: boolean
+          frequencia_verificacao?: number
+          ativo?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "configuracoes_alerta_avancadas_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "despesas_fornecedor_pj_id_fkey"
-            columns: ["fornecedor_pj_id"]
+            foreignKeyName: "configuracoes_alerta_avancadas_usuario_id_fkey"
+            columns: ["usuario_id"]
             isOneToOne: false
-            referencedRelation: "fornecedores_pj"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      despesas: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          data_despesa: string
+          descricao: string | null
+          etapa: string | null
+          fornecedor: string | null
+          id: string
+          insumo: string | null
+          obra_id: string
+          tenant_id: string | null
+          tipo_despesa: string | null
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          data_despesa: string
+          descricao?: string | null
+          etapa?: string | null
+          fornecedor?: string | null
+          id?: string
+          insumo?: string | null
+          obra_id: string
+          tenant_id?: string | null
+          tipo_despesa?: string | null
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          data_despesa?: string
+          descricao?: string | null
+          etapa?: string | null
+          fornecedor?: string | null
+          id?: string
+          insumo?: string | null
+          obra_id?: string
+          tenant_id?: string | null
+          tipo_despesa?: string | null
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
           {
             foreignKeyName: "despesas_obra_id_fkey"
             columns: ["obra_id"]
@@ -152,72 +236,59 @@ export type Database = {
           bairro: string | null
           cep: string | null
           cidade: string | null
-          complemento: string | null
           cpf: string
           created_at: string
-          data_nascimento: string | null
           email: string | null
           endereco: string | null
           estado: string | null
           id: string
           nome: string
-          numero: string | null
-          observacoes: string | null
-          rg: string | null
-          telefone_principal: string | null
-          telefone_secundario: string | null
+          obra_id: string
+          telefone: string | null
           tenant_id: string | null
-          tipo_fornecedor: string | null
-          updated_at: string
-          usuario_id: string | null
+          updated_at: string | null
         }
         Insert: {
           bairro?: string | null
           cep?: string | null
           cidade?: string | null
-          complemento?: string | null
           cpf: string
           created_at?: string
-          data_nascimento?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
           nome: string
-          numero?: string | null
-          observacoes?: string | null
-          rg?: string | null
-          telefone_principal?: string | null
-          telefone_secundario?: string | null
+          obra_id: string
+          telefone?: string | null
           tenant_id?: string | null
-          tipo_fornecedor?: string | null
-          updated_at?: string
-          usuario_id?: string | null
+          updated_at?: string | null
         }
         Update: {
           bairro?: string | null
           cep?: string | null
           cidade?: string | null
-          complemento?: string | null
           cpf?: string
           created_at?: string
-          data_nascimento?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
           nome?: string
-          numero?: string | null
-          observacoes?: string | null
-          rg?: string | null
-          telefone_principal?: string | null
-          telefone_secundario?: string | null
+          obra_id?: string
+          telefone?: string | null
           tenant_id?: string | null
-          tipo_fornecedor?: string | null
-          updated_at?: string
-          usuario_id?: string | null
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_pf_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fornecedores_pj: {
         Row: {
@@ -225,159 +296,212 @@ export type Database = {
           cep: string | null
           cidade: string | null
           cnpj: string
-          complemento: string | null
           created_at: string
           email: string | null
           endereco: string | null
           estado: string | null
           id: string
-          inscricao_estadual: string | null
-          inscricao_municipal: string | null
           nome_fantasia: string | null
-          numero: string | null
-          observacoes: string | null
+          obra_id: string
           razao_social: string
-          telefone_principal: string | null
-          telefone_secundario: string | null
+          telefone: string | null
           tenant_id: string | null
-          updated_at: string
-          usuario_id: string | null
-          website: string | null
+          updated_at: string | null
         }
         Insert: {
           bairro?: string | null
           cep?: string | null
           cidade?: string | null
           cnpj: string
-          complemento?: string | null
           created_at?: string
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
-          inscricao_estadual?: string | null
-          inscricao_municipal?: string | null
           nome_fantasia?: string | null
-          numero?: string | null
-          observacoes?: string | null
+          obra_id: string
           razao_social: string
-          telefone_principal?: string | null
-          telefone_secundario?: string | null
+          telefone?: string | null
           tenant_id?: string | null
-          updated_at?: string
-          usuario_id?: string | null
-          website?: string | null
+          updated_at?: string | null
         }
         Update: {
           bairro?: string | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string
-          complemento?: string | null
           created_at?: string
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
-          inscricao_estadual?: string | null
-          inscricao_municipal?: string | null
           nome_fantasia?: string | null
-          numero?: string | null
-          observacoes?: string | null
+          obra_id?: string
           razao_social?: string
-          telefone_principal?: string | null
-          telefone_secundario?: string | null
+          telefone?: string | null
           tenant_id?: string | null
-          updated_at?: string
-          usuario_id?: string | null
-          website?: string | null
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_pj_obra_id_fkey"
+            columns: ["obra_id"]
+            isOneToOne: false
+            referencedRelation: "obras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes_alertas: {
+        Row: {
+          id: string
+          alerta_id: string
+          usuario_id: string
+          tenant_id: string | null
+          tipo_notificacao: string
+          status: string
+          titulo: string
+          mensagem: string
+          dados_extras: Json | null
+          tentativas: number
+          max_tentativas: number
+          enviada_em: string | null
+          lida_em: string | null
+          lida: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          alerta_id: string
+          usuario_id: string
+          tenant_id?: string | null
+          tipo_notificacao: string
+          status?: string
+          titulo: string
+          mensagem: string
+          dados_extras?: Json | null
+          tentativas?: number
+          max_tentativas?: number
+          enviada_em?: string | null
+          lida_em?: string | null
+          lida?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          alerta_id?: string
+          usuario_id?: string
+          tenant_id?: string | null
+          tipo_notificacao?: string
+          status?: string
+          titulo?: string
+          mensagem?: string
+          dados_extras?: Json | null
+          tentativas?: number
+          max_tentativas?: number
+          enviada_em?: string | null
+          lida_em?: string | null
+          lida?: boolean | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_alertas_alerta_id_fkey"
+            columns: ["alerta_id"]
+            isOneToOne: false
+            referencedRelation: "alertas_desvio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_alertas_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       obras: {
         Row: {
-          cep: string
-          cidade: string
+          bairro: string | null
+          cep: string | null
+          cidade: string | null
           created_at: string
-          data_inicio: string | null
-          data_prevista_termino: string | null
-          endereco: string
-          estado: string
+          data_fim: string | null
+          data_inicio: string
+          descricao: string | null
+          endereco: string | null
+          estado: string | null
           id: string
           nome: string
-          orcamento: number
+          orcamento_total: number | null
+          status: string | null
           tenant_id: string | null
-          updated_at: string
-          usuario_id: string
+          updated_at: string | null
         }
         Insert: {
-          cep: string
-          cidade: string
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
           created_at?: string
-          data_inicio?: string | null
-          data_prevista_termino?: string | null
-          endereco: string
-          estado: string
+          data_fim?: string | null
+          data_inicio: string
+          descricao?: string | null
+          endereco?: string | null
+          estado?: string | null
           id?: string
           nome: string
-          orcamento?: number
+          orcamento_total?: number | null
+          status?: string | null
           tenant_id?: string | null
-          updated_at?: string
-          usuario_id: string
+          updated_at?: string | null
         }
         Update: {
-          cep?: string
-          cidade?: string
+          bairro?: string | null
+          cep?: string | null
+          cidade?: string | null
           created_at?: string
-          data_inicio?: string | null
-          data_prevista_termino?: string | null
-          endereco?: string
-          estado?: string
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          endereco?: string | null
+          estado?: string | null
           id?: string
           nome?: string
-          orcamento?: number
+          orcamento_total?: number | null
+          status?: string | null
           tenant_id?: string | null
-          updated_at?: string
-          usuario_id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
-          cpf: string | null
+          avatar_url: string | null
           created_at: string
-          data_nascimento: string | null
-          first_name: string | null
+          email: string | null
+          full_name: string | null
           id: string
-          last_name: string | null
-          role: string
-          telefone: string | null
-          tenant_id: string
-          updated_at: string
+          tenant_id: string | null
+          updated_at: string | null
         }
         Insert: {
-          cpf?: string | null
+          avatar_url?: string | null
           created_at?: string
-          data_nascimento?: string | null
-          first_name?: string | null
+          email?: string | null
+          full_name?: string | null
           id: string
-          last_name?: string | null
-          role?: string
-          telefone?: string | null
-          tenant_id: string
-          updated_at?: string
+          tenant_id?: string | null
+          updated_at?: string | null
         }
         Update: {
-          cpf?: string | null
+          avatar_url?: string | null
           created_at?: string
-          data_nascimento?: string | null
-          first_name?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
-          last_name?: string | null
-          role?: string
-          telefone?: string | null
-          tenant_id?: string
-          updated_at?: string
+          tenant_id?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -386,234 +510,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      buscar_sinapi_por_codigo: {
-        Args: {
-          codigo_param: string
-        }
+      calcular_desvios_todas_obras: {
+        Args: Record<PropertyKey, never>
         Returns: {
-          codigo: string
-          descricao: string
-          unidade: string
-          preco_unitario: number
-          categoria: string
-          fonte: string
-          estado: string
-        }[]
-      }
-      buscar_sinapi_unificado: {
-        Args: {
-          termo_busca?: string
-          limite?: number
-          offset_param?: number
-        }
-        Returns: {
-          codigo: string
-          descricao: string
-          unidade: string
-          preco_unitario: number
-          categoria: string
-          fonte: string
-          estado: string
+          obra_id: string
+          nome_obra: string
+          orcamento_total: number
+          total_gasto: number
+          desvio_percentual: number
+          status_obra: string
         }[]
       }
     }
     Enums: {
-      categoria_enum:
-        | "MATERIAL_CONSTRUCAO"
-        | "MAO_DE_OBRA"
-        | "ALUGUEL_EQUIPAMENTOS"
-        | "TRANSPORTE_FRETE"
-        | "TAXAS_LICENCAS"
-        | "SERVICOS_TERCEIRIZADOS"
-        | "ADMINISTRATIVO"
-        | "IMPREVISTOS"
-        | "PROJETO_ARQUITETONICO"
-        | "PROJETO_ESTRUTURAL"
-        | "PROJETO_ELETRICO"
-        | "PROJETO_HIDRAULICO"
-        | "TAXAS_LEGAIS"
-        | "DOCUMENTACAO"
-        | "SEGURO_OBRA"
-        | "MARKETING_VENDAS"
-        | "CUSTOS_FINANCEIROS"
-        | "SEGURANCA_TRABALHO"
-        | "AQUISICAO_TERRENO_AREA"
-        | "AQUISICAO_IMOVEL_REFORMA_LEILAO"
-        | "OUTROS"
-      etapa_enum:
-        | "PLANEJAMENTO"
-        | "DEMOLICAO"
-        | "TERRAPLANAGEM"
-        | "FUNDACAO"
-        | "ESTRUTURA"
-        | "ALVENARIA"
-        | "COBERTURA"
-        | "INSTALACOES_ELETRICAS"
-        | "INSTALACOES_HIDRAULICAS"
-        | "INSTALACOES_GAS"
-        | "INSTALACOES_AR_CONDICIONADO"
-        | "AUTOMACAO"
-        | "REVESTIMENTOS_INTERNOS"
-        | "REVESTIMENTOS_EXTERNOS"
-        | "PINTURA"
-        | "ACABAMENTOS"
-        | "PAISAGISMO"
-        | "LIMPEZA_POS_OBRA"
-        | "ENTREGA_VISTORIA"
-        | "DOCUMENTACAO"
-        | "OUTROS"
-        | "ADAPTACAO_ESTRUTURAL"
-        | "RECUPERACAO_ESTRUTURAL"
-        | "READEQUACAO_INSTALACOES"
-      insumo_enum:
-        | "CONCRETO_USINADO"
-        | "ACO_CA50"
-        | "FORMA_MADEIRA"
-        | "ESCAVACAO"
-        | "IMPERMEABILIZACAO_FUND"
-        | "IMPERMEABILIZANTE_ASFALTICO"
-        | "LASTRO_BRITA"
-        | "CONCRETO_MAGRO"
-        | "ACO_CA60"
-        | "TELA_SOLDADA"
-        | "ESPAÇADOR_ACO"
-        | "LAJE_PRE_MOLDADA"
-        | "VIGA_CONCRETO"
-        | "PILAR_CONCRETO"
-        | "TIJOLO_CERAMICO"
-        | "BLOCO_CONCRETO"
-        | "TIJOLO_ECOLOGICO"
-        | "BLOCO_CELULAR"
-        | "ARGAMASSA_ASSENTAMENTO"
-        | "CIMENTO_CP2"
-        | "CIMENTO_CP5"
-        | "CAL_HIDRATADA"
-        | "AREIA_MEDIA_LAVADA"
-        | "BRITA_0"
-        | "VERGA_CONTRAVERGA"
-        | "TELHA_CERAMICA"
-        | "TELHA_FIBROCIMENTO"
-        | "TELHA_CONCRETO"
-        | "TELHA_METALICA"
-        | "MADEIRAMENTO_TELHADO"
-        | "MANTA_SUBCOBERTURA"
-        | "RUFO_CALHA"
-        | "IMPERMEABILIZACAO_LAJE"
-        | "FIO_CABO_ELETRICO"
-        | "ELETRODUTO"
-        | "QUADRO_DISTRIBUICAO"
-        | "DISJUNTOR"
-        | "TOMADA_INTERRUPTOR"
-        | "LUMINARIA"
-        | "CABO_REDE_CAT6"
-        | "CABO_COAXIAL"
-        | "INTERFONE"
-        | "SENSOR_PRESENCA"
-        | "TUBO_PVC_ESGOTO"
-        | "TUBO_PVC_AGUA_FRIA"
-        | "TUBO_CPVC_AGUA_QUENTE"
-        | "TUBO_PEX_AGUA_QUENTE"
-        | "CONEXOES_HIDRAULICAS"
-        | "CAIXA_DAGUA"
-        | "CAIXA_GORDURA"
-        | "CAIXA_INSPECAO"
-        | "LOUCAS_METAIS"
-        | "AQUECEDOR_AGUA"
-        | "REGISTRO_GAVETA"
-        | "REGISTRO_PRESSAO"
-        | "FILTRO_AGUA"
-        | "CHAPISCO"
-        | "EMBOCO"
-        | "REBOCO"
-        | "GESSO_LISO"
-        | "AZULEJO"
-        | "PISO_CERAMICO"
-        | "PORCELANATO"
-        | "PISO_LAMINADO"
-        | "PISO_VINILICO"
-        | "RODAPE"
-        | "REJUNTE_EPOXI"
-        | "REJUNTE_ACRILICO"
-        | "FORRO_PVC"
-        | "FORRO_GESSO_ACARTONADO"
-        | "REVESTIMENTO_FACHADA"
-        | "TEXTURA_GRAFIATO"
-        | "PISO_EXTERNO"
-        | "IMPERMEABILIZANTE_PAREDE"
-        | "MASSA_CORRIDA_PVA"
-        | "MASSA_ACRILICA"
-        | "SELADOR_ACRILICO"
-        | "TINTA_LATEX_PVA"
-        | "TINTA_ACRILICA"
-        | "VERNIZ"
-        | "LIXA"
-        | "FITA_CREPE"
-        | "ROLO_PINTURA"
-        | "TRINCHA_PINCEL"
-        | "SOLVENTE_THINNER"
-        | "PORTA_MADEIRA"
-        | "PORTA_ALUMINIO"
-        | "JANELA_MADEIRA"
-        | "JANELA_ALUMINIO"
-        | "JANELA_VIDRO"
-        | "BANCADA_GRANITO"
-        | "SOLEIRA_PEITORIL"
-        | "VIDRO_COMUM"
-        | "ESPELHO"
-        | "BOX_BANHEIRO"
-        | "FECHADURA_DOBRADICA"
-        | "GUARDA_CORPO"
-        | "TERRA_ADUBADA"
-        | "GRAMA"
-        | "MUDA_PLANTA"
-        | "PEDRA_DECORATIVA"
-        | "LIMITADOR_GRAMA"
-        | "SISTEMA_IRRIGACAO"
-        | "ILUMINACAO_JARDIM"
-        | "PROJETO_ARQUITETONICO"
-        | "PROJETO_ESTRUTURAL"
-        | "PROJETO_ELETRICO"
-        | "PROJETO_HIDRAULICO"
-        | "ART_RRT"
-        | "TAXA_PREFEITURA"
-        | "TAXA_CARTORIO"
-        | "ISS"
-        | "SEGURO_OBRA"
-        | "CONSULTORIA_ESPECIALIZADA"
-        | "PEDREIRO"
-        | "SERVENTE"
-        | "ELETRICISTA"
-        | "ENCANADOR"
-        | "PINTOR"
-        | "GESSEIRO"
-        | "CARPINTEIRO"
-        | "MARMORISTA"
-        | "VIDRACEIRO"
-        | "SERRALHEIRO"
-        | "JARDINEIRO"
-        | "MESTRE_OBRAS"
-        | "ENGENHEIRO_ARQUITETO"
-        | "AJUDANTE_GERAL"
-        | "BETONEIRA"
-        | "ANDAIME"
-        | "MARTELETE"
-        | "ESCORA"
-        | "COMPACTADOR_SOLO"
-        | "ESMERILHADEIRA"
-        | "GERADOR_ENERGIA"
-        | "BOMBA_SUBMERSA"
-        | "EPI"
-        | "FERRAMENTA"
-        | "PLACAS_SINALIZACAO"
-        | "AGUA_OBRA"
-        | "LUZ_OBRA"
-        | "LIMPEZA_OBRA"
-        | "CONTAINER_ENTULHO"
-        | "CONSUMIVEIS_ESCRITORIO"
-        | "ALIMENTACAO_EQUIPE"
-        | "TRANSPORTE_EQUIPE"
-        | "TAXAS_BANCARIAS"
-        | "OUTROS"
+      categoria_enum: "MATERIAL" | "MAO_DE_OBRA" | "EQUIPAMENTO" | "SERVICO" | "OUTROS"
+      insumo_enum: "CIMENTO" | "AREIA" | "BRITA" | "FERRO" | "MADEIRA" | "TIJOLO" | "TELHA" | "TINTA" | "OUTROS"
+      etapa_enum: "FUNDACAO" | "ESTRUTURA" | "ALVENARIA" | "COBERTURA" | "INSTALACOES" | "ACABAMENTO" | "OUTROS"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -621,29 +533,27 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type PublicSchema = Database[keyof Database]
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -651,22 +561,20 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -674,22 +582,20 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -697,23 +603,21 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof PublicSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -722,212 +626,17 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+// Constants object for accessing enums
 export const Constants = {
   public: {
     Enums: {
-      categoria_enum: [
-        "MATERIAL_CONSTRUCAO",
-        "MAO_DE_OBRA",
-        "ALUGUEL_EQUIPAMENTOS",
-        "TRANSPORTE_FRETE",
-        "TAXAS_LICENCAS",
-        "SERVICOS_TERCEIRIZADOS",
-        "ADMINISTRATIVO",
-        "IMPREVISTOS",
-        "PROJETO_ARQUITETONICO",
-        "PROJETO_ESTRUTURAL",
-        "PROJETO_ELETRICO",
-        "PROJETO_HIDRAULICO",
-        "TAXAS_LEGAIS",
-        "DOCUMENTACAO",
-        "SEGURO_OBRA",
-        "MARKETING_VENDAS",
-        "CUSTOS_FINANCEIROS",
-        "SEGURANCA_TRABALHO",
-        "AQUISICAO_TERRENO_AREA",
-        "AQUISICAO_IMOVEL_REFORMA_LEILAO",
-        "OUTROS",
-      ],
-      etapa_enum: [
-        "PLANEJAMENTO",
-        "DEMOLICAO",
-        "TERRAPLANAGEM",
-        "FUNDACAO",
-        "ESTRUTURA",
-        "ALVENARIA",
-        "COBERTURA",
-        "INSTALACOES_ELETRICAS",
-        "INSTALACOES_HIDRAULICAS",
-        "INSTALACOES_GAS",
-        "INSTALACOES_AR_CONDICIONADO",
-        "AUTOMACAO",
-        "REVESTIMENTOS_INTERNOS",
-        "REVESTIMENTOS_EXTERNOS",
-        "PINTURA",
-        "ACABAMENTOS",
-        "PAISAGISMO",
-        "LIMPEZA_POS_OBRA",
-        "ENTREGA_VISTORIA",
-        "DOCUMENTACAO",
-        "OUTROS",
-        "ADAPTACAO_ESTRUTURAL",
-        "RECUPERACAO_ESTRUTURAL",
-        "READEQUACAO_INSTALACOES",
-      ],
-      insumo_enum: [
-        "CONCRETO_USINADO",
-        "ACO_CA50",
-        "FORMA_MADEIRA",
-        "ESCAVACAO",
-        "IMPERMEABILIZACAO_FUND",
-        "IMPERMEABILIZANTE_ASFALTICO",
-        "LASTRO_BRITA",
-        "CONCRETO_MAGRO",
-        "ACO_CA60",
-        "TELA_SOLDADA",
-        "ESPAÇADOR_ACO",
-        "LAJE_PRE_MOLDADA",
-        "VIGA_CONCRETO",
-        "PILAR_CONCRETO",
-        "TIJOLO_CERAMICO",
-        "BLOCO_CONCRETO",
-        "TIJOLO_ECOLOGICO",
-        "BLOCO_CELULAR",
-        "ARGAMASSA_ASSENTAMENTO",
-        "CIMENTO_CP2",
-        "CIMENTO_CP5",
-        "CAL_HIDRATADA",
-        "AREIA_MEDIA_LAVADA",
-        "BRITA_0",
-        "VERGA_CONTRAVERGA",
-        "TELHA_CERAMICA",
-        "TELHA_FIBROCIMENTO",
-        "TELHA_CONCRETO",
-        "TELHA_METALICA",
-        "MADEIRAMENTO_TELHADO",
-        "MANTA_SUBCOBERTURA",
-        "RUFO_CALHA",
-        "IMPERMEABILIZACAO_LAJE",
-        "FIO_CABO_ELETRICO",
-        "ELETRODUTO",
-        "QUADRO_DISTRIBUICAO",
-        "DISJUNTOR",
-        "TOMADA_INTERRUPTOR",
-        "LUMINARIA",
-        "CABO_REDE_CAT6",
-        "CABO_COAXIAL",
-        "INTERFONE",
-        "SENSOR_PRESENCA",
-        "TUBO_PVC_ESGOTO",
-        "TUBO_PVC_AGUA_FRIA",
-        "TUBO_CPVC_AGUA_QUENTE",
-        "TUBO_PEX_AGUA_QUENTE",
-        "CONEXOES_HIDRAULICAS",
-        "CAIXA_DAGUA",
-        "CAIXA_GORDURA",
-        "CAIXA_INSPECAO",
-        "LOUCAS_METAIS",
-        "AQUECEDOR_AGUA",
-        "REGISTRO_GAVETA",
-        "REGISTRO_PRESSAO",
-        "FILTRO_AGUA",
-        "CHAPISCO",
-        "EMBOCO",
-        "REBOCO",
-        "GESSO_LISO",
-        "AZULEJO",
-        "PISO_CERAMICO",
-        "PORCELANATO",
-        "PISO_LAMINADO",
-        "PISO_VINILICO",
-        "RODAPE",
-        "REJUNTE_EPOXI",
-        "REJUNTE_ACRILICO",
-        "FORRO_PVC",
-        "FORRO_GESSO_ACARTONADO",
-        "REVESTIMENTO_FACHADA",
-        "TEXTURA_GRAFIATO",
-        "PISO_EXTERNO",
-        "IMPERMEABILIZANTE_PAREDE",
-        "MASSA_CORRIDA_PVA",
-        "MASSA_ACRILICA",
-        "SELADOR_ACRILICO",
-        "TINTA_LATEX_PVA",
-        "TINTA_ACRILICA",
-        "VERNIZ",
-        "LIXA",
-        "FITA_CREPE",
-        "ROLO_PINTURA",
-        "TRINCHA_PINCEL",
-        "SOLVENTE_THINNER",
-        "PORTA_MADEIRA",
-        "PORTA_ALUMINIO",
-        "JANELA_MADEIRA",
-        "JANELA_ALUMINIO",
-        "JANELA_VIDRO",
-        "BANCADA_GRANITO",
-        "SOLEIRA_PEITORIL",
-        "VIDRO_COMUM",
-        "ESPELHO",
-        "BOX_BANHEIRO",
-        "FECHADURA_DOBRADICA",
-        "GUARDA_CORPO",
-        "TERRA_ADUBADA",
-        "GRAMA",
-        "MUDA_PLANTA",
-        "PEDRA_DECORATIVA",
-        "LIMITADOR_GRAMA",
-        "SISTEMA_IRRIGACAO",
-        "ILUMINACAO_JARDIM",
-        "PROJETO_ARQUITETONICO",
-        "PROJETO_ESTRUTURAL",
-        "PROJETO_ELETRICO",
-        "PROJETO_HIDRAULICO",
-        "ART_RRT",
-        "TAXA_PREFEITURA",
-        "TAXA_CARTORIO",
-        "ISS",
-        "SEGURO_OBRA",
-        "CONSULTORIA_ESPECIALIZADA",
-        "PEDREIRO",
-        "SERVENTE",
-        "ELETRICISTA",
-        "ENCANADOR",
-        "PINTOR",
-        "GESSEIRO",
-        "CARPINTEIRO",
-        "MARMORISTA",
-        "VIDRACEIRO",
-        "SERRALHEIRO",
-        "JARDINEIRO",
-        "MESTRE_OBRAS",
-        "ENGENHEIRO_ARQUITETO",
-        "AJUDANTE_GERAL",
-        "BETONEIRA",
-        "ANDAIME",
-        "MARTELETE",
-        "ESCORA",
-        "COMPACTADOR_SOLO",
-        "ESMERILHADEIRA",
-        "GERADOR_ENERGIA",
-        "BOMBA_SUBMERSA",
-        "EPI",
-        "FERRAMENTA",
-        "PLACAS_SINALIZACAO",
-        "AGUA_OBRA",
-        "LUZ_OBRA",
-        "LIMPEZA_OBRA",
-        "CONTAINER_ENTULHO",
-        "CONSUMIVEIS_ESCRITORIO",
-        "ALIMENTACAO_EQUIPE",
-        "TRANSPORTE_EQUIPE",
-        "TAXAS_BANCARIAS",
-        "OUTROS",
-      ],
-    },
-  },
+      categoria_enum: ["MATERIAL", "MAO_DE_OBRA", "EQUIPAMENTO", "SERVICO", "OUTROS"] as const,
+      insumo_enum: ["CIMENTO", "AREIA", "BRITA", "FERRO", "MADEIRA", "TIJOLO", "TELHA", "TINTA", "OUTROS"] as const,
+      etapa_enum: ["FUNDACAO", "ESTRUTURA", "ALVENARIA", "COBERTURA", "INSTALACOES", "ACABAMENTO", "OUTROS"] as const
+    }
+  }
 } as const

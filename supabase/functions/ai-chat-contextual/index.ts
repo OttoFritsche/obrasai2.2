@@ -13,7 +13,8 @@ import { corsHeaders } from '../_shared/cors.ts';
  */
 
 interface ChatRequest {
-  pergunta: string;
+  pergunta?: string;
+  message?: string;
   obra_id?: string;
   usuario_id?: string;
   contexto_adicional?: string;
@@ -22,6 +23,8 @@ interface ChatRequest {
   incluir_despesas?: boolean;
   max_tokens?: number;
   temperatura?: number;
+  pageContext?: string;
+  documentationPath?: string;
 }
 
 interface ContextoItem {
@@ -49,6 +52,209 @@ const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const openaiApiKey = Deno.env.get('OPENAI_API_KEY')!;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+/**
+ * Processa requisições do widget de ajuda contextual
+ */
+async function processarWidgetAjuda(pergunta: string, pageContext: string, documentationPath: string): Promise<Response> {
+  try {
+    const documentation = getDocumentationContent(documentationPath);
+    
+    const contextualPrompt = `
+Você é um assistente IA especializado no sistema ObrasAI, especificamente no módulo de ${pageContext}.
+
+Documentação do módulo:
+${documentation}
+
+Instruções:
+1. Responda APENAS sobre funcionalidades do módulo de ${pageContext}
+2. Use a documentação fornecida como base para suas respostas
+3. Seja claro, objetivo e útil
+4. Se a pergunta não estiver relacionada ao módulo, redirecione educadamente
+5. Forneça exemplos práticos quando apropriado
+6. Mantenha um tom profissional mas amigável
+
+Pergunta do usuário: ${pergunta}
+
+Resposta:
+`;
+
+    // Usar DeepSeek API se disponível, senão OpenAI
+    const deepseekApiKey = Deno.env.get('DEEPSEEK_API');
+    
+    let response;
+    if (deepseekApiKey) {
+      response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${deepseekApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é um assistente IA especializado no sistema ObrasAI. Responda sempre em português brasileiro.'
+            },
+            {
+              role: 'user',
+              content: contextualPrompt
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+    } else {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é um assistente IA especializado no sistema ObrasAI. Responda sempre em português brasileiro.'
+            },
+            {
+              role: 'user',
+              content: contextualPrompt
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+    }
+
+    if (!response.ok) {
+      throw new Error('Erro na API de IA');
+    }
+
+    const data = await response.json();
+    const resposta = data.choices[0]?.message?.content || 'Desculpe, não consegui processar sua pergunta.';
+
+    return new Response(
+      JSON.stringify({ response: resposta }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Erro no widget de ajuda:', error);
+    return new Response(
+      JSON.stringify({ error: 'Erro interno do servidor' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+/**
+ * Retorna documentação estática baseada no path
+ */
+function getDocumentationContent(path: string): string {
+  const documentationMap: Record<string, string> = {
+    '/docs/contrato/documentacao_contratoIA.md': `
+# Módulo de Contratos - ObrasAI
+
+## Funcionalidades Principais
+- Criação de contratos normais e com IA
+- Listagem e filtros de contratos
+- Edição e edição com IA
+- Envio para assinatura digital
+- Download de documentos
+- Gerenciamento de status
+
+## Como Criar um Contrato
+1. Clique em "Novo Contrato" ou "Criar com IA"
+2. Preencha os dados básicos
+3. Configure valores e condições
+4. Revise e salve
+
+## Status dos Contratos
+- Rascunho: Em elaboração
+- Pendente: Aguardando assinatura
+- Assinado: Finalizado
+- Cancelado: Cancelado
+    `,
+    '/docs/obras/documentacao_obras.md': `
+# Módulo de Obras - ObrasAI
+
+## Funcionalidades Principais
+- Cadastro de obras
+- Acompanhamento de progresso
+- Controle de status
+- Gestão de equipes
+- Relatórios de andamento
+
+## Como Cadastrar uma Obra
+1. Clique em "Nova Obra"
+2. Preencha dados básicos
+3. Configure cronograma
+4. Defina responsáveis
+5. Salve a obra
+
+## Status das Obras
+- Planejamento: Em fase de planejamento
+- Em Andamento: Obra em execução
+- Pausada: Temporariamente parada
+- Concluída: Obra finalizada
+    `,
+    '/docs/despesas/documentacao_despesas.md': `
+# Módulo de Despesas - ObrasAI
+
+## Funcionalidades Principais
+- Lançamento de despesas
+- Categorização automática
+- Controle orçamentário
+- Relatórios financeiros
+- Integração com SINAPI
+
+## Como Lançar uma Despesa
+1. Clique em "Nova Despesa"
+2. Selecione a obra
+3. Escolha categoria
+4. Informe valor e data
+5. Anexe comprovantes
+6. Salve o lançamento
+
+## Categorias de Despesas
+- Material: Materiais de construção
+- Mão de Obra: Pagamentos de funcionários
+- Equipamentos: Aluguel/compra de equipamentos
+- Outros: Despesas diversas
+    `,
+    '/docs/orcamentoIA/documentacao_orcamento.md': `
+# Módulo de Orçamentos - ObrasAI
+
+## Funcionalidades Principais
+- Criação paramétrica com IA
+- Análise de composições
+- Integração SINAPI
+- Relatórios detalhados
+- Comparativos de custos
+
+## Como Criar um Orçamento
+1. Clique em "Novo Orçamento"
+2. Descreva o projeto
+3. A IA analisa e sugere itens
+4. Revise composições
+5. Ajuste valores se necessário
+6. Gere relatório final
+
+## Análise IA
+- Sugestões automáticas de itens
+- Cálculo de quantitativos
+- Preços baseados no SINAPI
+- Alertas de inconsistências
+    `
+  };
+
+  return documentationMap[path] || 'Documentação não encontrada.';
+}
 
 /**
  * Gera embedding para busca semântica
@@ -149,37 +355,46 @@ async function buscarContextoObra(obraId: string): Promise<ContextoItem[]> {
 }
 
 /**
- * Busca contexto semântico relevante
+ * Busca contexto da base de conhecimento usando busca semântica
  */
-async function buscarContextoSemantico(
+async function buscarContextoConhecimento(
   pergunta: string, 
   obraId?: string
 ): Promise<ContextoItem[]> {
   const contextos: ContextoItem[] = [];
 
   try {
-    // Buscar na base de conhecimento
-    const { data: conhecimento } = await supabase
-      .from('embeddings_conhecimento')
-      .select('*')
-      .eq('obra_id', obraId)
-      .limit(5);
+    // Gerar embedding da pergunta
+    const queryEmbedding = await generateEmbedding(pergunta);
 
-    conhecimento?.forEach(item => {
+    // Buscar contexto relevante usando a função SQL
+    const { data: contextData, error } = await supabase.rpc('buscar_contexto_conhecimento', {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.7,
+      match_count: 5
+    });
+
+    if (error) {
+      console.error('Erro na busca semântica:', error);
+      return contextos;
+    }
+
+    contextData?.forEach(item => {
       contextos.push({
         tipo: 'conhecimento',
-        conteudo: `${item.titulo}: ${item.conteudo_resumido || item.conteudo.substring(0, 500)}`,
-        relevancia: 0.7,
-        fonte: 'base_conhecimento',
+        conteudo: `${item.documento} - ${item.secao}: ${item.conteudo}`,
+        relevancia: item.similarity,
+        fonte: 'documentacao',
         metadata: { 
-          tipo_conteudo: item.tipo_conteudo,
-          referencia_id: item.referencia_id 
+          documento: item.documento,
+          secao: item.secao,
+          similarity: item.similarity
         }
       });
     });
 
   } catch (error) {
-    console.error('Erro ao buscar contexto semântico:', error);
+    console.error('Erro ao buscar contexto de conhecimento:', error);
   }
 
   return contextos;
@@ -381,11 +596,29 @@ Deno.serve(async (req: Request) => {
 
     const body: ChatRequest = await req.json();
     
-    if (!body.pergunta || body.pergunta.trim().length === 0) {
+    const {
+      pergunta,
+      message,
+      obra_id,
+      usuario_id,
+      contexto_adicional,
+      incluir_sinapi = true,
+      incluir_orcamento = true,
+      incluir_despesas = true,
+      max_tokens = 1000,
+      temperatura = 0.7,
+      pageContext,
+      documentationPath
+    } = body;
+
+    // Suporte ao widget de ajuda contextual
+    const perguntaFinal = pergunta || message;
+    
+    if (!perguntaFinal) {
       return new Response(
         JSON.stringify({ 
           success: false,
-          error: 'Pergunta é obrigatória' 
+          error: 'Pergunta ou mensagem é obrigatória' 
         }),
         { 
           status: 400, 
@@ -394,19 +627,17 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const {
-      pergunta,
-      obra_id,
-      usuario_id,
-      contexto_adicional,
-      incluir_sinapi = true,
-      incluir_orcamento = true,
-      incluir_despesas = true,
-      max_tokens = 1000,
-      temperatura = 0.7
-    } = body;
+    // Processar requisições do widget de ajuda
+    if (message && pageContext && documentationPath) {
+      return await processarWidgetAjuda(message, pageContext, documentationPath);
+    }
 
-    console.log(`🤖 Processando pergunta: "${pergunta}"`);
+    console.log(`🤖 Processando pergunta: "${perguntaFinal}"`);
+    
+    // Se for uma requisição do widget de ajuda, usar documentação específica
+    if (pageContext && documentationPath) {
+      return await processarWidgetAjuda(perguntaFinal, pageContext, documentationPath);
+    }
 
     // Coletar contextos relevantes
     const contextos: ContextoItem[] = [];
@@ -417,9 +648,9 @@ Deno.serve(async (req: Request) => {
       contextos.push(...contextoObra);
     }
 
-    // Contexto semântico
-    const contextoSemantico = await buscarContextoSemantico(pergunta, obra_id);
-    contextos.push(...contextoSemantico);
+    // Contexto da base de conhecimento
+    const contextoConhecimento = await buscarContextoConhecimento(perguntaFinal, obra_id);
+    contextos.push(...contextoConhecimento);
 
     // Contexto SINAPI
     if (incluir_sinapi) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '../integrations/supabase/client';
+import { useToast } from './use-toast';
 
 export interface ConfiguracaoAlertaAvancada {
   id?: string;
@@ -37,7 +37,16 @@ export interface NotificacaoAlerta {
   max_tentativas: number;
   enviada_em?: string;
   lida_em?: string;
+  lida?: boolean;
   created_at: string;
+  alertas_desvio?: {
+    obra_id?: string;
+    tipo_alerta?: string;
+    percentual_desvio?: number;
+    obras?: {
+      nome?: string;
+    };
+  };
 }
 
 export interface HistoricoAlerta {
@@ -54,6 +63,11 @@ export interface HistoricoAlerta {
   acao: 'CRIADO' | 'VISUALIZADO' | 'RESOLVIDO' | 'IGNORADO' | 'REATIVADO';
   observacoes?: string;
   created_at: string;
+  alertas_desvio?: {
+    descricao?: string;
+    categoria?: string;
+    etapa?: string;
+  };
 }
 
 export interface ResumoNotificacoes {
@@ -77,12 +91,14 @@ export const useAdvancedAlerts = () => {
   });
   const [loading, setLoading] = useState(true);
   const [processando, setProcessando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Carregar configurações de alertas
   const carregarConfiguracoes = useCallback(async (obraId?: string) => {
     try {
       setLoading(true);
+      setError(null);
       let query = supabase
         .from('configuracoes_alerta_avancadas')
         .select('*')
@@ -97,7 +113,9 @@ export const useAdvancedAlerts = () => {
       if (error) throw error;
       setConfiguracoes(data || []);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       console.error('Erro ao carregar configurações:', error);
+      setError(errorMessage);
       toast({
         title: "Erro",
         description: "Erro ao carregar configurações de alertas.",
@@ -111,6 +129,7 @@ export const useAdvancedAlerts = () => {
   // Carregar notificações
   const carregarNotificacoes = useCallback(async (usuarioId?: string) => {
     try {
+      setError(null);
       let query = supabase
         .from('notificacoes_alertas')
         .select(`
@@ -134,10 +153,12 @@ export const useAdvancedAlerts = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setNotificacoes(data || []);
-      calcularResumoNotificacoes(data || []);
+      setNotificacoes((data || []) as NotificacaoAlerta[]);
+      calcularResumoNotificacoes((data || []) as NotificacaoAlerta[]);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       console.error('Erro ao carregar notificações:', error);
+      setError(errorMessage);
       toast({
         title: "Erro",
         description: "Erro ao carregar notificações.",
@@ -149,6 +170,7 @@ export const useAdvancedAlerts = () => {
   // Carregar histórico
   const carregarHistorico = useCallback(async (alertaId?: string, obraId?: string) => {
     try {
+      setError(null);
       let query = supabase
         .from('historico_alertas')
         .select(`
@@ -174,7 +196,9 @@ export const useAdvancedAlerts = () => {
       if (error) throw error;
       setHistorico(data || []);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       console.error('Erro ao carregar histórico:', error);
+      setError(errorMessage);
       toast({
         title: "Erro",
         description: "Erro ao carregar histórico de alertas.",
@@ -441,17 +465,20 @@ export const useAdvancedAlerts = () => {
     }
   }, []);
 
-  // Subscription para notificações em tempo real
+  // Configurar subscription para notificações em tempo real
   useEffect(() => {
-    let subscription: any = null;
+    let subscription: any;
     
     const setupSubscription = async () => {
       try {
         const { data: userData } = await supabase.auth.getUser();
         
         if (userData.user) {
+          // Criar um canal único com timestamp para evitar conflitos
+          const channelName = `notificacoes_alertas_${userData.user.id}_${Date.now()}`;
+          
           subscription = supabase
-            .channel('notificacoes_alertas')
+            .channel(channelName)
             .on(
               'postgres_changes',
               {
@@ -461,7 +488,8 @@ export const useAdvancedAlerts = () => {
                 filter: `usuario_id=eq.${userData.user.id}`
               },
               () => {
-                carregarNotificacoes(userData.user.id);
+                // Usar uma função estável para evitar dependências
+                carregarNotificacoes();
               }
             )
             .subscribe();
@@ -478,7 +506,7 @@ export const useAdvancedAlerts = () => {
         subscription.unsubscribe();
       }
     };
-  }, [carregarNotificacoes]);
+  }, []); // Sem dependências para evitar recriação desnecessária
 
   return {
     // Estados
@@ -488,6 +516,7 @@ export const useAdvancedAlerts = () => {
     resumoNotificacoes,
     loading,
     processando,
+    error,
 
     // Funções
     carregarConfiguracoes,

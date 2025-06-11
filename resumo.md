@@ -1,102 +1,134 @@
-# Resumo da Análise do Sistema ObrasAI - Orçamentos e Padrões de Obra
+# Resumo dos Problemas Enfrentados - Vectorização de Documentação ObrasAI
 
-## Contexto da Investigação
+## 📋 Contexto
+Tentativa de implementar funcionalidade de vectorização de documentação para busca semântica no ObrasAI, incluindo criação de script TypeScript e Edge Function para processar documentos e gerar embeddings.
 
-Esta análise foi realizada para entender como o sistema ObrasAI calcula os custos por metro quadrado para diferentes padrões de obra (NORMAL, ALTO, LUXO) e avaliar se um valor de R$ 1.941,49/m² para padrão Normal está adequado.
+## 🚨 Problemas Identificados
 
-## Principais Descobertas
+### 1. **Problemas de Compilação TypeScript**
+- **Erro**: Import `fs` ausente no script `vectorizar-documentacao.ts`
+- **Solução Aplicada**: Adicionado import correto
+- **Status**: ✅ Resolvido
 
-### 1. Estrutura do Sistema de Cálculo
+### 2. **Problemas de Execução do Script Compilado**
+- **Erro**: `MODULE_NOT_FOUND` ao executar o script JavaScript compilado
+- **Causa**: Dependência `@supabase/supabase-js` não instalada
+- **Solução Aplicada**: Executado `npm install @supabase/supabase-js`
+- **Status**: ✅ Resolvido
 
-- **Não há valores fixos por padrão**: O sistema ObrasAI não possui valores fixos de metro quadrado definidos para cada padrão de obra (Normal, Alto, Luxo)
-- **Cálculo dinâmico**: Os orçamentos são calculados dinamicamente baseados em composições detalhadas de insumos e mão de obra
-- **Base SINAPI**: Utiliza valores unitários fixos por insumo, seguindo tabelas do SINAPI
-- **Coeficientes técnicos**: São calculados por área, mas os valores unitários dos insumos permanecem fixos
+### 3. **Problemas de Módulo ES vs CommonJS**
+- **Erro**: Script sendo tratado como ES module devido ao `type: "module"` no package.json
+- **Tentativa 1**: Compilar para CommonJS - falhou por problemas de resolução de módulos
+- **Solução Final**: Compilar para ES2020 modules
+- **Status**: ✅ Resolvido
 
-### 2. Valores de Referência Encontrados
+### 4. **Problemas na Edge Function - Verificação de Tabela**
+- **Erro**: `relation "public.information_schema.tables" does not exist`
+- **Causa**: Tentativa de acessar information_schema através do cliente Supabase
+- **Tentativa de Correção**: Usar `supabase.rpc('exec_sql')` para verificar existência da tabela
+- **Novo Erro**: `function public.exec_sql(query) does not exist in the schema cache`
+- **Solução Final**: Remover lógica de verificação/criação de tabela da Edge Function
+- **Status**: ✅ Resolvido (lógica removida)
 
-#### No arquivo `analyze-planta/index.ts`:
-- **Padrão médio brasileiro**: R$ 1.200 - 1.800/m²
-- Usado como referência para análise de plantas
+### 5. **🔴 PROBLEMA CRÍTICO: Falha na Conexão com Banco de Dados**
+- **Erro**: `invalid SCRAM server-final-message` ao executar `supabase db push`
+- **Impacto**: Impossibilidade de aplicar migrações SQL
+- **Causa Provável**: 
+  - Credenciais de banco incorretas
+  - Problema de autenticação SCRAM
+  - Possível corrupção de senha do banco
+- **Status**: ❌ **NÃO RESOLVIDO**
 
-#### No arquivo `IMPLEMENTACAO_SINAPI_COMPLETO.md`:
-- **Exemplo Padrão Alto** (250m²): R$ 858,33/m²
-- Sistema otimizado com alta aderência ao SINAPI
+### 6. **Tabela `documentos_obra` Não Criada**
+- **Problema**: Tabela necessária para armazenar embeddings não existe no banco
+- **Dependência**: Resolução do problema de conexão (#5)
+- **Solução Preparada**: Script SQL `create_table.sql` criado para execução manual
+- **Status**: ⏳ Aguardando resolução do problema de conexão
 
-### 3. Arquivos Analisados
+## 🛠️ Soluções Implementadas
 
-#### Documentação:
-- `IMPLEMENTACAO_SINAPI_COMPLETO.md` - Exemplos práticos de orçamentos
-- `AI_CHAT_IMPLEMENTATION.md` - Implementação do sistema de chat
+### ✅ Correções Aplicadas
+1. **Script TypeScript**: Corrigido imports e compilação
+2. **Dependências**: Instalado `@supabase/supabase-js`
+3. **Edge Function**: Removida lógica problemática de verificação de tabela
+4. **Script SQL**: Criado `create_table.sql` para criação manual da tabela
 
-#### Edge Functions:
-- `ai-calculate-budget/index.ts` - Função principal de cálculo de orçamento
-- `analyze-planta/index.ts` - Análise de plantas com valores de referência
+### 📝 Arquivos Criados/Modificados
+- `scripts/vectorizar-documentacao.ts` - Script principal (corrigido)
+- `supabase/functions/gerar-embeddings-documentacao/index.ts` - Edge Function (simplificada)
+- `create_table.sql` - Script para criação da tabela
+- `temp/vectorizar-documentacao.js` - Script compilado
 
-#### Tipos e Definições:
-- `src/types/orcamento.ts` - Definições dos enums para padrões de obra
+## 🚨 Próximos Passos Necessários
 
-#### Serviços de API:
-- Vários arquivos mencionam `custo_m2`, `custoM2` e `valor_referencia_sinapi`
-
-### 4. Análise do Valor R$ 1.941,49/m² (Padrão Normal)
-
-#### Conclusão: **VALOR DENTRO DA FAIXA ESPERADA, MAS NO LIMITE SUPERIOR**
-
-**Justificativas:**
-- Está dentro da faixa superior da referência de R$ 1.200-1.800/m² para padrão médio
-- É esperado que um padrão Normal seja mais caro que o exemplo otimizado de Padrão Alto (R$ 858,33/m²)
-- Valores entre R$ 1.500-2.000/m² são considerados razoáveis para padrão Normal no mercado atual
-- O cálculo é baseado em composições detalhadas do SINAPI, não em valores arbitrários
-
-**Fatores que podem influenciar o valor:**
-- **Região**: Diferentes regiões têm custos distintos
-- **Composição específica**: Tipos de insumos e mão de obra utilizados
-- **Área da obra**: Obras menores tendem a ter custo/m² maior
-- **Detalhamento**: Nível de especificação dos materiais e serviços
-
-### 5. Recomendações
-
-1. **Verificar detalhes na aba "Composição de Custos"**
-   - Analisar quais categorias têm maior impacto no custo
-   - Material de Construção, Mão de Obra, Serviços Terceirizados
-
-2. **Comparar por região**
-   - Verificar se os valores estão adequados para a região específica
-
-3. **Analisar a área da obra**
-   - Obras menores podem ter custo/m² proporcionalmente maior
-
-4. **Revisar itens de maior impacto**
-   - Identificar oportunidades de otimização sem comprometer a qualidade
-
-### 6. Estrutura Técnica do Sistema
-
-#### Padrões de Obra (Enum):
-```typescript
-enum PadraoObra {
-  NORMAL = 'NORMAL',
-  ALTO = 'ALTO', 
-  LUXO = 'LUXO'
-}
+### 1. **PRIORIDADE CRÍTICA: Resolver Conexão com Banco**
+```bash
+# Erro atual:
+supabase db push --include-all
+# Resultado: invalid SCRAM server-final-message
 ```
 
-#### Cálculo de Orçamento:
-- Função `ai-calculate-budget` processa composições detalhadas
-- Utiliza `valor_referencia_sinapi` e `preco_unitario` por insumo
-- Calcula `custo_total` e `custo_m2` dinamicamente
+**Ações Recomendadas:**
+- Verificar/resetar credenciais do banco no Supabase Dashboard
+- Verificar configuração local do Supabase CLI
+- Verificar variáveis de ambiente
+- Considerar recriar instância do banco se necessário
 
-#### Integração com SINAPI:
-- Alta aderência às tabelas oficiais
-- Valores atualizados conforme referências do sistema
-- Coeficientes técnicos aplicados por área construída
+### 2. **Criar Tabela `documentos_obra`**
+Após resolver conexão, executar no Supabase SQL Editor:
+```sql
+-- Conteúdo do arquivo create_table.sql
+CREATE EXTENSION IF NOT EXISTS vector;
 
-## Conclusão Final
+CREATE TABLE IF NOT EXISTS documentos_obra (
+    id SERIAL PRIMARY KEY,
+    nome_documento VARCHAR(255) NOT NULL,
+    chunk_texto TEXT NOT NULL,
+    embedding vector(1536),
+    tipo_documento VARCHAR(100),
+    obra_id INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-O valor de R$ 1.941,49/m² para um orçamento padrão Normal **não está absurdamente alto**, mas encontra-se no **limite superior da faixa esperada**. O sistema utiliza uma metodologia robusta baseada no SINAPI com cálculos dinâmicos, o que garante maior precisão em relação a valores fixos por padrão.
+-- Índices para performance
+CREATE INDEX IF NOT EXISTS idx_documentos_obra_embedding ON documentos_obra USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_documentos_obra_tipo ON documentos_obra(tipo_documento);
+CREATE INDEX IF NOT EXISTS idx_documentos_obra_obra_id ON documentos_obra(obra_id);
+```
 
-**Status**: Valor aceitável, mas recomenda-se análise detalhada da composição para possíveis otimizações.
+### 3. **Testar Funcionalidade Completa**
+- Executar script de vectorização: `node temp/vectorizar-documentacao.js`
+- Verificar criação de embeddings na tabela
+- Testar busca semântica
+
+## 📊 Status Atual
+
+| Componente | Status | Observações |
+|------------|--------|-------------|
+| Script TypeScript | ✅ Funcionando | Compilação e execução OK |
+| Edge Function | ✅ Funcionando | Lógica simplificada |
+| Conexão Banco | ❌ **BLOQUEADO** | Erro SCRAM crítico |
+| Tabela documentos_obra | ❌ Pendente | Depende da conexão |
+| Funcionalidade E2E | ❌ Pendente | Depende da tabela |
+
+## 🔍 Diagnóstico do Problema Principal
+
+**Erro SCRAM**: Indica problema de autenticação PostgreSQL
+- Possível senha incorreta/corrompida
+- Problema de configuração SSL/TLS
+- Instância de banco com problemas
+
+**Impacto**: Bloqueia completamente o desenvolvimento da funcionalidade
+
+## 💡 Recomendações
+
+1. **Imediato**: Focar na resolução do problema de conexão com banco
+2. **Verificar**: Configurações do projeto no Supabase Dashboard
+3. **Backup**: Considerar backup dos dados antes de qualquer reset
+4. **Alternativa**: Se problema persistir, considerar migração para nova instância
 
 ---
 
-*Última atualização: Análise completa do sistema de orçamentos ObrasAI*
+**Data**: 2024-12-27  
+**Sessão**: Implementação Vectorização Documentação  
+**Status Geral**: 🔴 **BLOQUEADO** por problema de conexão com banco

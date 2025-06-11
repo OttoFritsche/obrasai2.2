@@ -86,11 +86,11 @@ export const NotificacoesAlertas: React.FC<NotificacoesAlertasProps> = ({
   const filtrarNotificacoes = () => {
     let notificacoesFiltradas = [...notificacoes];
 
-    if (filtroTipo) {
+    if (filtroTipo && filtroTipo !== 'ALL_TYPES') {
       notificacoesFiltradas = notificacoesFiltradas.filter(n => n.tipo_notificacao === filtroTipo);
     }
 
-    if (filtroStatus) {
+    if (filtroStatus && filtroStatus !== 'ALL_STATUS') {
       notificacoesFiltradas = notificacoesFiltradas.filter(n => n.status === filtroStatus);
     }
 
@@ -196,7 +196,7 @@ export const NotificacoesAlertas: React.FC<NotificacoesAlertasProps> = ({
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
+                  <SelectItem value="ALL_TYPES">Todos os tipos</SelectItem>
                   <SelectItem value="EMAIL">Email</SelectItem>
                   <SelectItem value="DASHBOARD">Dashboard</SelectItem>
                   <SelectItem value="WEBHOOK">Webhook</SelectItem>
@@ -211,7 +211,7 @@ export const NotificacoesAlertas: React.FC<NotificacoesAlertasProps> = ({
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="ALL_STATUS">Todos os status</SelectItem>
                   <SelectItem value="PENDENTE">Pendente</SelectItem>
                   <SelectItem value="ENVIADA">Enviada</SelectItem>
                   <SelectItem value="ERRO">Erro</SelectItem>

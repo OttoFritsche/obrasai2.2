@@ -34,17 +34,17 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-  const { login, user, session } = useAuth();
+  const { login, user, session, loading } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // ✅ Redirecionar automaticamente quando o usuário estiver autenticado
   useEffect(() => {
-    if (user && session) {
+    if (session && !loading) { // Condição de redirecionamento ajustada
       navigate("/dashboard", { replace: true });
     }
-  }, [user, session, navigate]);
+  }, [session, loading, navigate]); // Dependências ajustadas
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -66,8 +66,7 @@ const Login = () => {
       }
       
       toast.success(t("messages.loginSuccess"));
-      // ✅ Redirecionamento será feito automaticamente pelo useEffect
-      // quando o estado de autenticação for atualizado
+      // ✅ Redirecionamento será feito pelo useEffect
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t("messages.generalError");
       toast.error(errorMessage);

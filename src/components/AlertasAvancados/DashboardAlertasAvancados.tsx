@@ -31,11 +31,15 @@ import { ptBR } from 'date-fns/locale';
 interface DashboardAlertasAvancadosProps {
   obraId?: string;
   className?: string;
+  mostrarConfiguracoes?: boolean;
+  onFecharConfiguracoes?: () => void;
 }
 
 export const DashboardAlertasAvancados: React.FC<DashboardAlertasAvancadosProps> = ({
   obraId,
-  className = ''
+  className = '',
+  mostrarConfiguracoes: mostrarConfiguracoesExterno,
+  onFecharConfiguracoes
 }) => {
   const {
     configuracoes,
@@ -54,12 +58,16 @@ export const DashboardAlertasAvancados: React.FC<DashboardAlertasAvancadosProps>
 
   const [tabAtiva, setTabAtiva] = useState('dashboard');
   const [mostrarConfiguracoes, setMostrarConfiguracoes] = useState(false);
+  
+  // Usar estado externo se fornecido
+  const configuracoesVisivel = mostrarConfiguracoesExterno !== undefined ? mostrarConfiguracoesExterno : mostrarConfiguracoes;
+  const fecharConfiguracoes = onFecharConfiguracoes || (() => setMostrarConfiguracoes(false));
 
   useEffect(() => {
     carregarConfiguracoes(obraId);
     carregarNotificacoes();
     carregarHistorico(undefined, obraId);
-  }, [obraId, carregarConfiguracoes, carregarNotificacoes, carregarHistorico]);
+  }, [obraId]); // Removendo dependências de funções para evitar loop infinito
 
   const configuracaoAtiva = configuracoes.find(c => c.ativo && (!obraId || c.obra_id === obraId));
 
@@ -124,17 +132,18 @@ export const DashboardAlertasAvancados: React.FC<DashboardAlertasAvancadosProps>
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Alertas Avançados</h2>
-          <p className="text-muted-foreground">
-            Sistema avançado de monitoramento e notificações de desvios orçamentários
-          </p>
-        </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setMostrarConfiguracoes(true)}
+            onClick={() => {
+              if (onFecharConfiguracoes) {
+                // Se há callback externo, não gerenciamos o estado interno
+                return;
+              }
+              setMostrarConfiguracoes(true);
+            }}
             disabled={processando}
+            data-config-button
           >
             <Settings className="h-4 w-4 mr-2" />
             Configurações
@@ -160,7 +169,14 @@ export const DashboardAlertasAvancados: React.FC<DashboardAlertasAvancadosProps>
             <Button 
               variant="link" 
               className="p-0 h-auto font-semibold"
-              onClick={() => setMostrarConfiguracoes(true)}
+              onClick={() => {
+                if (onFecharConfiguracoes) {
+                  // Se há callback externo, não gerenciamos o estado interno
+                  return;
+                }
+                setMostrarConfiguracoes(true);
+              }}
+              data-config-button
             >
               Configure agora
             </Button>
@@ -273,13 +289,13 @@ export const DashboardAlertasAvancados: React.FC<DashboardAlertasAvancadosProps>
                       <span className="text-sm text-muted-foreground">Notificações:</span>
                       <div className="flex gap-2">
                         {configuracaoAtiva.notificar_email && (
-                          <Mail className="h-4 w-4 text-blue-500" title="Email ativo" />
+                          <Mail className="h-4 w-4 text-blue-500" />
                         )}
                         {configuracaoAtiva.notificar_dashboard && (
-                          <Bell className="h-4 w-4 text-green-500" title="Dashboard ativo" />
+                          <Bell className="h-4 w-4 text-green-500" />
                         )}
                         {configuracaoAtiva.notificar_webhook && (
-                          <Webhook className="h-4 w-4 text-purple-500" title="Webhook ativo" />
+                          <Webhook className="h-4 w-4 text-purple-500" />
                         )}
                       </div>
                     </div>
@@ -434,13 +450,13 @@ export const DashboardAlertasAvancados: React.FC<DashboardAlertasAvancadosProps>
       </Tabs>
 
       {/* Modal de Configurações */}
-      {mostrarConfiguracoes && (
+      {configuracoesVisivel && (
         <ConfiguracaoAlertasAvancadas
           obraId={obraId}
           configuracaoExistente={configuracaoAtiva}
-          onClose={() => setMostrarConfiguracoes(false)}
+          onClose={fecharConfiguracoes}
           onSalvar={() => {
-            setMostrarConfiguracoes(false);
+            fecharConfiguracoes();
             carregarConfiguracoes(obraId);
           }}
         />

@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/contexts/auth/ProtectedRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { AuthProvider } from "@/contexts/auth/AuthContext";
 
 import Index from "@/pages/Index";
 import Dashboard from "@/pages/Dashboard";
@@ -82,6 +83,7 @@ const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="obrasai-theme">
       <QueryClientProvider client={queryClient}>
+        <AuthProvider>
         <Routes>
           {/* Rotas públicas */}
           <Route index element={<Index />} />
@@ -297,7 +299,8 @@ const App = () => {
           {/* Rota de página não encontrada */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <Toaster position="top-center" />
+          <Toaster position="top-center" />
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

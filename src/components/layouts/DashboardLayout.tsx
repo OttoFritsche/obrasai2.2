@@ -17,6 +17,7 @@ import obrasAILight from "@/assets/logo/logo_light_horizon.png";
 import logoImageDark from "@/assets/logo/logo_image_dark.png";
 import logoImageLight from "@/assets/logo/logo_image_light.png";
 
+
 type DashboardLayoutProps = {
   children: React.ReactNode;
 };
@@ -111,22 +112,7 @@ const menuItems = [
     bgColor: "bg-rose-600/10 dark:bg-rose-400/10",
     hoverBg: "hover:bg-rose-600/20 dark:hover:bg-rose-400/20"
   },
-  {
-    icon: AlertTriangle,
-    label: "Alertas de Desvio",
-    path: "/dashboard/alertas",
-    color: "text-red-600 dark:text-red-400",
-    bgColor: "bg-red-600/10 dark:bg-red-400/10",
-    hoverBg: "hover:bg-red-600/20 dark:hover:bg-red-400/20"
-  },
-  {
-    icon: Bell,
-    label: "Alertas Avançados",
-    path: "/dashboard/alertas-avancados",
-    color: "text-violet-600 dark:text-violet-400",
-    bgColor: "bg-violet-600/10 dark:bg-violet-400/10",
-    hoverBg: "hover:bg-violet-600/20 dark:hover:bg-violet-400/20"
-  }
+
 ];
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
@@ -266,6 +252,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </main>
         </div>
       </div>
+
     </SidebarProvider>
   );
 };
