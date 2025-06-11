@@ -233,7 +233,7 @@ CREATE TABLE leads (
 - ✅ **Geração de Embeddings**: Edge Function `gerar-embeddings-documentacao`
   cria vetores com modelo `text-embedding-ada-002`.
 - ✅ **Armazenamento Vetorial**: Embeddings e metadados salvos na tabela
-  `documentos_obra` com `pgvector`.
+  `embeddings_conhecimento` com `pgvector`.
 - ✅ **Indexação e Busca Semântica**: Índices `ivfflat` para consultas similares
   em milissegundos.
 - ✅ **Integração com IA**: Embeddings alimentam o chat contextual e futuras
@@ -248,14 +248,19 @@ CREATE TABLE leads (
 **Tabela de Banco de Dados:**
 
 ```sql
-CREATE TABLE documentos_obra (
+CREATE TABLE embeddings_conhecimento (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nome_documento TEXT NOT NULL,
-  chunk_texto TEXT NOT NULL,
-  embedding VECTOR(1536),
-  obra_id UUID,                -- NULL para documentação geral
-  tipo_documento TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  obra_id UUID,                     -- NULL para documentação geral / docs globais
+  tipo_conteudo TEXT NOT NULL,      -- Ex: 'documentacao', 'despesas', 'contratos'
+  referencia_id UUID NOT NULL,      -- ID do item original (ou UUID randômico para docs gerais)
+  titulo TEXT NOT NULL,
+  conteudo TEXT NOT NULL,
+  conteudo_resumido TEXT,
+  embedding VECTOR(1536),           -- Embedding OpenAI
+  titulo_embedding VECTOR(1536),    -- Embedding do título
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 ```
 
@@ -689,24 +694,23 @@ ADD COLUMN ia_prompts JSONB DEFAULT '{}'::jsonb,           -- Prompts específic
 ADD COLUMN ia_sugestoes_padrao JSONB DEFAULT '[]'::jsonb; -- Sugestões pré-configuradas
 ```
 
-##### **4.3. Tabela documentos_obra**
+##### **4.3. Tabela embeddings_conhecimento**
 
 ```sql
-CREATE TABLE IF NOT EXISTS documentos_obra (
+CREATE TABLE embeddings_conhecimento (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nome_documento TEXT NOT NULL,
-  chunk_texto TEXT NOT NULL,
-  embedding VECTOR(1536),
-  obra_id UUID,
-  tipo_documento TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  obra_id UUID,                     -- NULL para documentação geral / docs globais
+  tipo_conteudo TEXT NOT NULL,      -- Ex: 'documentacao', 'despesas', 'contratos'
+  referencia_id UUID NOT NULL,      -- ID do item original (ou UUID randômico para docs gerais)
+  titulo TEXT NOT NULL,
+  conteudo TEXT NOT NULL,
+  conteudo_resumido TEXT,
+  embedding VECTOR(1536),           -- Embedding OpenAI
+  titulo_embedding VECTOR(1536),    -- Embedding do título
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
-
--- Índices para busca vetorial e filtros
-CREATE INDEX IF NOT EXISTS idx_documentos_obra_embedding
-  ON documentos_obra USING ivfflat (embedding vector_cosine_ops);
-CREATE INDEX IF NOT EXISTS idx_documentos_obra_tipo ON documentos_obra(tipo_documento);
-CREATE INDEX IF NOT EXISTS idx_documentos_obra_obra_id ON documentos_obra(obra_id);
 ```
 
 #### **5. Rotas e Navegação**

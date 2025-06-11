@@ -1,18 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { 
   Loader2, 
   Send, 
   Bot, 
@@ -21,7 +13,6 @@ import {
   MessageCircle,
   Zap,
   Brain,
-  Building,
   Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,17 +23,24 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 
-const InterfaceChat = ({ obraId: propObraId }: { obraId?: string }) => {
+interface InterfaceChatProps {
+  obraId?: string;
+  mode?: 'chat' | 'training';
+  topic?: string;
+}
+
+const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceChatProps) => {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
-  const [selectedObraId, setSelectedObraId] = useState<string | null>(propObraId || null);
+  const selectedObraId = propObraId || null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   
-  // Carregar obras disponíveis
+  // Carregar obras apenas para exibição do nome, se necessário
   const { data: obras = [] } = useQuery({
     queryKey: ["obras"],
     queryFn: () => obrasApi.getAll(),
+    enabled: Boolean(selectedObraId),
   });
   
   // Carregar histórico de mensagens
@@ -77,11 +75,27 @@ const InterfaceChat = ({ obraId: propObraId }: { obraId?: string }) => {
 
   // Enviar mensagem
   const { mutate: sendMessage, isPending } = useMutation({
-    mutationFn: () => aiApi.sendMessage(message, selectedObraId),
+    mutationFn: () => aiApi.sendMessage(message, selectedObraId, mode, topic),
     onSuccess: (data) => {
+      const userMessage = message; // salvar conteúdo antes de limpar
       setMessage("");
-      queryClient.invalidateQueries({ queryKey: ["chat_messages", selectedObraId] });
-      queryClient.refetchQueries({ queryKey: ["chat_messages", selectedObraId] });
+
+      if (mode === 'training') {
+        // Para modo treinamento, criamos mensagem local sem persistir no banco
+        const newMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          usuario_id: user?.id || 'anon',
+          obra_id: selectedObraId || null,
+          mensagem: userMessage,
+          resposta_bot: (data as any)?.resposta_bot || (data as any)?.result?.resposta_bot || '—',
+          created_at: new Date().toISOString(),
+        } as ChatMessage;
+
+        queryClient.setQueryData<ChatMessage[]>(["chat_messages", selectedObraId], (old = []) => [...old, newMsg]);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["chat_messages", selectedObraId] });
+        queryClient.refetchQueries({ queryKey: ["chat_messages", selectedObraId] });
+      }
     },
     onError: (error) => {
       toast.error("Erro ao enviar mensagem: " + error.message);
@@ -111,7 +125,22 @@ const InterfaceChat = ({ obraId: propObraId }: { obraId?: string }) => {
     }).format(date);
   };
 
-  // Simulação de typing quando está enviando mensagem
+  // Componente simples de typewriter para revelar texto aos poucos
+  const Typewriter = ({ text }: { text: string }) => {
+    const [displayed, setDisplayed] = useState("");
+    useEffect(() => {
+      let i = 0;
+      const id = setInterval(() => {
+        i++;
+        setDisplayed(text.slice(0, i));
+        if (i >= text.length) clearInterval(id);
+      }, 20);
+      return () => clearInterval(id);
+    }, [text]);
+    return <span>{displayed}</span>;
+  };
+
+  // Simulação de typing quando mensagem está sendo gerada no backend
   const TypingIndicator = () => (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -186,25 +215,9 @@ const InterfaceChat = ({ obraId: propObraId }: { obraId?: string }) => {
             </Button>
           )}
           
-          {/* Seletor de Obra */}
-          <div className="flex items-center gap-2">
-            <Building className="h-4 w-4 text-muted-foreground" />
-            <Select value={selectedObraId || "__NONE__"} onValueChange={(value) => setSelectedObraId(value === "__NONE__" ? null : value)}>
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Selecione uma obra (opcional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__NONE__">
-                  <span className="text-muted-foreground">Conversa geral</span>
-                </SelectItem>
-                {obras.map((obra) => (
-                  <SelectItem key={obra.id} value={obra.id}>
-                    {obra.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {selectedObraId && (
+            <div className="text-sm text-muted-foreground">Obra selecionada: {obras.find(o => o.id === selectedObraId)?.nome || "..."}</div>
+          )}
         </div>
       </CardHeader>
 
@@ -337,7 +350,13 @@ const InterfaceChat = ({ obraId: propObraId }: { obraId?: string }) => {
                           </Avatar>
                           <div className="space-y-1">
                             <div className="bg-muted/70 p-3 rounded-lg rounded-bl-none shadow-sm border">
-                              <p className="text-sm whitespace-pre-wrap">{msg.resposta_bot}</p>
+                              <p className="text-sm whitespace-pre-wrap">
+                                {index === messages.length - 1 ? (
+                                  <Typewriter text={msg.resposta_bot} />
+                                ) : (
+                                  msg.resposta_bot
+                                )}
+                              </p>
                             </div>
                           </div>
                         </div>

@@ -67,7 +67,7 @@ automação de processos e controle financeiro inteligente.
 - **Processamento automático** de documentos Markdown/PDF do domínio ObrasAI
 - **Edge Function dedicada** `gerar-embeddings-documentacao` com OpenAI
   Embeddings
-- **Armazenamento vetorial** na tabela `documentos_obra` via `pgvector`
+- **Armazenamento vetorial** na tabela `embeddings_conhecimento` via `pgvector`
 - **Busca semântica** para IA contextual, chat e futuras features de help desk
 - **Script auxiliar** `enviar_chunks_embeddings.py` para dividir arquivos em
   chunks

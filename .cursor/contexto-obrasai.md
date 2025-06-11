@@ -150,15 +150,20 @@ CREATE TABLE ia_contratos_interacoes (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Tabela de Documentação Embeddings
-CREATE TABLE documentos_obra (
+-- Tabela de Embeddings de Conhecimento
+CREATE TABLE embeddings_conhecimento (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nome_documento TEXT NOT NULL,
-  chunk_texto TEXT NOT NULL,
-  embedding VECTOR(1536),
   obra_id UUID,
-  tipo_documento TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  tipo_conteudo TEXT NOT NULL,
+  referencia_id UUID NOT NULL,
+  titulo TEXT NOT NULL,
+  conteudo TEXT NOT NULL,
+  conteudo_resumido TEXT,
+  embedding VECTOR(1536),
+  titulo_embedding VECTOR(1536),
+  metadata JSONB,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Outras tabelas do sistema principal
@@ -261,7 +266,7 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ Processamento de documentos Markdown e PDF através do script
   `enviar_chunks_embeddings.py` (chunking automático)
 - ✅ Geração de embeddings com modelo `text-embedding-ada-002` (OpenAI)
-- ✅ Armazenamento vetorial na tabela `documentos_obra` (`pgvector`)
+- ✅ Armazenamento vetorial na tabela `embeddings_conhecimento` (`pgvector`)
 - ✅ Índices `ivfflat` para busca semântica rápida
 - ✅ Integração futura com chat contextual e help desk IA
 

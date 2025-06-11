@@ -74,19 +74,29 @@ Deno.serve(async (req) => {
       const data = await response.json();
       const embedding = data.data[0].embedding;
 
+      // Log para depuração
+      console.log("Preparando para inserir em embeddings_conhecimento:", {
+        titulo: chunk.nome_documento || documento,
+        conteudo: chunk.conteudo,
+        embedding_length: embedding.length,
+        tipo_conteudo: documento,
+      });
+
       // Tentar inserir diretamente - se a tabela não existir, será criada automaticamente
       // através da migração SQL que deve estar aplicada no banco
 
-      // Inserir no banco de dados
+      // Inserir no banco de dados (nova tabela)
       const { data: insertData, error: insertError } = await supabase
-        .from("documentos_obra")
+        .from("embeddings_conhecimento")
         .insert([
           {
-            chunk_texto: chunk.conteudo,
-            nome_documento: chunk.nome_documento,
-            embedding,
-            obra_id: null, // Para documentação geral
-            tipo_documento: documento,
+            obra_id: null,
+            tipo_conteudo: documento,
+            referencia_id: crypto.randomUUID(),
+            titulo: chunk.nome_documento || documento,
+            conteudo: chunk.conteudo,
+            conteudo_resumido: chunk.conteudo.slice(0, 120),
+            embedding: `[${embedding.join(",")}]`,
           },
         ])
         .select();
@@ -95,7 +105,7 @@ Deno.serve(async (req) => {
         let msg = insertError.message || insertError;
         if (String(msg).includes("does not exist")) {
           msg =
-            "A tabela documentos_obra não existe. Certifique-se de rodar a migração no Supabase.";
+            "A tabela embeddings_conhecimento não existe. Certifique-se de rodar a migração correspondente no Supabase.";
         }
         console.error("Erro ao inserir no banco:", insertError);
         return new Response(
