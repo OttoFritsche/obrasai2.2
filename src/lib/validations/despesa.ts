@@ -1,65 +1,27 @@
 import { z } from "zod";
 import { t } from "@/lib/i18n";
+import { Constants } from "@/integrations/supabase/types";
 
 // Define as opções válidas para forma de pagamento
 export const formasPagamento = [
-  'PIX',
-  'Cartão de Crédito',
-  'Cartão de Débito',
-  'Boleto Bancário',
-  'Transferência Bancária',
-  'Dinheiro'
+  "PIX",
+  "Cartão de Crédito",
+  "Cartão de Débito",
+  "Boleto Bancário",
+  "Transferência Bancária",
+  "Dinheiro",
 ] as const; // Usa 'as const' para criar um tipo literal readonly
 
 // ✅ Define os enum types baseados no schema do banco de dados
 // ⚠️  IMPORTANTE: Usando apenas valores básicos testados para evitar erros de enum
 // 🔧 TODO: Sincronizar completamente com o banco após verificar enums PostgreSQL
 // 📍 Referência: src/integrations/supabase/types.ts - Database.public.Enums
-const CategoriaEnum = z.enum([
-  "MATERIAL_CONSTRUCAO",
-  "MAO_DE_OBRA",
-  "ALUGUEL_EQUIPAMENTOS", 
-  "TRANSPORTE_FRETE",
-  "TAXAS_LICENCAS",
-  "SERVICOS_TERCEIRIZADOS",
-  "ADMINISTRATIVO", 
-  "IMPREVISTOS",
-  "PROJETO_ARQUITETONICO",
-  "PROJETO_ESTRUTURAL",
-  "PROJETO_ELETRICO",
-  "PROJETO_HIDRAULICO",
-  "TAXAS_LEGAIS",
-  "DOCUMENTACAO",
-  "SEGURO_OBRA",
-  "MARKETING_VENDAS",
-  "CUSTOS_FINANCEIROS",
-  "SEGURANCA_TRABALHO",
-  "AQUISICAO_TERRENO_AREA",
-  "OUTROS"
+const CategoriaEnum = z.enum([...Constants.public.Enums.categoria_enum] as [
+  ...typeof Constants.public.Enums.categoria_enum,
 ]);
 
-const EtapaEnum = z.enum([
-  "PLANEJAMENTO",
-  "DEMOLICAO",
-  "TERRAPLANAGEM",
-  "FUNDACAO",
-  "ESTRUTURA", 
-  "ALVENARIA",
-  "COBERTURA", 
-  "INSTALACOES_ELETRICAS",
-  "INSTALACOES_HIDRAULICAS",
-  "INSTALACOES_GAS",
-  "INSTALACOES_AR_CONDICIONADO",
-  "AUTOMACAO",
-  "REVESTIMENTOS_INTERNOS",
-  "REVESTIMENTOS_EXTERNOS", 
-  "PINTURA",
-  "ACABAMENTOS", 
-  "PAISAGISMO",
-  "LIMPEZA_POS_OBRA",
-  "ENTREGA_VISTORIA",
-  "DOCUMENTACAO", 
-  "OUTROS"
+const EtapaEnum = z.enum([...Constants.public.Enums.etapa_enum] as [
+  ...typeof Constants.public.Enums.etapa_enum,
 ]);
 
 const InsumoEnum = z.enum([
@@ -210,7 +172,7 @@ const InsumoEnum = z.enum([
   "ALIMENTACAO_EQUIPE",
   "TRANSPORTE_EQUIPE",
   "TAXAS_BANCARIAS",
-  "OUTROS"
+  "OUTROS",
 ]);
 
 // Define o schema Zod para o formulário de despesa
@@ -222,7 +184,7 @@ export const despesaSchema = z.object({
   // ID do fornecedor PF (opcional, UUID)
   fornecedor_pf_id: z.string().uuid().nullable().optional(),
   // Descrição da despesa (obrigatório, mínimo 3 caracteres)
-  descricao: z.string().min(3, { message: t("messages.atLeast3Chars") }), 
+  descricao: z.string().min(3, { message: t("messages.atLeast3Chars") }),
   // Data da despesa (obrigatório)
   data_despesa: z.date({ required_error: t("messages.requiredField") }),
   // Insumo (opcional, baseado no enum)
@@ -240,11 +202,15 @@ export const despesaSchema = z.object({
   // Unidade de medida (opcional)
   unidade: z.string().nullable().optional(),
   // Quantidade (obrigatório, número positivo)
-  quantidade: z.coerce.number().positive({ message: t("messages.positiveNumber") })
-             .min(0.01, { message: t("messages.positiveNumber") }), 
+  quantidade: z.coerce.number().positive({
+    message: t("messages.positiveNumber"),
+  })
+    .min(0.01, { message: t("messages.positiveNumber") }),
   // Valor unitário (obrigatório, número positivo)
-  valor_unitario: z.coerce.number().positive({ message: t("messages.positiveNumber") })
-                  .min(0.01, { message: t("messages.positiveNumber") }), 
+  valor_unitario: z.coerce.number().positive({
+    message: t("messages.positiveNumber"),
+  })
+    .min(0.01, { message: t("messages.positiveNumber") }),
   // Número da nota fiscal (opcional)
   numero_nf: z.string().nullable().optional(),
   // Observações (opcional)
@@ -256,30 +222,30 @@ export const despesaSchema = z.object({
   // Forma de pagamento (opcional, mas obrigatório se 'pago' for true)
   forma_pagamento: z.enum(formasPagamento).nullable().optional(),
 })
-// Aplica validação refinada para campos condicionais de pagamento
-.superRefine((data, ctx) => {
-  // Se a despesa está marcada como paga
-  if (data.pago) {
-    // Verifica se a data de pagamento foi fornecida
-    if (!data.data_pagamento) {
-      // Adiciona um erro ao campo data_pagamento
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("messages.requiredField"), 
-        path: ["data_pagamento"], // Campo que gerou o erro
-      });
+  // Aplica validação refinada para campos condicionais de pagamento
+  .superRefine((data, ctx) => {
+    // Se a despesa está marcada como paga
+    if (data.pago) {
+      // Verifica se a data de pagamento foi fornecida
+      if (!data.data_pagamento) {
+        // Adiciona um erro ao campo data_pagamento
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("messages.requiredField"),
+          path: ["data_pagamento"], // Campo que gerou o erro
+        });
+      }
+      // Verifica se a forma de pagamento foi fornecida
+      if (!data.forma_pagamento) {
+        // Adiciona um erro ao campo forma_pagamento
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("messages.requiredField"),
+          path: ["forma_pagamento"], // Campo que gerou o erro
+        });
+      }
     }
-    // Verifica se a forma de pagamento foi fornecida
-    if (!data.forma_pagamento) {
-       // Adiciona um erro ao campo forma_pagamento
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: t("messages.requiredField"), 
-        path: ["forma_pagamento"], // Campo que gerou o erro
-      });
-    }
-  }
-});
+  });
 
 // Exporta o tipo inferido do schema para uso no formulário
 export type DespesaFormValues = z.infer<typeof despesaSchema>;

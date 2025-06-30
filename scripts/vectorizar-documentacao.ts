@@ -4,13 +4,20 @@ import { createClient } from "@supabase/supabase-js";
 
 // Configuração direta do Supabase
 const supabaseUrl = "https://anrphijuostbgbscxmzx.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFucnBoaWp1b3N0Ymdic2N4bXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDc0OTcsImV4cCI6MjA2MTUyMzQ5N30.6I89FlKMWwckt7xIqt6i9HxrI0MkupzWIbKlhINblUc";
+// A chave anônima do Supabase deve ser fornecida via variável de ambiente por questões de segurança.
+const supabaseKey = process.env.SUPABASE_ANON_KEY ?? "";
+
+if (!supabaseKey) {
+  throw new Error(
+    "Variável de ambiente SUPABASE_ANON_KEY não definida. Defina-a para autenticar com o Supabase.",
+  );
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface DocumentChunk {
   documento: string;
+  nome_documento: string; // <-- add
   secao: string;
   conteudo: string;
   metadata?: any;

@@ -78,7 +78,7 @@ export const aiApi = {
       ? {
         message,
         topic: topic || null,
-        usuario_id: userData.user.id,
+        user_id: userData.user.id,
       }
       : {
         message,

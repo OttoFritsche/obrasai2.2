@@ -41,7 +41,11 @@ const Dashboard = () => {
     (obra.data_fim && new Date(obra.data_fim) > new Date())
   ).length || 0;
 
-  const totalDespesas = despesas?.reduce((sum, despesa) => sum + despesa.valor, 0) || 0;
+  const totalDespesas = despesas?.reduce((sum, despesa) => {
+    // Compatibilidade: field custos pode ser 'custo' ou 'valor'
+    const valorDespesa = (despesa as any).custo ?? (despesa as any).valor ?? (despesa as any).valor_unitario ?? 0;
+    return sum + valorDespesa;
+  }, 0) || 0;
   const totalDespesasCount = despesas?.length || 0;
   const despesasPendentes = totalDespesasCount; // Todas as despesas são consideradas pendentes por padrão
 
@@ -54,7 +58,10 @@ const Dashboard = () => {
     return sum;
   }, 0) || 0;
 
-  const orcamentoTotal = obras?.reduce((sum, obra) => sum + obra.orcamento_total, 0) || 0;
+  const orcamentoTotal = obras?.reduce((sum, obra) => {
+    const orc = (obra as any).orcamento_total ?? (obra as any).orcamento ?? 0;
+    return sum + orc;
+  }, 0) || 0;
   const percentualGasto = orcamentoTotal > 0 ? (totalDespesas / orcamentoTotal * 100) : 0;
 
   // Métricas principais com dados reais
@@ -97,8 +104,12 @@ const Dashboard = () => {
   const recentProjects = obras?.slice(0, 3).map(obra => {
     // Calcular progresso real baseado em despesas vs orçamento
     const despesasObra = despesas?.filter(d => d.obra_id === obra.id) || [];
-    const totalGastoObra = despesasObra.reduce((sum, d) => sum + d.valor, 0);
-    const progressoReal = obra.orcamento_total > 0 ? Math.min(Math.round((totalGastoObra / obra.orcamento_total) * 100), 100) : 0;
+    const totalGastoObra = despesasObra.reduce((sum, d) => {
+      const v = (d as any).custo ?? (d as any).valor ?? (d as any).valor_unitario ?? 0;
+      return sum + v;
+    }, 0);
+    const orcObra = (obra as any).orcamento_total ?? (obra as any).orcamento ?? 0;
+    const progressoReal = orcObra > 0 ? Math.min(Math.round((totalGastoObra / orcObra) * 100), 100) : 0;
     
     return {
       id: obra.id,
@@ -107,7 +118,7 @@ const Dashboard = () => {
       progress: progressoReal,
       deadline: obra.data_fim ? formatDateBR(obra.data_fim) : "Não definido",
       priority: "média",
-      budget: obra.orcamento_total,
+      budget: orcObra,
       city: obra.cidade,
       state: obra.estado
     };

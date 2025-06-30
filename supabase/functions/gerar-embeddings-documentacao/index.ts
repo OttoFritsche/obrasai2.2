@@ -44,6 +44,10 @@ Deno.serve(async (req) => {
 
     const resultados = [];
 
+    // Controlar detalhes de log através da variável de ambiente DEBUG ("true" ou "1")
+    const isDebug = (Deno.env.get("DEBUG") ?? "").toLowerCase() === "true" ||
+      Deno.env.get("DEBUG") === "1";
+
     // Processar cada chunk
     for (const chunk of chunks) {
       // Gerar embeddings usando a API da OpenAI
@@ -74,13 +78,24 @@ Deno.serve(async (req) => {
       const data = await response.json();
       const embedding = data.data[0].embedding;
 
-      // Log para depuração
-      console.log("Preparando para inserir em embeddings_conhecimento:", {
-        titulo: chunk.nome_documento || documento,
-        conteudo: chunk.conteudo,
-        embedding_length: embedding.length,
-        tipo_conteudo: documento,
-      });
+      // Log para depuração (omite conteúdo sensível em produção)
+      if (isDebug) {
+        console.log(
+          "Preparando para inserir em embeddings_conhecimento (DEBUG):",
+          {
+            titulo: chunk.nome_documento || documento,
+            conteudo_preview: chunk.conteudo.slice(0, 80) + "…",
+            embedding_length: embedding.length,
+            tipo_conteudo: documento,
+          },
+        );
+      } else {
+        console.log("Preparando para inserir em embeddings_conhecimento:", {
+          titulo: chunk.nome_documento || documento,
+          embedding_length: embedding.length,
+          tipo_conteudo: documento,
+        });
+      }
 
       // Tentar inserir diretamente - se a tabela não existir, será criada automaticamente
       // através da migração SQL que deve estar aplicada no banco
@@ -96,7 +111,8 @@ Deno.serve(async (req) => {
             titulo: chunk.nome_documento || documento,
             conteudo: chunk.conteudo,
             conteudo_resumido: chunk.conteudo.slice(0, 120),
-            embedding: `[${embedding.join(",")}]`,
+            // supabase-js will cast number[] → vector
+            embedding,
           },
         ])
         .select();
