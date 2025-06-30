@@ -60,7 +60,6 @@ security-audit.*
 # ✅ Database Files (if any)
 *.sqlite
 *.db
-*.sql
 
 # ✅ OS Generated Files
 Thumbs.db
