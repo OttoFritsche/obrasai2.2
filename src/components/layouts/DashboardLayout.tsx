@@ -124,14 +124,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const handleSignOut = async () => {
     try {
       setIsLoggingOut(true);
+      // ✅ Apenas chamar logout - o AuthContext vai gerenciar o redirecionamento
       await logout();
-      navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);
       toast.error(t("messages.error"));
-    } finally {
       setIsLoggingOut(false);
     }
+    // ✅ Não definir isLoggingOut(false) aqui pois o usuário vai sair da página
   };
 
   return (

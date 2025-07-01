@@ -88,6 +88,30 @@ export const changePasswordSchema = z.object({
 });
 
 /**
+ * Schema para solicitação de reset de senha
+ */
+export const forgotPasswordSchema = z.object({
+  email: z.string().email({
+    message: t("messages.invalidEmail"),
+  }),
+});
+
+/**
+ * Schema para redefinição de senha (com token)
+ */
+export const resetPasswordSchema = z.object({
+  password: passwordSchema,
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não conferem",
+  path: ["confirmPassword"],
+});
+
+// Tipos para redefinição de senha
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
+/**
  * Função para verificar força da senha
  */
 export const checkPasswordStrength = (password: string): {

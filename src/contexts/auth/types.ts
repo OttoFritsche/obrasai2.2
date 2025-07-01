@@ -33,4 +33,6 @@ export interface AuthContextType {
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error?: unknown }>;
   logout: () => Promise<void>;
   checkSubscription: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ error?: unknown }>;
+  resetPassword: (password: string) => Promise<{ error?: unknown }>;
 }

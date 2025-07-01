@@ -142,6 +142,12 @@ export const obrasApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Obra created successfully", {
+        obraId: data.id,
+        userId: user.id,
+      });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in obrasApi.create", error);
@@ -210,6 +216,9 @@ export const obrasApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Obra updated successfully", { obraId: data.id });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in obrasApi.update", error, { obraId: id });
@@ -228,6 +237,9 @@ export const obrasApi = {
         secureLogger.error("Failed to delete obra", error, { obraId: id });
         throw error;
       }
+
+      // ✅ Log de sucesso
+      secureLogger.info("Obra deleted successfully", { obraId: id });
 
       return true;
     } catch (error) {
@@ -338,6 +350,12 @@ export const fornecedoresPJApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Fornecedor PJ created successfully", {
+        fornecedorId: data.id,
+        userId: user.id,
+      });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in fornecedoresPJApi.create", error, {
@@ -383,6 +401,11 @@ export const fornecedoresPJApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Fornecedor PJ updated successfully", {
+        fornecedorId: data.id,
+      });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in fornecedoresPJApi.update", error, {
@@ -405,6 +428,11 @@ export const fornecedoresPJApi = {
         });
         throw error;
       }
+
+      // ✅ Log de sucesso
+      secureLogger.info("Fornecedor PJ deleted successfully", {
+        fornecedorId: id,
+      });
 
       return true;
     } catch (error) {
@@ -546,6 +574,12 @@ export const fornecedoresPFApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Fornecedor PF created successfully", {
+        fornecedorId: data.id,
+        userId: user.id,
+      });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in fornecedoresPFApi.create", error, {
@@ -617,6 +651,11 @@ export const fornecedoresPFApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Fornecedor PF updated successfully", {
+        fornecedorId: data.id,
+      });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in fornecedoresPFApi.update", error, {
@@ -639,6 +678,11 @@ export const fornecedoresPFApi = {
         });
         throw error;
       }
+
+      // ✅ Log de sucesso
+      secureLogger.info("Fornecedor PF deleted successfully", {
+        fornecedorId: id,
+      });
 
       return true;
     } catch (error) {
@@ -805,6 +849,12 @@ export const despesasApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Despesa created successfully", {
+        despesaId: data.id,
+        userId: user.id,
+      });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in despesasApi.create", error, { tenantId });
@@ -864,6 +914,9 @@ export const despesasApi = {
         throw error;
       }
 
+      // ✅ Log de sucesso
+      secureLogger.info("Despesa updated successfully", { despesaId: data.id });
+
       return data;
     } catch (error) {
       secureLogger.error("Error in despesasApi.update", error, {
@@ -891,6 +944,9 @@ export const despesasApi = {
         });
         throw error;
       }
+
+      // ✅ Log de sucesso
+      secureLogger.info("Despesa deleted successfully", { despesaId: id });
 
       return true;
     } catch (error) {
@@ -1066,6 +1122,12 @@ export const notasFiscaisApi = {
       throw error;
     }
 
+    // ✅ Log de sucesso
+    secureLogger.info("Nota Fiscal created successfully", {
+      notaFiscalId: data.id,
+      userId: data.usuario_upload_id,
+    });
+
     return data;
   },
 
@@ -1166,6 +1228,11 @@ export const notasFiscaisApi = {
       throw error;
     }
 
+    // ✅ Log de sucesso
+    secureLogger.info("Nota Fiscal updated successfully", {
+      notaFiscalId: data.id,
+    });
+
     return data;
   },
 
@@ -1207,6 +1274,9 @@ export const notasFiscaisApi = {
       console.error(`Error deleting nota fiscal ${id}:`, error);
       throw error;
     }
+
+    // ✅ Log de sucesso
+    secureLogger.info("Nota Fiscal deleted successfully", { notaFiscalId: id });
 
     return true;
   },

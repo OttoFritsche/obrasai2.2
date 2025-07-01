@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -38,13 +38,85 @@ const Login = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasRedirectedRef = useRef(false);
 
-  // ✅ Redirecionar automaticamente quando o usuário estiver autenticado
+  // ✅ Função robusta de redirecionamento com timeout de segurança
+  const performRedirect = useRef(() => {
+    if (hasRedirectedRef.current) return;
+    
+    hasRedirectedRef.current = true;
+    console.log("🔄 Redirecionando para dashboard...");
+    navigate("/dashboard", { replace: true });
+  });
+
+  // ✅ Cleanup de timeout ao desmontar
   useEffect(() => {
-    if (session && !loading) { // Condição de redirecionamento ajustada
-      navigate("/dashboard", { replace: true });
-    }
-  }, [session, loading, navigate]); // Dependências ajustadas
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // ✅ Redirecionamento robusto com múltiplas condições de segurança
+  useEffect(() => {
+    // Se já redirecionou, não fazer nada
+    if (hasRedirectedRef.current) return;
+
+    // ✅ Aguardar um momento para garantir que logout foi processado
+    const checkRedirect = setTimeout(() => {
+      // Condição principal: usuário autenticado e session ativa
+      if (session?.user && !loading) {
+        console.log("✅ Session ativa detectada, redirecionando...");
+        performRedirect.current();
+        return;
+      }
+
+      // Condição de segurança: se session existe mas loading está stuck
+      if (session?.user && loading) {
+        console.log("⚠️ Session ativa mas loading stuck, forçando redirecionamento em 2s...");
+        redirectTimeoutRef.current = setTimeout(() => {
+          if (session?.user) {
+            console.log("🔧 Timeout de segurança atingido, forçando redirecionamento");
+            performRedirect.current();
+          }
+        }, 2000);
+      }
+    }, 500); // Aguardar 500ms para processar logout
+
+    // Cleanup do timeout se as condições mudarem
+    return () => {
+      clearTimeout(checkRedirect);
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+        redirectTimeoutRef.current = null;
+      }
+    };
+  }, [session, loading, navigate]);
+
+  // ✅ Detectar login bem-sucedido mesmo que o AuthContext tenha problemas
+  useEffect(() => {
+    if (hasRedirectedRef.current) return;
+
+    const checkAuthState = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (currentSession?.user && !hasRedirectedRef.current) {
+          console.log("🔍 Session detectada via Supabase direto, redirecionando...");
+          performRedirect.current();
+        }
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+      }
+    };
+
+    // Verificar a cada segundo se há uma session ativa
+    const intervalId = setInterval(checkAuthState, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -57,6 +129,8 @@ const Login = () => {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true);
+      hasRedirectedRef.current = false; // Reset para permitir novo redirecionamento
+      
       const { error } = await login(data.email, data.password);
       
       if (error) {
@@ -66,7 +140,18 @@ const Login = () => {
       }
       
       toast.success(t("messages.loginSuccess"));
-      // ✅ Redirecionamento será feito pelo useEffect
+      
+      // ✅ Backup de redirecionamento imediato após login bem-sucedido
+      setTimeout(async () => {
+        if (!hasRedirectedRef.current) {
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          if (currentSession?.user) {
+            console.log("🚀 Redirecionamento backup após login bem-sucedido");
+            performRedirect.current();
+          }
+        }
+      }, 1500);
+      
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : t("messages.generalError");
       toast.error(errorMessage);

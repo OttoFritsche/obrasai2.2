@@ -9,6 +9,8 @@ import Index from "@/pages/Index";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 import Settings from "@/pages/Settings";
 import Subscription from "@/pages/Subscription";
@@ -89,6 +91,8 @@ const App = () => {
           <Route index element={<Index />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
+          <Route path="reset-password" element={<ResetPassword />} />
           
           {/* Rotas protegidas */}
           <Route path="dashboard" element={

@@ -1,0 +1,1 @@
+"Faça o deploy completo: adicione todas as alterações do projeto, faça um commit com uma mensagem padrão e envie para o branch main do GitHub."

@@ -18,8 +18,8 @@ export const DashboardHeader = () => {
   const navigate = useNavigate();
   
   const handleLogout = async () => {
+    // ✅ Apenas chamar logout - o AuthContext vai gerenciar o redirecionamento
     await logout();
-    navigate("/login");
   };
 
   const getInitials = () => {

@@ -1,15 +1,17 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 interface AlertaDesvio {
   id: string;
   obra_id: string;
-  tipo_alerta: 'BAIXO' | 'MEDIO' | 'ALTO' | 'CRITICO';
+  tipo_alerta: "BAIXO" | "MEDIO" | "ALTO" | "CRITICO";
   percentual_desvio: number;
   valor_orcado: number;
   valor_realizado: number;
@@ -37,89 +39,146 @@ interface ConfiguracaoAlerta {
   ativo: boolean;
 }
 
+// ✅ Schema Zod para validar o corpo da requisição
+const AlertsProcessorRequestSchema = z.object({
+  action: z.enum([
+    "process_new_alert",
+    "send_notifications",
+    "check_thresholds",
+    "process_webhook",
+    "mark_notification_read",
+  ]),
+  alerta_id: z.string().uuid().optional(),
+  obra_id: z.string().uuid().optional(),
+  usuario_id: z.string().uuid().optional(),
+});
+
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    );
 
-    const { action, alerta_id, obra_id, usuario_id } = await req.json()
+    const body = await req.json();
+    const validationResult = AlertsProcessorRequestSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({
+          error: "Dados de entrada inválidos",
+          details: validationResult.error.flatten().fieldErrors,
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const { action, alerta_id, obra_id, usuario_id } = validationResult.data;
 
     switch (action) {
-      case 'process_new_alert':
-        return await processNewAlert(supabaseClient, alerta_id)
-      
-      case 'send_notifications':
-        return await sendNotifications(supabaseClient, alerta_id)
-      
-      case 'check_thresholds':
-        return await checkThresholds(supabaseClient, obra_id)
-      
-      case 'process_webhook':
-        return await processWebhook(supabaseClient, alerta_id)
-      
-      case 'mark_notification_read':
-        return await markNotificationRead(supabaseClient, alerta_id, usuario_id)
-      
+      case "process_new_alert":
+        if (!alerta_id) {
+          throw new Error("O 'alerta_id' é obrigatório para esta ação.");
+        }
+        return await processNewAlert(supabaseClient, alerta_id);
+
+      case "send_notifications":
+        if (!alerta_id) {
+          throw new Error("O 'alerta_id' é obrigatório para esta ação.");
+        }
+        return await sendNotifications(supabaseClient, alerta_id);
+
+      case "check_thresholds":
+        if (!obra_id) {
+          throw new Error("O 'obra_id' é obrigatório para esta ação.");
+        }
+        return await checkThresholds(supabaseClient, obra_id);
+
+      case "process_webhook":
+        if (!alerta_id) {
+          throw new Error("O 'alerta_id' é obrigatório para esta ação.");
+        }
+        return await processWebhook(supabaseClient, alerta_id);
+
+      case "mark_notification_read":
+        if (!alerta_id || !usuario_id) {
+          throw new Error(
+            "O 'alerta_id' e 'usuario_id' são obrigatórios para esta ação.",
+          );
+        }
+        return await markNotificationRead(
+          supabaseClient,
+          alerta_id,
+          usuario_id,
+        );
+
       default:
-        throw new Error('Ação não reconhecida')
+        // Este caso se torna teoricamente inalcançável devido à validação do enum com Zod
+        throw new Error("Ação não reconhecida");
     }
-  } catch (error) {
-    console.error('Erro no processamento de alertas avançados:', error)
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.error("Erro no processamento de alertas avançados:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 400, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
-})
+});
 
 async function processNewAlert(supabaseClient: any, alertaId: string) {
   // Buscar o alerta
   const { data: alerta, error: alertaError } = await supabaseClient
-    .from('alertas_desvio')
-    .select('*')
-    .eq('id', alertaId)
-    .single()
+    .from("alertas_desvio")
+    .select("*")
+    .eq("id", alertaId)
+    .single();
 
-  if (alertaError) throw alertaError
+  if (alertaError) throw alertaError;
 
   // Buscar configurações de alerta para a obra
   const { data: configuracoes, error: configError } = await supabaseClient
-    .from('configuracoes_alerta_avancadas')
-    .select('*')
-    .eq('obra_id', alerta.obra_id)
-    .eq('ativo', true)
+    .from("configuracoes_alerta_avancadas")
+    .select("*")
+    .eq("obra_id", alerta.obra_id)
+    .eq("ativo", true);
 
-  if (configError) throw configError
+  if (configError) throw configError;
 
   // Registrar no histórico
-  await registrarHistorico(supabaseClient, alerta, 'CRIADO')
+  await registrarHistorico(supabaseClient, alerta, "CRIADO");
 
   // Processar notificações para cada configuração
   for (const config of configuracoes) {
-    await criarNotificacoes(supabaseClient, alerta, config)
+    await criarNotificacoes(supabaseClient, alerta, config);
   }
 
   return new Response(
-    JSON.stringify({ 
-      success: true, 
-      message: 'Alerta processado com sucesso',
-      notificacoes_criadas: configuracoes.length
+    JSON.stringify({
+      success: true,
+      message: "Alerta processado com sucesso",
+      notificacoes_criadas: configuracoes.length,
     }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 }
 
-async function criarNotificacoes(supabaseClient: any, alerta: AlertaDesvio, config: ConfiguracaoAlerta) {
-  const notificacoes = []
+async function criarNotificacoes(
+  supabaseClient: any,
+  alerta: AlertaDesvio,
+  config: ConfiguracaoAlerta,
+) {
+  const notificacoes = [];
 
   // Notificação no dashboard
   if (config.notificar_dashboard) {
@@ -127,16 +186,18 @@ async function criarNotificacoes(supabaseClient: any, alerta: AlertaDesvio, conf
       alerta_id: alerta.id,
       usuario_id: config.usuario_id,
       tenant_id: config.tenant_id,
-      tipo_notificacao: 'DASHBOARD',
+      tipo_notificacao: "DASHBOARD",
       titulo: `Alerta de Desvio ${alerta.tipo_alerta}`,
-      mensagem: `Desvio de ${alerta.percentual_desvio.toFixed(2)}% detectado na obra`,
+      mensagem: `Desvio de ${
+        alerta.percentual_desvio.toFixed(2)
+      }% detectado na obra`,
       dados_extras: {
         obra_id: alerta.obra_id,
         valor_desvio: alerta.valor_desvio,
         categoria: alerta.categoria,
-        etapa: alerta.etapa
-      }
-    })
+        etapa: alerta.etapa,
+      },
+    });
   }
 
   // Notificação por email
@@ -145,15 +206,17 @@ async function criarNotificacoes(supabaseClient: any, alerta: AlertaDesvio, conf
       alerta_id: alerta.id,
       usuario_id: config.usuario_id,
       tenant_id: config.tenant_id,
-      tipo_notificacao: 'EMAIL',
+      tipo_notificacao: "EMAIL",
       titulo: `ObrasAI - Alerta de Desvio Orçamentário`,
-      mensagem: `Um desvio de ${alerta.percentual_desvio.toFixed(2)}% foi detectado. Valor do desvio: R$ ${alerta.valor_desvio.toFixed(2)}`,
+      mensagem: `Um desvio de ${
+        alerta.percentual_desvio.toFixed(2)
+      }% foi detectado. Valor do desvio: R$ ${alerta.valor_desvio.toFixed(2)}`,
       dados_extras: {
         obra_id: alerta.obra_id,
-        template: 'alerta_desvio',
-        prioridade: alerta.tipo_alerta
-      }
-    })
+        template: "alerta_desvio",
+        prioridade: alerta.tipo_alerta,
+      },
+    });
   }
 
   // Notificação por webhook
@@ -162,9 +225,9 @@ async function criarNotificacoes(supabaseClient: any, alerta: AlertaDesvio, conf
       alerta_id: alerta.id,
       usuario_id: config.usuario_id,
       tenant_id: config.tenant_id,
-      tipo_notificacao: 'WEBHOOK',
-      titulo: 'Webhook Alert',
-      mensagem: 'Budget deviation detected',
+      tipo_notificacao: "WEBHOOK",
+      titulo: "Webhook Alert",
+      mensagem: "Budget deviation detected",
       dados_extras: {
         webhook_url: config.webhook_url,
         payload: {
@@ -172,150 +235,167 @@ async function criarNotificacoes(supabaseClient: any, alerta: AlertaDesvio, conf
           deviation_percentage: alerta.percentual_desvio,
           deviation_amount: alerta.valor_desvio,
           obra_id: alerta.obra_id,
-          timestamp: new Date().toISOString()
-        }
-      }
-    })
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
   }
 
   // Inserir todas as notificações
   if (notificacoes.length > 0) {
     const { error } = await supabaseClient
-      .from('notificacoes_alertas')
-      .insert(notificacoes)
+      .from("notificacoes_alertas")
+      .insert(notificacoes);
 
-    if (error) throw error
+    if (error) throw error;
   }
 }
 
 async function sendNotifications(supabaseClient: any, alertaId: string) {
   // Buscar notificações pendentes
   const { data: notificacoes, error } = await supabaseClient
-    .from('notificacoes_alertas')
-    .select('*')
-    .eq('alerta_id', alertaId)
-    .eq('status', 'PENDENTE')
-    .lt('tentativas', 3)
+    .from("notificacoes_alertas")
+    .select("*")
+    .eq("alerta_id", alertaId)
+    .eq("status", "PENDENTE")
+    .lt("tentativas", 3);
 
-  if (error) throw error
+  if (error) throw error;
 
-  let enviadas = 0
-  let erros = 0
+  let enviadas = 0;
+  let erros = 0;
 
   for (const notificacao of notificacoes) {
     try {
       switch (notificacao.tipo_notificacao) {
-        case 'EMAIL':
-          await enviarEmail(supabaseClient, notificacao)
-          break
-        case 'WEBHOOK':
-          await enviarWebhook(supabaseClient, notificacao)
-          break
-        case 'DASHBOARD':
+        case "EMAIL":
+          await enviarEmail(supabaseClient, notificacao);
+          break;
+        case "WEBHOOK":
+          await enviarWebhook(supabaseClient, notificacao);
+          break;
+        case "DASHBOARD":
           // Dashboard notifications são marcadas como enviadas imediatamente
-          await marcarNotificacaoEnviada(supabaseClient, notificacao.id)
-          break
+          await marcarNotificacaoEnviada(supabaseClient, notificacao.id);
+          break;
       }
-      enviadas++
-    } catch (error) {
-      console.error(`Erro ao enviar notificação ${notificacao.id}:`, error)
-      await marcarNotificacaoErro(supabaseClient, notificacao.id, error.message)
-      erros++
+      enviadas++;
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      console.error(`Erro ao enviar notificação ${notificacao.id}:`, error);
+      await marcarNotificacaoErro(
+        supabaseClient,
+        notificacao.id,
+        error.message,
+      );
+      erros++;
     }
   }
 
   return new Response(
-    JSON.stringify({ 
-      success: true, 
-      enviadas, 
+    JSON.stringify({
+      success: true,
+      enviadas,
       erros,
-      total: notificacoes.length
+      total: notificacoes.length,
     }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 }
 
 async function enviarEmail(supabaseClient: any, notificacao: any) {
   // Buscar dados do usuário
-  const { data: usuario, error: userError } = await supabaseClient.auth.admin.getUserById(notificacao.usuario_id)
-  if (userError) throw userError
+  const { data: usuario, error: userError } = await supabaseClient.auth.admin
+    .getUserById(notificacao.usuario_id);
+  if (userError) throw userError;
 
   // Aqui você integraria com seu provedor de email (SendGrid, Resend, etc.)
   // Por enquanto, apenas simulamos o envio
-  console.log(`Enviando email para ${usuario.user.email}:`, notificacao.titulo)
-  
-  await marcarNotificacaoEnviada(supabaseClient, notificacao.id)
+  console.log(`Enviando email para ${usuario.user.email}:`, notificacao.titulo);
+
+  await marcarNotificacaoEnviada(supabaseClient, notificacao.id);
 }
 
 async function enviarWebhook(supabaseClient: any, notificacao: any) {
-  const webhookUrl = notificacao.dados_extras.webhook_url
-  const payload = notificacao.dados_extras.payload
+  const webhookUrl = notificacao.dados_extras.webhook_url;
+  const payload = notificacao.dados_extras.payload;
 
   const response = await fetch(webhookUrl, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': 'ObrasAI-Alerts/1.0'
+      "Content-Type": "application/json",
+      "User-Agent": "ObrasAI-Alerts/1.0",
     },
-    body: JSON.stringify(payload)
-  })
+    body: JSON.stringify(payload),
+  });
 
   if (!response.ok) {
-    throw new Error(`Webhook failed: ${response.status} ${response.statusText}`)
+    throw new Error(
+      `Webhook failed: ${response.status} ${response.statusText}`,
+    );
   }
 
-  await marcarNotificacaoEnviada(supabaseClient, notificacao.id)
+  await marcarNotificacaoEnviada(supabaseClient, notificacao.id);
 }
 
-async function marcarNotificacaoEnviada(supabaseClient: any, notificacaoId: string) {
+async function marcarNotificacaoEnviada(
+  supabaseClient: any,
+  notificacaoId: string,
+) {
   await supabaseClient
-    .from('notificacoes_alertas')
-    .update({ 
-      status: 'ENVIADA', 
-      enviada_em: new Date().toISOString() 
+    .from("notificacoes_alertas")
+    .update({
+      status: "ENVIADA",
+      enviada_em: new Date().toISOString(),
     })
-    .eq('id', notificacaoId)
+    .eq("id", notificacaoId);
 }
 
-async function marcarNotificacaoErro(supabaseClient: any, notificacaoId: string, erro: string) {
+async function marcarNotificacaoErro(
+  supabaseClient: any,
+  notificacaoId: string,
+  erro: string,
+) {
   await supabaseClient
-    .from('notificacoes_alertas')
-    .update({ 
-      status: 'ERRO',
-      tentativas: supabaseClient.raw('tentativas + 1'),
-      dados_extras: supabaseClient.raw(`dados_extras || '${JSON.stringify({ ultimo_erro: erro })}'::jsonb`)
+    .from("notificacoes_alertas")
+    .update({
+      status: "ERRO",
+      tentativas: supabaseClient.raw("tentativas + 1"),
+      dados_extras: supabaseClient.raw(
+        `dados_extras || '${JSON.stringify({ ultimo_erro: erro })}'::jsonb`,
+      ),
     })
-    .eq('id', notificacaoId)
+    .eq("id", notificacaoId);
 }
 
 async function checkThresholds(supabaseClient: any, obraId: string) {
   // Buscar configurações ativas para a obra
   const { data: configuracoes, error } = await supabaseClient
-    .from('configuracoes_alerta_avancadas')
-    .select('*')
-    .eq('obra_id', obraId)
-    .eq('ativo', true)
+    .from("configuracoes_alerta_avancadas")
+    .select("*")
+    .eq("obra_id", obraId)
+    .eq("ativo", true);
 
-  if (error) throw error
+  if (error) throw error;
 
   // Calcular desvios atuais
-  const desvios = await calcularDesviosObra(supabaseClient, obraId)
-  
-  let alertasGerados = 0
+  const desvios = await calcularDesviosObra(supabaseClient, obraId);
+
+  let alertasGerados = 0;
 
   for (const config of configuracoes) {
     for (const desvio of desvios) {
-      const tipoAlerta = determinarTipoAlerta(desvio.percentual, config)
-      
+      const tipoAlerta = determinarTipoAlerta(desvio.percentual, config);
+
       if (tipoAlerta) {
         // Verificar se já existe alerta ativo para esta situação
         const { data: alertaExistente } = await supabaseClient
-          .from('alertas_desvio')
-          .select('id')
-          .eq('obra_id', obraId)
-          .eq('categoria', desvio.categoria)
-          .eq('status', 'ATIVO')
-          .single()
+          .from("alertas_desvio")
+          .select("id")
+          .eq("obra_id", obraId)
+          .eq("categoria", desvio.categoria)
+          .eq("status", "ATIVO")
+          .single();
 
         if (!alertaExistente) {
           // Criar novo alerta
@@ -327,21 +407,24 @@ async function checkThresholds(supabaseClient: any, obraId: string) {
             valor_realizado: desvio.valor_realizado,
             valor_desvio: desvio.valor_desvio,
             categoria: desvio.categoria,
-            descricao: `Desvio de ${desvio.percentual.toFixed(2)}% na categoria ${desvio.categoria}`,
-            status: 'ATIVO',
-            tenant_id: config.tenant_id
-          }
+            descricao: `Desvio de ${
+              desvio.percentual.toFixed(2)
+            }% na categoria ${desvio.categoria}`,
+            status: "ATIVO",
+            tenant_id: config.tenant_id,
+          };
 
-          const { data: alertaCriado, error: alertaError } = await supabaseClient
-            .from('alertas_desvio')
-            .insert(novoAlerta)
-            .select()
-            .single()
+          const { data: alertaCriado, error: alertaError } =
+            await supabaseClient
+              .from("alertas_desvio")
+              .insert(novoAlerta)
+              .select()
+              .single();
 
           if (!alertaError) {
-            alertasGerados++
+            alertasGerados++;
             // Processar o novo alerta
-            await processNewAlert(supabaseClient, alertaCriado.id)
+            await processNewAlert(supabaseClient, alertaCriado.id);
           }
         }
       }
@@ -349,96 +432,118 @@ async function checkThresholds(supabaseClient: any, obraId: string) {
   }
 
   return new Response(
-    JSON.stringify({ 
-      success: true, 
+    JSON.stringify({
+      success: true,
       alertas_gerados: alertasGerados,
-      desvios_analisados: desvios.length
+      desvios_analisados: desvios.length,
     }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 }
 
-function determinarTipoAlerta(percentual: number, config: ConfiguracaoAlerta): string | null {
-  if (percentual >= config.threshold_critico) return 'CRITICO'
-  if (percentual >= config.threshold_alto) return 'ALTO'
-  if (percentual >= config.threshold_medio) return 'MEDIO'
-  if (percentual >= config.threshold_baixo) return 'BAIXO'
-  return null
+function determinarTipoAlerta(
+  percentual: number,
+  config: ConfiguracaoAlerta,
+): string | null {
+  if (percentual >= config.threshold_critico) return "CRITICO";
+  if (percentual >= config.threshold_alto) return "ALTO";
+  if (percentual >= config.threshold_medio) return "MEDIO";
+  if (percentual >= config.threshold_baixo) return "BAIXO";
+  return null;
 }
 
 async function calcularDesviosObra(supabaseClient: any, obraId: string) {
   // Buscar orçamento e despesas da obra
   const { data: orcamento } = await supabaseClient
-    .from('orcamento')
-    .select('*')
-    .eq('obra_id', obraId)
+    .from("orcamento")
+    .select("*")
+    .eq("obra_id", obraId);
 
   const { data: despesas } = await supabaseClient
-    .from('despesas')
-    .select('*')
-    .eq('obra_id', obraId)
+    .from("despesas")
+    .select("*")
+    .eq("obra_id", obraId);
 
   // Agrupar por categoria e calcular desvios
-  const desviosPorCategoria = []
-  const categorias = [...new Set(orcamento?.map(item => item.categoria) || [])]
+  const desviosPorCategoria = [];
+  const categorias = [
+    ...new Set(
+      orcamento?.map((item: { categoria: string }) => item.categoria) || [],
+    ),
+  ];
 
   for (const categoria of categorias) {
     const orcadoCategoria = orcamento
-      ?.filter(item => item.categoria === categoria)
-      .reduce((sum, item) => sum + (item.custo || 0), 0) || 0
+      ?.filter((item: { categoria: string }) => item.categoria === categoria)
+      .reduce(
+        (sum: number, item: { custo?: number }) => sum + (item.custo || 0),
+        0,
+      ) || 0;
 
     const realizadoCategoria = despesas
-      ?.filter(item => item.categoria === categoria)
-      .reduce((sum, item) => sum + (item.custo || 0), 0) || 0
+      ?.filter((item: { categoria: string }) => item.categoria === categoria)
+      .reduce(
+        (sum: number, item: { custo?: number }) => sum + (item.custo || 0),
+        0,
+      ) || 0;
 
     if (orcadoCategoria > 0) {
-      const percentualDesvio = ((realizadoCategoria - orcadoCategoria) / orcadoCategoria) * 100
-      
+      const percentualDesvio =
+        ((realizadoCategoria - orcadoCategoria) / orcadoCategoria) * 100;
+
       if (Math.abs(percentualDesvio) >= 5) { // Só considera desvios >= 5%
         desviosPorCategoria.push({
           categoria,
           percentual: Math.abs(percentualDesvio),
           valor_orcado: orcadoCategoria,
           valor_realizado: realizadoCategoria,
-          valor_desvio: realizadoCategoria - orcadoCategoria
-        })
+          valor_desvio: realizadoCategoria - orcadoCategoria,
+        });
       }
     }
   }
 
-  return desviosPorCategoria
+  return desviosPorCategoria;
 }
 
 async function processWebhook(supabaseClient: any, alertaId: string) {
   // Implementar processamento específico de webhooks se necessário
   return new Response(
-    JSON.stringify({ success: true, message: 'Webhook processado' }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+    JSON.stringify({ success: true, message: "Webhook processado" }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 }
 
-async function markNotificationRead(supabaseClient: any, alertaId: string, usuarioId: string) {
+async function markNotificationRead(
+  supabaseClient: any,
+  alertaId: string,
+  usuarioId: string,
+) {
   const { error } = await supabaseClient
-    .from('notificacoes_alertas')
-    .update({ 
-      status: 'LIDA', 
-      lida_em: new Date().toISOString() 
+    .from("notificacoes_alertas")
+    .update({
+      status: "LIDA",
+      lida_em: new Date().toISOString(),
     })
-    .eq('alerta_id', alertaId)
-    .eq('usuario_id', usuarioId)
-    .eq('tipo_notificacao', 'DASHBOARD')
+    .eq("alerta_id", alertaId)
+    .eq("usuario_id", usuarioId)
+    .eq("tipo_notificacao", "DASHBOARD");
 
-  if (error) throw error
+  if (error) throw error;
 
   return new Response(
-    JSON.stringify({ success: true, message: 'Notificação marcada como lida' }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  )
+    JSON.stringify({ success: true, message: "Notificação marcada como lida" }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+  );
 }
 
-async function registrarHistorico(supabaseClient: any, alerta: AlertaDesvio, acao: string) {
+async function registrarHistorico(
+  supabaseClient: any,
+  alerta: AlertaDesvio,
+  acao: string,
+) {
   await supabaseClient
-    .from('historico_alertas')
+    .from("historico_alertas")
     .insert({
       alerta_id: alerta.id,
       obra_id: alerta.obra_id,
@@ -448,6 +553,6 @@ async function registrarHistorico(supabaseClient: any, alerta: AlertaDesvio, aca
       valor_orcado: alerta.valor_orcado,
       valor_realizado: alerta.valor_realizado,
       valor_desvio: alerta.valor_desvio,
-      acao
-    })
+      acao,
+    });
 }

@@ -277,7 +277,7 @@ export default function MetricsDashboard() {
               {user?.email}
             </span>
             <Button
-              onClick={() => logout().then(() => navigate('/login'))}
+              onClick={() => logout()}
               variant="outline"
               size="sm"
             >

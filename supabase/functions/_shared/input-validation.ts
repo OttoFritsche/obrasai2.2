@@ -3,37 +3,39 @@
  * Provides comprehensive security validation for user inputs
  */
 
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
+
 // Padrões maliciosos conhecidos
 const MALICIOUS_PATTERNS = {
   // SQL Injection patterns
   sql: [
     /('|(--)|(;)|(\|\|)|(\*|\*))/i,
     /(union|select|insert|delete|update|drop|create|alter|exec|execute)/i,
-    /script|javascript|vbscript/i
+    /script|javascript|vbscript/i,
   ],
-  
+
   // XSS patterns
   xss: [
     /<script[^>]*>.*?<\/script>/gi,
     /<iframe[^>]*>.*?<\/iframe>/gi,
     /javascript:/gi,
-    /on\w+\s*=/gi
+    /on\w+\s*=/gi,
   ],
-  
+
   // Path Traversal patterns
   pathTraversal: [
-    /(\.\.\/|\.\.\\\/)/g
+    /(\.\.\/|\.\.\\\/)/g,
   ],
-  
+
   // Command Injection patterns
   commandInjection: [
-    /[;|&`$(){}]/g
+    /[;|&`$(){}]/g,
   ],
-  
+
   // LDAP Injection patterns
   ldap: [
-    /[()=*!&|]/g
-  ]
+    /[()=*!&|]/g,
+  ],
 };
 
 // Padrões permitidos para diferentes tipos de entrada
@@ -43,13 +45,14 @@ const ALLOWED_PATTERNS = {
   alphanumeric: /^[a-zA-Z0-9\s]+$/,
   numeric: /^[0-9]+$/,
   decimal: /^[0-9]+(\.[0-9]+)?$/,
-  url: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+  url:
+    /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
   cpf: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
   cnpj: /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
   cep: /^\d{5}-?\d{3}$/,
   date: /^\d{4}-\d{2}-\d{2}$/,
   time: /^\d{2}:\d{2}(:\d{2})?$/,
-  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/
+  password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
 };
 
 /**
@@ -60,50 +63,50 @@ export function detectMaliciousPatterns(input: string): {
   detectedPatterns: string[];
 } {
   const detectedPatterns: string[] = [];
-  
+
   // Verifica SQL Injection
   for (const pattern of MALICIOUS_PATTERNS.sql) {
     if (pattern.test(input)) {
-      detectedPatterns.push('SQL Injection');
+      detectedPatterns.push("SQL Injection");
       break;
     }
   }
-  
+
   // Verifica XSS
   for (const pattern of MALICIOUS_PATTERNS.xss) {
     if (pattern.test(input)) {
-      detectedPatterns.push('XSS');
+      detectedPatterns.push("XSS");
       break;
     }
   }
-  
+
   // Verifica Path Traversal
   for (const pattern of MALICIOUS_PATTERNS.pathTraversal) {
     if (pattern.test(input)) {
-      detectedPatterns.push('Path Traversal');
+      detectedPatterns.push("Path Traversal");
       break;
     }
   }
-  
+
   // Verifica Command Injection
   for (const pattern of MALICIOUS_PATTERNS.commandInjection) {
     if (pattern.test(input)) {
-      detectedPatterns.push('Command Injection');
+      detectedPatterns.push("Command Injection");
       break;
     }
   }
-  
+
   // Verifica LDAP Injection
   for (const pattern of MALICIOUS_PATTERNS.ldap) {
     if (pattern.test(input)) {
-      detectedPatterns.push('LDAP Injection');
+      detectedPatterns.push("LDAP Injection");
       break;
     }
   }
-  
+
   return {
     isMalicious: detectedPatterns.length > 0,
-    detectedPatterns
+    detectedPatterns,
   };
 }
 
@@ -116,45 +119,45 @@ export function sanitizeInput(
     allowHtml?: boolean;
     preserveSpaces?: boolean;
     maxLength?: number;
-  } = {}
+  } = {},
 ): string {
-  if (!input || typeof input !== 'string') {
-    return '';
+  if (!input || typeof input !== "string") {
+    return "";
   }
-  
+
   let sanitized = input;
-  
+
   // Limita o comprimento se especificado
   if (options.maxLength && sanitized.length > options.maxLength) {
     sanitized = sanitized.substring(0, options.maxLength);
   }
-  
+
   // Remove HTML se não permitido
   if (!options.allowHtml) {
     sanitized = sanitized
-      .replace(/<script[^>]*>.*?<\/script>/gi, '')
-      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
-      .replace(/<[^>]*>/g, '');
+      .replace(/<script[^>]*>.*?<\/script>/gi, "")
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, "")
+      .replace(/<[^>]*>/g, "");
   }
-  
+
   // Remove padrões perigosos
   sanitized = sanitized
     // Remove javascript: URLs
-    .replace(/javascript:/gi, '')
+    .replace(/javascript:/gi, "")
     // Remove event handlers
-    .replace(/on\w+\s*=/gi, '')
+    .replace(/on\w+\s*=/gi, "")
     // Remove caracteres SQL perigosos
-    .replace(/['"\\;]/g, '')
+    .replace(/['"\\;]/g, "")
     // Remove caracteres de path traversal
-    .replace(/\.\.\/|\.\.\\\\/g, '')
+    .replace(/\.\.\/|\.\.\\\\/g, "")
     // Remove caracteres de command injection
-    .replace(/[;|&`$(){}]/g, '');
-  
+    .replace(/[;|&`$(){}]/g, "");
+
   // Remove espaços extras se não preservar
   if (!options.preserveSpaces) {
-    sanitized = sanitized.replace(/\s+/g, ' ').trim();
+    sanitized = sanitized.replace(/\s+/g, " ").trim();
   }
-  
+
   return sanitized;
 }
 
@@ -169,7 +172,7 @@ export function validateInput(
     customPattern?: RegExp;
     minLength?: number;
     maxLength?: number;
-  } = {}
+  } = {},
 ): {
   isValid: boolean;
   errors: string[];
@@ -177,73 +180,80 @@ export function validateInput(
 } {
   const errors: string[] = [];
   const sanitized = sanitizeInput(input, { maxLength: options.maxLength });
-  
+
   // Verifica se é obrigatório
   if (options.required && !sanitized.trim()) {
-    errors.push('Campo obrigatório');
+    errors.push("Campo obrigatório");
   }
-  
+
   // Verifica comprimento mínimo
   if (options.minLength && sanitized.length < options.minLength) {
     errors.push(`Mínimo de ${options.minLength} caracteres`);
   }
-  
+
   // Verifica comprimento máximo
   if (options.maxLength && sanitized.length > options.maxLength) {
     errors.push(`Máximo de ${options.maxLength} caracteres`);
   }
-  
+
   // Verifica padrão personalizado ou padrão do tipo
   const pattern = options.customPattern || ALLOWED_PATTERNS[type];
   if (sanitized && pattern && !pattern.test(sanitized)) {
     errors.push(`Formato inválido para ${type}`);
   }
-  
+
   // Verifica padrões maliciosos
   const maliciousCheck = detectMaliciousPatterns(sanitized);
   if (maliciousCheck.isMalicious) {
-    errors.push(`Conteúdo suspeito detectado: ${maliciousCheck.detectedPatterns.join(', ')}`);
+    errors.push(
+      `Conteúdo suspeito detectado: ${
+        maliciousCheck.detectedPatterns.join(", ")
+      }`,
+    );
   }
-  
+
   return {
     isValid: errors.length === 0,
     errors,
-    sanitized
+    sanitized,
   };
 }
 
 /**
  * Validações específicas para tipos comuns
  */
-export const validateEmail = (email: string, required = false) => 
-  validateInput(email, 'email', { required });
+export const validateEmail = (email: string, required = false) =>
+  validateInput(email, "email", { required });
 
-export const validatePhone = (phone: string, required = false) => 
-  validateInput(phone, 'phone', { required });
+export const validatePhone = (phone: string, required = false) =>
+  validateInput(phone, "phone", { required });
 
-export const validateCPF = (cpf: string, required = false) => 
-  validateInput(cpf, 'cpf', { required });
+export const validateCPF = (cpf: string, required = false) =>
+  validateInput(cpf, "cpf", { required });
 
-export const validateCNPJ = (cnpj: string, required = false) => 
-  validateInput(cnpj, 'cnpj', { required });
+export const validateCNPJ = (cnpj: string, required = false) =>
+  validateInput(cnpj, "cnpj", { required });
 
-export const validateCEP = (cep: string, required = false) => 
-  validateInput(cep, 'cep', { required });
+export const validateCEP = (cep: string, required = false) =>
+  validateInput(cep, "cep", { required });
 
-export const validatePassword = (password: string, required = true) => 
-  validateInput(password, 'password', { required, minLength: 8 });
+export const validatePassword = (password: string, required = true) =>
+  validateInput(password, "password", { required, minLength: 8 });
 
-export const validateURL = (url: string, required = false) => 
-  validateInput(url, 'url', { required });
+export const validateURL = (url: string, required = false) =>
+  validateInput(url, "url", { required });
 
-export const validateNumeric = (value: string, required = false) => 
-  validateInput(value, 'numeric', { required });
+export const validateNumeric = (value: string, required = false) =>
+  validateInput(value, "numeric", { required });
 
-export const validateDecimal = (value: string, required = false) => 
-  validateInput(value, 'decimal', { required });
+export const validateDecimal = (value: string, required = false) =>
+  validateInput(value, "decimal", { required });
 
-export const validateAlphanumeric = (value: string, required = false, maxLength = 255) => 
-  validateInput(value, 'alphanumeric', { required, maxLength });
+export const validateAlphanumeric = (
+  value: string,
+  required = false,
+  maxLength = 255,
+) => validateInput(value, "alphanumeric", { required, maxLength });
 
 /**
  * Valida dados de requisição completos
@@ -256,7 +266,7 @@ export function validateRequestData(
     minLength?: number;
     maxLength?: number;
     customPattern?: RegExp;
-  }>
+  }>,
 ): {
   isValid: boolean;
   errors: Record<string, string[]>;
@@ -264,22 +274,22 @@ export function validateRequestData(
 } {
   const errors: Record<string, string[]> = {};
   const sanitizedData: Record<string, string> = {};
-  
+
   for (const [field, rules] of Object.entries(schema)) {
     const value = data[field];
-    const validation = validateInput(value || '', rules.type, rules);
-    
+    const validation = validateInput(String(value || ""), rules.type, rules);
+
     if (!validation.isValid) {
       errors[field] = validation.errors;
     }
-    
+
     sanitizedData[field] = validation.sanitized;
   }
-  
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors,
-    sanitizedData
+    sanitizedData,
   };
 }
 
@@ -317,3 +327,43 @@ export type SanitizationOptions = {
   preserveSpaces?: boolean;
   maxLength?: number;
 };
+
+/**
+ * Define um schema de validação para a entrada do chat de IA.
+ * - `user_id`: Deve ser um UUID válido.
+ * - `obra_id`: UUID opcional. Se presente, deve ser válido.
+ * - `message`: String obrigatória, com no mínimo 1 e no máximo 5000 caracteres.
+ *              O método `.trim()` remove espaços em branco no início e no fim.
+ */
+export const aiChatSchema = z.object({
+  user_id: z.string({ required_error: "ID do usuário é obrigatório." })
+    .uuid({ message: "ID de usuário inválido." }),
+  obra_id: z.string().uuid({ message: "ID da obra inválido." }).optional(),
+  message: z.string({ required_error: "A mensagem não pode estar vazia." })
+    .trim()
+    .min(1, { message: "A mensagem não pode estar vazia." })
+    .max(5000, { message: "A mensagem excede o limite de 5000 caracteres." }),
+});
+
+// Exporta um objeto contendo todos os schemas para fácil acesso.
+export const VALIDATION_SCHEMAS = {
+  aiChat: aiChatSchema,
+  // Outros schemas podem ser adicionados aqui no futuro.
+};
+
+/**
+ * Função genérica para validar um objeto contra um schema Zod.
+ * Atualmente não utilizada, mas mantida para referência futura.
+ * A abordagem recomendada é usar `schema.safeParse()` diretamente na função.
+ */
+export function validateObject<T extends z.ZodTypeAny>(
+  obj: unknown,
+  schema: T,
+): { isValid: boolean; errors?: any; sanitizedObject?: z.infer<T> } {
+  const result = schema.safeParse(obj);
+  if (result.success) {
+    return { isValid: true, sanitizedObject: result.data };
+  } else {
+    return { isValid: false, errors: result.error.flatten().fieldErrors };
+  }
+}

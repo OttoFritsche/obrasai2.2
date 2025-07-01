@@ -7,19 +7,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Loader2, 
   Send, 
-  Bot, 
   User as UserIcon, 
-  Sparkles, 
-  MessageCircle,
-  Zap,
-  Brain,
   Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { aiApi, ChatMessage } from "@/services/aiApi";
 import { obrasApi } from "@/services/api";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
 import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";

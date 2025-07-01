@@ -20,10 +20,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const loadingRef = useRef(false);
 
-  // ✅ Função para carregar dados do usuário com tratamento de erro
+  // ✅ Função para carregar dados do usuário com tratamento de erro e timeout de segurança
   const loadUserData = useCallback(async (userId: string, authUser: User) => {
     if (loadingRef.current) return;
     loadingRef.current = true;
+
+    // ✅ Timeout de segurança para garantir que loading seja sempre resolvido
+    const safetyTimeout = setTimeout(() => {
+      console.warn('⚠️ loadUserData timeout - forçando loading = false');
+      setLoading(false);
+      loadingRef.current = false;
+    }, 5000);
 
     try {
       const userProfile = await fetchUserProfile(userId, authUser);
@@ -31,12 +38,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // ✅ Definir loading como false após carregar dados com sucesso
       setLoading(false);
+      clearTimeout(safetyTimeout);
     } catch (error) {
       console.error('Error loading user profile:', error);
       // ✅ Em caso de erro ao carregar o perfil, defina o usuário como nulo e loading como false.
       // A sessão de autenticação do Supabase permanece válida.
       setUser(null);
       setLoading(false);
+      clearTimeout(safetyTimeout);
     } finally {
       loadingRef.current = false;
     }
@@ -64,12 +73,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (import.meta.env.DEV && event === 'TOKEN_REFRESHED' && !session) {
             console.log('🔄 Token refresh failed');
           }
-          await clearCorruptedAuthData();
-          setUser(null);
-          setSession(null);
-          setSubscription(null);
-          setLoading(false); // Ensure loading is false on sign out or refresh failure
-          if (event === 'SIGNED_OUT') clearProfileCache();
+          
+          // ✅ Para SIGNED_OUT, limpar dados e redirecionar
+          if (event === 'SIGNED_OUT') {
+            secureLogger.info("SIGNED_OUT event detectado - processando logout");
+            await clearCorruptedAuthData();
+            clearProfileCache();
+            setUser(null);
+            setSession(null);
+            setSubscription(null);
+            setLoading(false);
+            
+            // ✅ Redirecionar para login após logout bem-sucedido
+            setTimeout(() => {
+              if (window.location.pathname !== '/login') {
+                secureLogger.info("Redirecionamento onAuthStateChange para /login");
+                window.location.href = '/login';
+              }
+            }, 100);
+          } else {
+            // TOKEN_REFRESHED failed
+            await clearCorruptedAuthData();
+            setUser(null);
+            setSession(null);
+            setSubscription(null);
+            setLoading(false);
+          }
+          
           return; // Early return for these cases
         }
 
@@ -145,12 +175,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSubscription(null);
         setLoading(false); // Ensure loading is false on catch
       } finally {
-        // setLoading(false) is called in most paths, but ensure it's false if not already.
-        // However, if loadUserData is running, it will manage setLoading.
-        // This final setLoading(false) might be redundant if loadUserData always completes.
-        if (loadingRef.current === false) { // Only set if not already being handled by loadUserData
+        // ✅ Timeout de segurança global para garantir que loading seja sempre resolvido
+        setTimeout(() => {
+          if (loadingRef.current === false) {
             setLoading(false);
-        }
+          }
+        }, 1000);
       }
     };
 
@@ -164,30 +194,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login with email and password
   const login = async (email: string, password: string) => {
+    // 1. Log da tentativa
+    secureLogger.info("Login attempt", { email: `exists: ${!!email}` });
+    
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      // ✅ Timeout de segurança para o login
+      const loginTimeout = setTimeout(() => {
+        console.warn('⚠️ Login timeout - forçando loading = false');
+        setLoading(false);
+      }, 10000);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      clearTimeout(loginTimeout);
       
       if (error) {
+        secureLogger.error("Login failed", error, { email: `exists: ${!!email}` });
         toast.error(error.message);
-        setLoading(false); // ✅ Só define loading como false em caso de erro
+        setLoading(false);
         return { error };
       }
+
+      // 2. Log de sucesso
+      if (data.user) {
+        secureLogger.info("Login successful", { userId: data.user.id });
+      }
       
-      // ✅ Login bem-sucedido - o onAuthStateChange vai gerenciar o loading.
-      // O estado de loading será definido como false por loadUserData.
+      // ✅ Não definir loading = false aqui pois o onAuthStateChange vai gerenciar
       return {};
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to login";
-      secureLogger.error("Login failed", error, { hasEmail: !!email });
-      toast.error(errorMessage);
-      setLoading(false); // ✅ Só define loading como false em caso de erro
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      secureLogger.error("Login exception", error, { email: `exists: ${!!email}` });
+      toast.error(error.message);
+      setLoading(false);
       return { error };
     }
   };
 
   // Login with Google OAuth
   const loginWithGoogle = async () => {
+    // 1. Log da tentativa de login com Google
+    secureLogger.info("Google login attempt started");
+
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({ 
@@ -216,9 +266,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Register new user
   const register = async (email: string, password: string, firstName: string, lastName: string) => {
+    // 1. Log da tentativa de registro
+    secureLogger.info("Registration attempt", { email: `exists: ${!!email}` });
+
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -232,8 +285,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       if (error) {
+        secureLogger.error("Registration failed", error, { email: `exists: ${!!email}` });
         toast.error(error.message);
         return { error };
+      }
+
+      // 2. Log de sucesso
+      if (data.user) {
+        secureLogger.info("Registration successful", { userId: data.user.id });
       }
       
       // ✅ Fazer logout automático para garantir que o usuário vá para login
@@ -247,14 +306,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast.success("Registration successful! Please check your email to verify your account.");
       return {};
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to register";
-      secureLogger.error("Registration failed", error, { 
-        hasEmail: !!email, 
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      secureLogger.error("Registration exception", error, { 
+        email: `exists: ${!!email}`, 
         hasFirstName: !!firstName, 
         hasLastName: !!lastName 
       });
-      toast.error(errorMessage);
+      toast.error(error.message);
       return { error };
     } finally {
       setLoading(false);
@@ -264,19 +323,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Logout
   const logout = async () => {
     try {
+      secureLogger.info("Logout iniciado");
       setLoading(true);
-      await supabase.auth.signOut();
-      // ✅ Limpar cache e estado local
+      
+      // ✅ Limpar estado local antes do signOut
       clearProfileCache();
       setUser(null);
       setSession(null);
       setSubscription(null);
-      navigate('/login');
+      
+      // ✅ Fazer signOut - o onAuthStateChange vai gerenciar o redirecionamento
+      await supabase.auth.signOut();
+      secureLogger.info("Logout Supabase concluído");
+      
+      // ✅ Timeout de segurança para garantir redirecionamento
+      setTimeout(() => {
+        if (window.location.pathname !== '/login') {
+          secureLogger.info("Redirecionamento de segurança para /login");
+          navigate('/login', { replace: true });
+        }
+        setLoading(false);
+      }, 1000);
+      
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to logout";
       secureLogger.error("Logout failed", error);
       toast.error(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
@@ -295,6 +367,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Forgot password
+  const forgotPassword = async (email: string) => {
+    secureLogger.info("Password reset requested", { email: `exists: ${!!email}` });
+    
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) {
+        secureLogger.error("Password reset failed", error, { email: `exists: ${!!email}` });
+        toast.error(error.message);
+        return { error };
+      }
+
+      secureLogger.info("Password reset email sent successfully", { email: `exists: ${!!email}` });
+      toast.success("Link de redefinição de senha enviado para seu email!");
+      return {};
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      secureLogger.error("Password reset exception", error, { email: `exists: ${!!email}` });
+      toast.error(error.message);
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset password (with token)
+  const resetPassword = async (password: string) => {
+    secureLogger.info("Password reset attempt");
+    
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+      });
+      
+      if (error) {
+        secureLogger.error("Password reset update failed", error);
+        toast.error(error.message);
+        return { error };
+      }
+
+      secureLogger.info("Password reset successful");
+      toast.success("Senha redefinida com sucesso!");
+      navigate('/login');
+      return {};
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      secureLogger.error("Password reset update exception", error);
+      toast.error(error.message);
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     session,
@@ -304,7 +435,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithGoogle,
     register,
     logout,
-    checkSubscription
+    checkSubscription,
+    forgotPassword,
+    resetPassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
