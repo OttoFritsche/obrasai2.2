@@ -62,11 +62,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Listen for auth state changes FIRST
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // ✅ Log apenas eventos importantes em desenvolvimento (removido para reduzir ruído no console)
-        // const isDev = import.meta.env.DEV;
-        // if (isDev && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
-        //   console.log('🔄 Auth:', event);
-        // }
+        // ✅ Log todos os eventos para debug
+        console.log('🔄 onAuthStateChange:', event, !!session);
         
         // ✅ Lidar com refresh token inválido/expirado
         if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
@@ -84,13 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSubscription(null);
             setLoading(false);
             
-            // ✅ Redirecionar para login após logout bem-sucedido
-            setTimeout(() => {
-              if (window.location.pathname !== '/login') {
-                secureLogger.info("Redirecionamento onAuthStateChange para /login");
-                window.location.href = '/login';
-              }
-            }, 100);
+            // ✅ Redirecionar imediatamente para login após logout bem-sucedido
+            secureLogger.info("Redirecionamento SIGNED_OUT para /login");
+            navigate('/login', { replace: true });
           } else {
             // TOKEN_REFRESHED failed
             await clearCorruptedAuthData();
@@ -320,11 +313,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Logout
+  // ✅ Função de logout forçado e direto
+  const forceLogout = () => {
+    secureLogger.info("Logout forçado iniciado");
+    
+    try {
+      // 1. Limpar localStorage imediatamente
+      const keysToRemove = Object.keys(localStorage).filter(key => 
+        key.startsWith('sb-') || key.includes('supabase') || key.includes('auth')
+      );
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // 2. Limpar estados locais
+      clearProfileCache();
+      setUser(null);
+      setSession(null);
+      setSubscription(null);
+      setLoading(false);
+      
+      // 3. Redirecionar imediatamente
+      secureLogger.info("Logout forçado - redirecionando");
+      window.location.href = '/login';
+      
+    } catch (error) {
+      secureLogger.error("Erro no logout forçado", error);
+      window.location.href = '/login'; // Fallback
+    }
+  };
+
+  // Logout aprimorado com fallback
   const logout = async () => {
     try {
       secureLogger.info("Logout iniciado");
       setLoading(true);
+      
+      // ✅ Timer de segurança - se não redirecionar em 3s, forçar
+      const forceLogoutTimer = setTimeout(() => {
+        secureLogger.warn("Logout timeout - forçando redirecionamento");
+        forceLogout();
+      }, 3000);
       
       // ✅ Limpar estado local antes do signOut
       clearProfileCache();
@@ -332,24 +359,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setSubscription(null);
       
-      // ✅ Fazer signOut - o onAuthStateChange vai gerenciar o redirecionamento
+      // ✅ Fazer signOut do Supabase
       await supabase.auth.signOut();
       secureLogger.info("Logout Supabase concluído");
       
-      // ✅ Timeout de segurança para garantir redirecionamento
+      // ✅ Limpar timer se chegou até aqui
+      clearTimeout(forceLogoutTimer);
+      
+      // ✅ Redirecionamento imediato adicional
       setTimeout(() => {
         if (window.location.pathname !== '/login') {
-          secureLogger.info("Redirecionamento de segurança para /login");
-          navigate('/login', { replace: true });
+          secureLogger.info("Redirecionamento direto pós-logout");
+          window.location.href = '/login';
         }
-        setLoading(false);
-      }, 1000);
+      }, 500);
       
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to logout";
       secureLogger.error("Logout failed", error);
       toast.error(errorMessage);
-      setLoading(false);
+      
+      // ✅ Em caso de erro, forçar logout
+      forceLogout();
     }
   };
 

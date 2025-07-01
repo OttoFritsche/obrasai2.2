@@ -12,13 +12,15 @@ import {
   Receipt,
   Users,
   Sparkles,
-  Building2
+  Building2,
+  LogOut
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { MetricCard } from "@/components/ui/metric-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -27,12 +29,16 @@ import { useDespesas } from "@/hooks/useDespesas";
 import { useNotasFiscais } from "@/hooks/useNotasFiscais";
 import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { Link } from "react-router-dom";
+import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const { obras, isLoading: obrasLoading } = useObras();
   const { despesas, isLoading: despesasLoading } = useDespesas();
   const { notasFiscais, isLoading: notasLoading } = useNotasFiscais();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [testingLogout, setTestingLogout] = useState(false);
 
   // Calcular métricas reais
   const totalObras = obras?.length || 0;
@@ -163,6 +169,31 @@ const Dashboard = () => {
 
   const isLoading = obrasLoading || despesasLoading || notasLoading;
 
+  // ✅ Função de teste de logout direto
+  const testLogout = async () => {
+    setTestingLogout(true);
+    console.log("🧪 TESTE: Iniciando logout direto");
+    
+    try {
+      // Limpar localStorage diretamente
+      const keys = Object.keys(localStorage);
+      keys.forEach(key => {
+        if (key.includes('supabase') || key.includes('auth') || key.startsWith('sb-')) {
+          localStorage.removeItem(key);
+          console.log(`🧪 Removido: ${key}`);
+        }
+      });
+      
+      // Redirecionar diretamente
+      console.log("🧪 TESTE: Redirecionando diretamente");
+      window.location.href = '/login';
+      
+    } catch (error) {
+      console.error("🧪 TESTE: Erro", error);
+      window.location.href = '/login';
+    }
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -179,6 +210,33 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
+        {/* 🧪 BOTÃO DE TESTE TEMPORÁRIO */}
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-700">🧪 TESTE DE LOGOUT</CardTitle>
+            <CardDescription>Botão temporário para debug - será removido</CardDescription>
+          </CardHeader>
+          <CardContent className="flex gap-4">
+            <Button 
+              onClick={testLogout}
+              disabled={testingLogout}
+              variant="destructive"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              {testingLogout ? "Testando..." : "TESTE: Logout Direto"}
+            </Button>
+            <Button 
+              onClick={logout}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout Normal
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Header de boas-vindas */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

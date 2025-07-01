@@ -124,14 +124,25 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const handleSignOut = async () => {
     try {
       setIsLoggingOut(true);
-      // ✅ Apenas chamar logout - o AuthContext vai gerenciar o redirecionamento
+      console.log("🔴 DashboardLayout: Iniciando logout");
+      
+      // ✅ Timeout de segurança - se não sair em 2s, forçar redirecionamento
+      const emergencyExit = setTimeout(() => {
+        console.log("🚨 DashboardLayout: Logout timeout - redirecionamento de emergência");
+        window.location.href = '/login';
+      }, 2000);
+      
       await logout();
+      clearTimeout(emergencyExit);
+      
     } catch (error) {
       console.error("Error signing out:", error);
       toast.error(t("messages.error"));
-      setIsLoggingOut(false);
+      
+      // ✅ Fallback de emergência
+      console.log("🚨 DashboardLayout: Erro no logout - redirecionamento de emergência");
+      window.location.href = '/login';
     }
-    // ✅ Não definir isLoggingOut(false) aqui pois o usuário vai sair da página
   };
 
   return (
