@@ -140,25 +140,89 @@ const NovaDespesa = () => {
   });
 
   const onSubmit = (values: DespesaFormValues) => {
-    const submissionData = { ...values };
+    // ✅ Criar cópia limpa dos dados - apenas campos essenciais primeiro
+    const submissionData: any = {
+      obra_id: values.obra_id,
+      descricao: values.descricao,
+      data_despesa: values.data_despesa,
+      quantidade: values.quantidade,
+      valor_unitario: values.valor_unitario,
+      pago: values.pago || false,
+    };
 
-    if (!submissionData.pago) {
-      submissionData.data_pagamento = null;
-      submissionData.forma_pagamento = null;
+    // ✅ Adicionar campos opcionais apenas se não forem null/undefined
+    if (values.categoria) {
+      submissionData.categoria = values.categoria;
+    }
+    
+    if (values.etapa) {
+      submissionData.etapa = values.etapa;
+    }
+    
+    if (values.unidade) {
+      submissionData.unidade = values.unidade;
+    }
+    
+    if (values.numero_nf) {
+      submissionData.numero_nf = values.numero_nf;
+    }
+    
+    if (values.observacoes) {
+      submissionData.observacoes = values.observacoes;
     }
 
-    // Adicionar dados SINAPI se selecionado
-    if (sinapiSelecionado) {
-      const valorReal = values.valor_unitario;
-      const valorSinapi = sinapiSelecionado.preco_unitario;
-      const variacao = calcularVariacao(valorReal, valorSinapi);
-
-      submissionData.codigo_sinapi = sinapiSelecionado.codigo;
-      submissionData.valor_referencia_sinapi = valorSinapi;
-      submissionData.variacao_sinapi = variacao;
-      submissionData.fonte_sinapi = sinapiSelecionado.fonte;
-      submissionData.estado_referencia = sinapiSelecionado.estado || 'SP';
+    // ✅ Adicionar fornecedores apenas se válidos
+    if (values.fornecedor_pj_id && values.fornecedor_pj_id !== '__NONE__') {
+      submissionData.fornecedor_pj_id = values.fornecedor_pj_id;
     }
+    
+    if (values.fornecedor_pf_id && values.fornecedor_pf_id !== '__NONE__') {
+      submissionData.fornecedor_pf_id = values.fornecedor_pf_id;
+    }
+
+    // ✅ Tratar campos de pagamento
+    if (submissionData.pago) {
+      if (values.data_pagamento) {
+        submissionData.data_pagamento = values.data_pagamento;
+      }
+      if (values.forma_pagamento) {
+        submissionData.forma_pagamento = values.forma_pagamento;
+      }
+    }
+
+    // ✅ Tratar insumos baseado no tipo selecionado
+    if (tipoInsumo === 'sinapi') {
+      // Para insumos SINAPI
+      if (values.insumo) {
+        submissionData.insumo = values.insumo;
+      }
+      
+      // Adicionar dados SINAPI se selecionado
+      if (sinapiSelecionado) {
+        const valorReal = values.valor_unitario;
+        const valorSinapi = sinapiSelecionado.preco_unitario;
+        const variacao = calcularVariacao(valorReal, valorSinapi);
+
+        submissionData.codigo_sinapi = sinapiSelecionado.codigo;
+        submissionData.valor_referencia_sinapi = valorSinapi;
+        submissionData.variacao_sinapi = variacao;
+        submissionData.fonte_sinapi = sinapiSelecionado.fonte;
+        submissionData.estado_referencia = sinapiSelecionado.estado || 'SP';
+      }
+    } else {
+      // Para insumos manuais
+      if (values.insumo_customizado) {
+        submissionData.insumo_customizado = values.insumo_customizado;
+      }
+    }
+
+    // ✅ Debug: log dos dados que serão enviados
+    // console.log('🚀 Dados finais para API:', {
+    //   submissionData,
+    //   tipoInsumo,
+    //   sinapiSelecionado: sinapiSelecionado ? sinapiSelecionado.codigo : null,
+    //   originalValues: values
+    // });
     
     mutate(submissionData);
   };
@@ -178,6 +242,39 @@ const NovaDespesa = () => {
   };
 
   const isLoading = isLoadingObras || isLoadingPJ || isLoadingPF;
+
+  // ✅ Função helper para converter enum em label legível
+  const getCategoriaLabel = (categoria: string) => {
+    const labels: Record<string, string> = {
+      "MATERIAL_CONSTRUCAO": "Material de Construção",
+      "MAO_DE_OBRA": "Mão de Obra",
+      "ALUGUEL_EQUIPAMENTOS": "Aluguel de Equipamentos",
+      "TRANSPORTE_FRETE": "Transporte/Frete",
+      "TAXAS_LICENCAS": "Taxas e Licenças",
+      "SERVICOS_TERCEIRIZADOS": "Serviços Terceirizados",
+      "ADMINISTRATIVO": "Administrativo",
+      "IMPREVISTOS": "Imprevistos",
+      "OUTROS": "Outros",
+      "DEMOLICAO_REMOCAO": "Demolição/Remoção",
+      "PROTECAO_ESTRUTURAL": "Proteção Estrutural",
+      "AQUISICAO_TERRENO_AREA": "Aquisição Terreno/Área",
+      "AQUISICAO_IMOVEL_REFORMA_LEILAO": "Aquisição Imóvel/Reforma/Leilão"
+    };
+    return labels[categoria] || categoria.replace(/_/g, ' ');
+  };
+
+  const getEtapaLabel = (etapa: string) => {
+    const labels: Record<string, string> = {
+      "FUNDACAO": "Fundação",
+      "ESTRUTURA": "Estrutura", 
+      "ALVENARIA": "Alvenaria",
+      "COBERTURA": "Cobertura",
+      "INSTALACOES": "Instalações",
+      "ACABAMENTO": "Acabamento",
+      "OUTROS": "Outros"
+    };
+    return labels[etapa] || etapa.replace(/_/g, ' ');
+  };
 
   if (isLoading) {
     return (
@@ -216,17 +313,17 @@ const NovaDespesa = () => {
               <Receipt className="h-6 w-6 text-green-500 dark:text-green-400" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Nova Despesa</h1>
+              <h1 className="text-2xl font-bold">Adicionar Despesa</h1>
               <p className="text-sm text-muted-foreground">
                 {obraIdFromUrl ? (
                   <>
-                    Registre uma nova despesa para a obra selecionada
+                    Registre uma compra ou gasto na obra selecionada
                     <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                      Obra pré-selecionada
+                      ✓ Obra pré-selecionada
                     </span>
                   </>
                 ) : (
-                  "Registre uma nova despesa na obra"
+                  "Registre uma compra ou gasto da sua obra"
                 )}
               </p>
             </div>
@@ -258,8 +355,11 @@ const NovaDespesa = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Plus className="h-5 w-5 text-green-500" />
-                Informações da Despesa
+                Dados da Compra/Gasto
               </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Preencha as informações básicas da sua despesa
+              </p>
             </CardHeader>
             <CardContent>
               <Form {...form}>
@@ -268,7 +368,7 @@ const NovaDespesa = () => {
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Building2 className="h-4 w-4" />
-                      Informações Básicas
+                      O que você comprou/gastou?
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
@@ -351,7 +451,7 @@ const NovaDespesa = () => {
                                 <SelectContent>
                                   {Constants.public.Enums.categoria_enum.map((categoria) => (
                                     <SelectItem key={categoria} value={categoria}>
-                                      {categoria.replace(/_/g, ' ')}
+                                      {getCategoriaLabel(categoria)}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -362,96 +462,116 @@ const NovaDespesa = () => {
                         )}
                       />
 
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id="insumo-sinapi"
-                            name="tipo-insumo"
-                            checked={tipoInsumo === 'sinapi'}
-                            onChange={() => setTipoInsumo('sinapi')}
-                            className="h-4 w-4"
-                          />
-                          <label htmlFor="insumo-sinapi" className="text-sm font-medium">
-                            Buscar no SINAPI
-                          </label>
-                          <input
-                            type="radio"
-                            id="insumo-manual"
-                            name="tipo-insumo"
-                            checked={tipoInsumo === 'manual'}
-                            onChange={() => setTipoInsumo('manual')}
-                            className="h-4 w-4 ml-4"
-                          />
-                          <label htmlFor="insumo-manual" className="text-sm font-medium">
-                            Inserir manualmente
-                          </label>
-                        </div>
-
-                        {tipoInsumo === 'sinapi' ? (
-                          <FormField
-                            control={form.control}
-                            name="insumo"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Insumo (SINAPI)</FormLabel>
-                                <FormControl>
-                                  <div className="space-y-2">
-                                    <SinapiSelectorDespesas
-                                      onSelect={(item) => {
-                                        field.onChange(item.descricao);
-                                        form.setValue('unidade', item.unidade);
-                                        form.setValue('sinapi_codigo', item.codigo);
-                                        form.setValue('sinapi_referencia_id', item.codigo);
-                                        form.setValue('insumo_customizado', null);
-                                        if (!form.getValues('valor_unitario')) {
-                                          form.setValue('valor_unitario', item.preco_unitario);
-                                        }
-                                        setSinapiSelecionado(item);
-                                      }}
-                                      placeholder="Buscar insumo no SINAPI (ex: cimento, areia, tijolo...)"
-                                      className="w-full"
-                                    />
-                                    {field.value && (
-                                      <div className="text-sm text-muted-foreground bg-muted/50 p-2 rounded">
-                                        <strong>Insumo selecionado:</strong> {field.value}
-                                      </div>
-                                    )}
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        ) : (
-                          <FormField
-                            control={form.control}
-                            name="insumo_customizado"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Insumo (Manual)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Digite o nome do insumo (ex: Cimento Portland CP-II)"
-                                    {...field}
-                                    value={field.value ?? ''}
-                                    className="bg-background/50"
-                                    onChange={(e) => {
-                                      field.onChange(e.target.value);
-                                      // Limpar campos SINAPI quando inserir manual
-                                      form.setValue('insumo', null);
-                                      form.setValue('sinapi_codigo', null);
-                                      form.setValue('sinapi_referencia_id', null);
-                                      setSinapiSelecionado(null);
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                      {/* Campo único para insumo - simples e direto */}
+                      <FormField
+                        control={form.control}
+                        name="insumo_customizado"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Insumo/Material
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (ex: Cimento CP-II, Areia lavada, Tijolo cerâmico...)
+                              </span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Digite o nome do insumo ou material"
+                                {...field}
+                                value={field.value ?? ''}
+                                className="bg-background/50"
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  // Limpar dados SINAPI anteriores se estiver editando
+                                  form.setValue('insumo', null);
+                                  form.setValue('sinapi_codigo', null);
+                                  form.setValue('sinapi_referencia_id', null);
+                                  setSinapiSelecionado(null);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
                         )}
-                      </div>
+                      />
+
+                      {/* Botão opcional para buscar referência SINAPI */}
+                      {form.watch('insumo_customizado') && form.watch('insumo_customizado')!.length > 3 && (
+                        <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                                💡 Quer comparar com o preço de referência?
+                              </h4>
+                              <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                O SINAPI é a tabela nacional de preços. Isso ajuda a saber se você está pagando um bom preço.
+                              </p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setTipoInsumo(tipoInsumo === 'sinapi' ? 'manual' : 'sinapi')}
+                              className="ml-3 text-blue-700 border-blue-300 hover:bg-blue-100 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/30"
+                            >
+                              {tipoInsumo === 'sinapi' ? 'Não comparar' : 'Buscar SINAPI'}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Área de busca SINAPI (apenas quando solicitado) */}
+                      {tipoInsumo === 'sinapi' && form.watch('insumo_customizado') && (
+                        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-3">
+                          <h4 className="text-sm font-medium text-green-900 dark:text-green-100 flex items-center gap-2">
+                            <Search className="h-4 w-4" />
+                            Buscar referência SINAPI
+                          </h4>
+                          <SinapiSelectorDespesas
+                            onSelect={(item) => {
+                              setSinapiSelecionado(item);
+                              // Opcional: sugerir ajustar o valor para o SINAPI
+                              if (item.preco_unitario > 0 && !form.getValues('valor_unitario')) {
+                                form.setValue('valor_unitario', item.preco_unitario);
+                              }
+                              if (item.unidade && !form.getValues('unidade')) {
+                                form.setValue('unidade', item.unidade);
+                              }
+                            }}
+                            placeholder={`Buscar "${form.watch('insumo_customizado')}" no SINAPI...`}
+                            className="w-full"
+                          />
+                          
+                          {sinapiSelecionado && (
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded border">
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                                  ✓ Referência encontrada
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setSinapiSelecionado(null)}
+                                  className="text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                  Remover
+                                </button>
+                              </div>
+                              <p className="text-sm font-medium">{sinapiSelecionado.descricao}</p>
+                              <p className="text-xs text-muted-foreground">
+                                <strong>Código:</strong> {sinapiSelecionado.codigo} | 
+                                <strong> Preço ref.:</strong> R$ {sinapiSelecionado.preco_unitario.toFixed(2)}/{sinapiSelecionado.unidade}
+                              </p>
+                              
+                              {form.watch('valor_unitario') > 0 && (
+                                <VariacaoSinapiIndicator
+                                  valorReal={form.watch('valor_unitario')}
+                                  valorSinapi={sinapiSelecionado.preco_unitario}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       <FormField
                         control={form.control}
@@ -470,7 +590,7 @@ const NovaDespesa = () => {
                                 <SelectContent>
                                   {Constants.public.Enums.etapa_enum.map((etapa) => (
                                     <SelectItem key={etapa} value={etapa}>
-                                      {etapa.replace(/_/g, ' ')}
+                                      {getEtapaLabel(etapa)}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -502,90 +622,52 @@ const NovaDespesa = () => {
                     </div>
                   </div>
 
-                  {/* Seção SINAPI - apenas para insumos SINAPI */}
-                  {tipoInsumo === 'sinapi' && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
-                        <Search className="h-4 w-4" />
-                        Referência SINAPI (Opcional)
-                      </h3>
-                      <div className="space-y-4">
-                        <SinapiSelectorDespesas
-                          onSelect={handleSinapiSelect}
-                          selectedItem={sinapiSelecionado}
-                        />
-                        
-                        {sinapiSelecionado && (
-                          <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">Item SINAPI Selecionado:</span>
-                              <button
-                                type="button"
-                                onClick={() => setSinapiSelecionado(null)}
-                                className="text-xs text-muted-foreground hover:text-foreground"
-                              >
-                                Remover
-                              </button>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              <strong>Código:</strong> {sinapiSelecionado.codigo}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <strong>Descrição:</strong> {sinapiSelecionado.descricao}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <strong>Preço Referência:</strong> R$ {sinapiSelecionado.preco_unitario.toFixed(2)} / {sinapiSelecionado.unidade}
-                            </p>
-                            <VariacaoSinapiIndicator
-                              valorReal={form.watch('valor_unitario') || 0}
-                              valorSinapi={sinapiSelecionado.preco_unitario}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Análise de Insumo Manual */}
-                  {tipoInsumo === 'manual' && form.watch('insumo_customizado') && (
-                    <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
-                        <Package className="h-4 w-4" />
-                        Análise do Insumo
-                      </h3>
-                      <InsumoAnalysisCard
-                        insumoCustomizado={form.watch('insumo_customizado')}
-                        valorUnitario={form.watch('valor_unitario') || 0}
-                        unidade={form.watch('unidade') || undefined}
-                        sinapiReferencia={sinapiSelecionado || undefined}
-                        onBuscarSinapi={() => {
-                          // Implementar busca automática de referência SINAPI
-                          // baseada no nome do insumo customizado
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Seção Financeira */}
+                  {/* Seção Financeira - Mais Intuitiva */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
                       <DollarSign className="h-4 w-4" />
-                      Informações Financeiras
+                      Valores da Compra
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <div className="grid grid-cols-3 gap-4">
                       <FormField
                         control={form.control}
                         name="quantidade"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Quantidade</FormLabel>
+                            <FormLabel>
+                              Quantidade
+                              <span className="text-xs text-muted-foreground ml-1">(ex: 5)</span>
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
                                 step="0.01"
-                                placeholder="1.00"
+                                placeholder="5.00"
                                 {...field}
                                 onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                className="bg-background/50"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="unidade"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Unidade
+                              <span className="text-xs text-muted-foreground ml-1">(m², kg, un...)</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="ex: m², kg, un, sc"
+                                {...field}
+                                value={field.value ?? ''}
                                 className="bg-background/50"
                               />
                             </FormControl>
@@ -599,121 +681,152 @@ const NovaDespesa = () => {
                         name="valor_unitario"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Valor Unitário (R$)</FormLabel>
+                            <FormLabel>
+                              Preço Unitário
+                              <span className="text-xs text-muted-foreground ml-1">(por unidade)</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="100.00"
-                                {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                                className="bg-background/50"
-                              />
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">R$</span>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="25.50"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                  className="bg-background/50 pl-10"
+                                />
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-
-                      {form.watch("valor_unitario") > 0 && form.watch("quantidade") > 0 && (
-                        <div className="flex items-end">
-                          <div className="w-full">
-                            <FormLabel>Valor Total</FormLabel>
-                            <div className="h-10 flex items-center px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-md">
-                              <p className="text-lg font-medium text-green-600 dark:text-green-400">
-                                R$ {(form.watch("valor_unitario") * form.watch("quantidade")).toFixed(2)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Calculadora Visual */}
+                    {form.watch("valor_unitario") > 0 && form.watch("quantidade") > 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/30 dark:to-blue-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">📊 Cálculo:</span>
+                          <span className="text-muted-foreground">
+                            {form.watch("quantidade")} {form.watch("unidade") || "unidades"} × R$ {form.watch("valor_unitario").toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-semibold text-green-700 dark:text-green-300">
+                            Valor Total:
+                          </span>
+                          <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                            R$ {(form.watch("valor_unitario") * form.watch("quantidade")).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Seção Fornecedores */}
+                  {/* Seção Fornecedores - Simplificada */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
                       <User className="h-4 w-4" />
-                      Fornecedor
+                      🏢 Fornecedor da Compra
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="fornecedor_pj_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Fornecedor (Pessoa Jurídica)</FormLabel>
-                            <FormControl>
-                              <Select
-                                value={field.value || ''}
-                                onValueChange={(value) => {
-                                  field.onChange(value === '__NONE__' ? null : value);
-                                  if (value && value !== '__NONE__') {
-                                    form.setValue("fornecedor_pf_id", null, { shouldValidate: true });
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="bg-background/50">
-                                  <SelectValue placeholder="Selecione um fornecedor PJ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="__NONE__">Nenhum</SelectItem>
-                                  {fornecedoresPJ?.map((fornecedor) => (
-                                    <SelectItem key={fornecedor.id} value={fornecedor.id}>
-                                      {fornecedor.razao_social} ({fornecedor.cnpj})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                          💡 <strong>Dica:</strong> Selecione apenas um tipo de fornecedor (empresa ou pessoa física)
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="fornecedor_pj_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                🏢 Empresa/Loja (CNPJ)
+                                <span className="text-xs text-muted-foreground ml-2">(ex: Material de Construção XYZ)</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Select
+                                  value={field.value || ''}
+                                  onValueChange={(value) => {
+                                    field.onChange(value === '__NONE__' ? null : value);
+                                    if (value && value !== '__NONE__') {
+                                      form.setValue("fornecedor_pf_id", null, { shouldValidate: true });
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-background/50">
+                                    <SelectValue placeholder="Escolher empresa/loja" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="__NONE__">Não é empresa</SelectItem>
+                                    {fornecedoresPJ?.map((fornecedor) => (
+                                      <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                                        {fornecedor.razao_social} ({fornecedor.cnpj})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                      <FormField
-                        control={form.control}
-                        name="fornecedor_pf_id"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Fornecedor (Pessoa Física)</FormLabel>
-                            <FormControl>
-                              <Select
-                                 value={field.value || ''}
-                                 onValueChange={(value) => {
-                                   field.onChange(value === '__NONE__' ? null : value);
-                                  if (value && value !== '__NONE__') {
-                                    form.setValue("fornecedor_pj_id", null, { shouldValidate: true });
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="bg-background/50">
-                                  <SelectValue placeholder="Selecione um fornecedor PF" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                   <SelectItem value="__NONE__">Nenhum</SelectItem>
-                                  {fornecedoresPF?.map((fornecedor) => (
-                                    <SelectItem key={fornecedor.id} value={fornecedor.id}>
-                                      {fornecedor.nome} ({fornecedor.cpf})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
+                        <FormField
+                          control={form.control}
+                          name="fornecedor_pf_id"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                👤 Pessoa Física (CPF)
+                                <span className="text-xs text-muted-foreground ml-2">(ex: Pedreiro, marceneiro...)</span>
+                              </FormLabel>
+                              <FormControl>
+                                <Select
+                                   value={field.value || ''}
+                                   onValueChange={(value) => {
+                                     field.onChange(value === '__NONE__' ? null : value);
+                                    if (value && value !== '__NONE__') {
+                                      form.setValue("fornecedor_pj_id", null, { shouldValidate: true });
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-background/50">
+                                    <SelectValue placeholder="Escolher pessoa física" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                     <SelectItem value="__NONE__">Não é pessoa física</SelectItem>
+                                    {fornecedoresPF?.map((fornecedor) => (
+                                      <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                                        {fornecedor.nome} ({fornecedor.cpf})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
                       <FormField
                         control={form.control}
                         name="numero_nf"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Número da Nota Fiscal</FormLabel>
+                            <FormLabel>
+                              📄 Número da Nota Fiscal
+                              <span className="text-xs text-muted-foreground ml-2">(opcional)</span>
+                            </FormLabel>
                             <FormControl>
                               <Input 
-                                placeholder="000123" 
+                                placeholder="ex: 000123 (se tiver nota fiscal)" 
                                 {...field} 
                                 value={field.value ?? ''}
                                 className="bg-background/50"
@@ -730,20 +843,23 @@ const NovaDespesa = () => {
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
                       <FileText className="h-4 w-4" />
-                      Informações Adicionais
+                      Observações (opcional)
                     </h3>
                     <FormField
                       control={form.control}
                       name="observacoes"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Observações</FormLabel>
+                          <FormLabel>
+                            Alguma observação sobre esta compra?
+                            <span className="text-xs text-muted-foreground ml-2">(ex: desconto obtido, qualidade do material...)</span>
+                          </FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Informações adicionais sobre a despesa..."
+                              placeholder="ex: Material de boa qualidade, consegui 10% de desconto à vista"
                               {...field}
                               value={field.value ?? ''}
-                              className="bg-background/50 min-h-[100px]"
+                              className="bg-background/50 min-h-[80px]"
                             />
                           </FormControl>
                           <FormMessage />
@@ -755,8 +871,8 @@ const NovaDespesa = () => {
                   {/* Seção Pagamento */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2 border-t pt-4">
-                      <Calendar className="h-4 w-4" />
-                      Status de Pagamento
+                      
+                      💳 Pagamento
                     </h3>
                     
                     <FormField
@@ -855,35 +971,38 @@ const NovaDespesa = () => {
                   </div>
 
                   {/* Botões de Ação */}
-                  <div className="flex justify-end gap-3 pt-6 border-t">
-                     <Button
+                  <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 rounded-lg">
+                    <Button
                       type="button"
                       variant="outline"
                       disabled={isPending}
                       onClick={() => navigate("/dashboard/despesas")}
-                      className="border-border/50"
+                      className="border-border/50 hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
-                      Cancelar
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Cancelar e Voltar
                     </Button>
                     <Button 
                       type="submit" 
                       disabled={isPending}
+                      size="lg"
                       className={cn(
                         "bg-gradient-to-r from-green-500 to-green-600",
                         "hover:from-green-600 hover:to-green-700",
-                        "text-white shadow-lg",
-                        "transition-all duration-300"
+                        "text-white shadow-lg font-semibold",
+                        "transition-all duration-300 transform hover:scale-[1.02]",
+                        "px-8 py-3"
                       )}
                     >
                       {isPending ? (
                         <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Salvando...
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                          💾 Salvando despesa...
                         </>
                       ) : (
                         <>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Criar Despesa
+                          <Plus className="h-5 w-5 mr-2" />
+                          Adicionar Despesa
                         </>
                       )}
                     </Button>
