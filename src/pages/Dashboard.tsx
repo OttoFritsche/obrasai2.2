@@ -13,7 +13,8 @@ import {
   Users,
   Sparkles,
   Building2,
-  LogOut
+  LogOut,
+  BarChart3
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
