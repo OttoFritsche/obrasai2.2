@@ -5,7 +5,6 @@ import { useAuth } from "./hooks";
 // Protected route wrapper with error boundary
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  const [redirectTimeout, setRedirectTimeout] = React.useState<NodeJS.Timeout | null>(null);
 
   // ✅ Sempre chamar hooks no topo do componente
   let user = null;
@@ -30,13 +29,8 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [hasAuthError, navigate]);
 
-  // ✅ Redirecionamento robusto com timeout de segurança
+  // ✅ Redirecionamento simples e direto (sem loops)
   useEffect(() => {
-    // Limpar timeout anterior
-    if (redirectTimeout) {
-      clearTimeout(redirectTimeout);
-    }
-
     // Se não há sessão ativa, redirecionar imediatamente
     if (!session && !loading) {
       console.log('🔒 ProtectedRoute: Sem sessão, redirecionando para login');
@@ -50,30 +44,21 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
       navigate('/login', { replace: true });
       return;
     }
+  }, [user, loading, session, navigate]);
 
-    // Timeout de segurança: se loading ficar stuck por mais de 10 segundos
+  // ✅ Timeout de segurança separado para loading stuck
+  useEffect(() => {
     if (loading) {
       const timeoutId = setTimeout(() => {
         console.log('⚠️ ProtectedRoute: Loading timeout - forçando redirecionamento');
         if (!user || !session) {
-          navigate('/login', { replace: true });
+          window.location.href = '/login';
         }
       }, 10000);
       
-      setRedirectTimeout(timeoutId);
-      
       return () => clearTimeout(timeoutId);
     }
-  }, [user, loading, session, navigate, redirectTimeout]);
-
-  // ✅ Cleanup do timeout ao desmontar
-  useEffect(() => {
-    return () => {
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
-      }
-    };
-  }, [redirectTimeout]);
+  }, [loading, user, session]);
 
   if (hasAuthError) {
     return <div className="flex items-center justify-center min-h-screen">Redirecting...</div>;

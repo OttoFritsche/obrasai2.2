@@ -341,45 +341,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Logout aprimorado com fallback
+  // Logout otimizado - usa forceLogout que já funciona
   const logout = async () => {
     try {
       secureLogger.info("Logout iniciado");
-      setLoading(true);
       
-      // ✅ Timer de segurança - se não redirecionar em 3s, forçar
-      const forceLogoutTimer = setTimeout(() => {
-        secureLogger.warn("Logout timeout - forçando redirecionamento");
-        forceLogout();
-      }, 3000);
+      // ✅ Fazer signOut do Supabase em background
+      supabase.auth.signOut().catch(error => {
+        secureLogger.error("Supabase signOut falhou", error);
+      });
       
-      // ✅ Limpar estado local antes do signOut
-      clearProfileCache();
-      setUser(null);
-      setSession(null);
-      setSubscription(null);
-      
-      // ✅ Fazer signOut do Supabase
-      await supabase.auth.signOut();
-      secureLogger.info("Logout Supabase concluído");
-      
-      // ✅ Limpar timer se chegou até aqui
-      clearTimeout(forceLogoutTimer);
-      
-      // ✅ Redirecionamento imediato adicional
+      // ✅ Usar forceLogout imediatamente (já testado e funcionando)
       setTimeout(() => {
-        if (window.location.pathname !== '/login') {
-          secureLogger.info("Redirecionamento direto pós-logout");
-          window.location.href = '/login';
-        }
-      }, 500);
+        forceLogout();
+      }, 100);
       
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to logout";
       secureLogger.error("Logout failed", error);
-      toast.error(errorMessage);
       
-      // ✅ Em caso de erro, forçar logout
+      // ✅ Fallback sempre usar forceLogout
       forceLogout();
     }
   };
