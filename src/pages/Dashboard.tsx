@@ -31,14 +31,15 @@ import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { Link } from "react-router-dom";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { RecentProjects } from "@/components/dashboard/RecentProjects";
 
 const Dashboard = () => {
   const { obras, isLoading: obrasLoading } = useObras();
   const { despesas, isLoading: despesasLoading } = useDespesas();
   const { notasFiscais, isLoading: notasLoading } = useNotasFiscais();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const [testingLogout, setTestingLogout] = useState(false);
+  const { user } = useAuth();
 
   // Calcular métricas reais
   const totalObras = obras?.length || 0;
@@ -169,31 +170,6 @@ const Dashboard = () => {
 
   const isLoading = obrasLoading || despesasLoading || notasLoading;
 
-  // ✅ Função de teste de logout direto
-  const testLogout = async () => {
-    setTestingLogout(true);
-    console.log("🧪 TESTE: Iniciando logout direto");
-    
-    try {
-      // Limpar localStorage diretamente
-      const keys = Object.keys(localStorage);
-      keys.forEach(key => {
-        if (key.includes('supabase') || key.includes('auth') || key.startsWith('sb-')) {
-          localStorage.removeItem(key);
-          console.log(`🧪 Removido: ${key}`);
-        }
-      });
-      
-      // Redirecionar diretamente
-      console.log("🧪 TESTE: Redirecionando diretamente");
-      window.location.href = '/login';
-      
-    } catch (error) {
-      console.error("🧪 TESTE: Erro", error);
-      window.location.href = '/login';
-    }
-  };
-
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -210,277 +186,102 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        {/* 🧪 BOTÃO DE TESTE TEMPORÁRIO */}
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader>
-            <CardTitle className="text-red-700">🧪 TESTE DE LOGOUT</CardTitle>
-            <CardDescription>Botão temporário para debug - será removido</CardDescription>
-          </CardHeader>
-          <CardContent className="flex gap-4">
-            <Button 
-              onClick={testLogout}
-              disabled={testingLogout}
-              variant="destructive"
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              {testingLogout ? "Testando..." : "TESTE: Logout Direto"}
-            </Button>
-            <Button 
-              onClick={logout}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout Normal
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Header de boas-vindas */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
+          transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            {totalObras === 0 
-              ? "Bem-vindo! Comece criando sua primeira obra." 
-              : `Acompanhe o progresso de suas ${totalObras} obras.`
-            }
-          </p>
+          <DashboardOverview />
         </motion.div>
 
-        {/* Métricas principais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {metrics.map((metric, index) => (
-            <motion.div
-              key={metric.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <MetricCard {...metric} />
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Grid principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Projetos Recentes */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="lg:col-span-2"
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
-                    <Building className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                  </div>
-                  <span className="text-blue-700 dark:text-blue-300">Obras Recentes</span>
-                </CardTitle>
-                <Button variant="outline" size="sm" asChild className="border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                  <Link to="/dashboard/obras">Ver todas</Link>
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {recentProjects.length === 0 ? (
-                  <div className="text-center py-8 space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mx-auto">
-                      <Building className="h-8 w-8 text-blue-500 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-slate-700 dark:text-slate-300">Nenhuma obra cadastrada</h3>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Comece criando sua primeira obra
-                      </p>
-                    </div>
-                    <Button asChild className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
-                      <Link to="/dashboard/obras/nova">Criar Obra</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recentProjects.map((project, index) => (
-                      <motion.div
-                        key={project.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 + index * 0.1 }}
-                        className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`w-3 h-3 rounded-full ${statusColors[project.status]}`} />
-                          <div>
-                            <h4 className="font-medium text-slate-700 dark:text-slate-300">{project.name}</h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                              {project.city}/{project.state} • <span className="text-emerald-600 dark:text-emerald-400 font-medium">{formatCurrencyBR(project.budget)}</span>
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{project.deadline}</p>
-                          <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-600">
-                            {project.status === "em_andamento" ? "Em andamento" : "Planejamento"}
-                          </Badge>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <RecentProjects />
           </motion.div>
 
-          {/* Tarefas Pendentes */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <Card className="border-emerald-200/50 dark:border-emerald-700/50 bg-gradient-to-br from-emerald-50/50 to-green-50/50 dark:from-emerald-900/10 dark:to-green-900/10 backdrop-blur-sm">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center">
-                    <CheckCircle className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
-                  </div>
-                  <span className="text-emerald-700 dark:text-emerald-300">Ações Necessárias</span>
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  Ações Rápidas
                 </CardTitle>
+                <CardDescription>
+                  Acesse as funcionalidades mais utilizadas
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                {pendingTasks.length === 0 ? (
-                  <div className="text-center py-8 space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto">
-                      <CheckCircle className="h-8 w-8 text-emerald-500 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-emerald-700 dark:text-emerald-300">Tudo em dia!</h3>
-                      <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                        Não há tarefas pendentes no momento
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {pendingTasks.map((task, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 + index * 0.1 }}
-                        className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-colors"
-                      >
-                        <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                          <task.icon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm text-slate-700 dark:text-slate-300">{task.title}</h4>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{task.description}</p>
-                        </div>
-                        <Badge 
-                          variant={priorityColors[task.priority] as "default" | "secondary" | "destructive" | "outline"}
-                          className="text-xs"
-                        >
-                          {task.priority}
-                        </Badge>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" asChild>
+                    <Link to="/dashboard/obras/nova">
+                      <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span className="font-medium">Nova Obra</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" asChild>
+                    <Link to="/dashboard/fornecedores/pj">
+                      <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+                      </div>
+                      <span className="font-medium">Fornecedores</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-[#daa916]/30 dark:border-[#daa916]/50 text-[#daa916] dark:text-[#daa916] hover:bg-[#daa916]/10 dark:hover:bg-[#daa916]/20 transition-colors" asChild>
+                    <Link to="/dashboard/orcamentos">
+                      <div className="h-10 w-10 rounded-lg bg-[#daa916]/20 dark:bg-[#daa916]/30 flex items-center justify-center">
+                        <FileText className="h-6 w-6 text-[#daa916] dark:text-[#daa916]" />
+                      </div>
+                      <span className="font-medium">Orçamentos IA</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-[#182b4d]/30 dark:border-[#daa916]/50 text-[#182b4d] dark:text-[#daa916] hover:bg-[#182b4d]/10 dark:hover:bg-[#daa916]/20 transition-colors" asChild>
+                    <Link to="/dashboard/chat">
+                      <div className="h-10 w-10 rounded-lg bg-[#182b4d]/20 dark:bg-[#daa916]/30 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 text-[#182b4d] dark:text-[#daa916]" />
+                      </div>
+                      <span className="font-medium">Chat IA</span>
+                    </Link>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-cyan-200 dark:border-cyan-700 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors" asChild>
+                    <Link to="/dashboard/plantas">
+                      <div className="h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                        <Building className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
+                      </div>
+                      <span className="font-medium">Plantas IA</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" asChild>
+                    <Link to="/dashboard/construtoras/nova">
+                      <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <span className="font-medium">Nova Construtora</span>
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" asChild>
+                    <Link to="/dashboard/alertas">
+                      <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                        <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                      </div>
+                      <span className="font-medium">Alertas de Desvio</span>
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
         </div>
-
-        {/* Ações rápidas */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card className="border-amber-200/50 dark:border-amber-700/50 bg-gradient-to-br from-amber-50/30 to-yellow-50/30 dark:from-amber-900/10 dark:to-yellow-900/10 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-amber-500 dark:text-amber-400" />
-                </div>
-                <span className="text-amber-700 dark:text-amber-300">Ações Rápidas</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" asChild>
-                  <Link to="/dashboard/obras/nova">
-                    <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                      <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <span className="font-medium">Nova Obra</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-emerald-200 dark:border-emerald-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors" asChild>
-                  <Link to="/dashboard/despesas/nova">
-                    <div className="h-10 w-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                      <Receipt className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <span className="font-medium">Nova Despesa</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-green-200 dark:border-green-700 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors" asChild>
-                  <Link to="/dashboard/fornecedores/pj">
-                    <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="font-medium">Fornecedores</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-[#daa916]/30 dark:border-[#daa916]/50 text-[#daa916] dark:text-[#daa916] hover:bg-[#daa916]/10 dark:hover:bg-[#daa916]/20 transition-colors" asChild>
-                  <Link to="/dashboard/orcamentos">
-                    <div className="h-10 w-10 rounded-lg bg-[#daa916]/20 dark:bg-[#daa916]/30 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-[#daa916] dark:text-[#daa916]" />
-                    </div>
-                    <span className="font-medium">Orçamentos IA</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-[#182b4d]/30 dark:border-[#daa916]/50 text-[#182b4d] dark:text-[#daa916] hover:bg-[#182b4d]/10 dark:hover:bg-[#daa916]/20 transition-colors" asChild>
-                  <Link to="/dashboard/chat">
-                    <div className="h-10 w-10 rounded-lg bg-[#182b4d]/20 dark:bg-[#daa916]/30 flex items-center justify-center">
-                      <Sparkles className="h-6 w-6 text-[#182b4d] dark:text-[#daa916]" />
-                    </div>
-                    <span className="font-medium">Chat IA</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-cyan-200 dark:border-cyan-700 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors" asChild>
-                  <Link to="/dashboard/plantas">
-                    <div className="h-10 w-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-                      <Building className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
-                    </div>
-                    <span className="font-medium">Plantas IA</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors" asChild>
-                  <Link to="/dashboard/construtoras/nova">
-                    <div className="h-10 w-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                      <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <span className="font-medium">Nova Construtora</span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col gap-2 border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" asChild>
-                  <Link to="/dashboard/alertas">
-                    <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                      <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
-                    </div>
-                    <span className="font-medium">Alertas de Desvio</span>
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
     </DashboardLayout>
   );
