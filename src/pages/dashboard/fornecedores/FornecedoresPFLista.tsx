@@ -91,14 +91,14 @@ const FornecedoresPFLista = () => {
       accessorKey: "nome",
       header: "Nome",
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.nome}</div>
+        <div className="font-medium text-slate-900 dark:text-slate-100">{row.original.nome}</div>
       ),
     },
     {
       accessorKey: "cpf",
       header: "CPF",
       cell: ({ row }) => (
-        <span className="font-mono text-sm">{row.original.cpf}</span>
+        <span className="font-mono text-sm text-slate-600 dark:text-slate-400">{row.original.cpf}</span>
       ),
     },
     {

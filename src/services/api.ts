@@ -741,8 +741,38 @@ export const despesasApi = {
       const sanitizedDespesa = sanitizeFormData(despesa);
 
       // 🌐 Mapeamento de categoria legacy → enum atual do banco
-      if (sanitizedDespesa.categoria === "SERVICO") {
-        sanitizedDespesa.categoria = "SERVICOS_TERCEIRIZADOS";
+      const categoriaMapping: Record<string, string> = {
+        "MATERIAL": "MATERIAL_CONSTRUCAO",
+        "MATERIAL_CONSTRUCAO": "MATERIAL_CONSTRUCAO",
+        "MAO_DE_OBRA": "MAO_DE_OBRA",
+        "EQUIPAMENTO": "ALUGUEL_EQUIPAMENTOS",
+        "ALUGUEL_EQUIPAMENTOS": "ALUGUEL_EQUIPAMENTOS",
+        "SERVICO": "SERVICOS_TERCEIRIZADOS",
+        "SERVICOS_TERCEIRIZADOS": "SERVICOS_TERCEIRIZADOS",
+        "TRANSPORTE": "TRANSPORTE_FRETE",
+        "TRANSPORTE_FRETE": "TRANSPORTE_FRETE",
+        "TAXAS": "TAXAS_LICENCAS",
+        "TAXAS_LICENCAS": "TAXAS_LICENCAS",
+        "ADMINISTRATIVO": "ADMINISTRATIVO",
+        "IMPREVISTOS": "IMPREVISTOS",
+        "OUTROS": "OUTROS",
+        "DEMOLICAO": "DEMOLICAO_REMOCAO",
+        "DEMOLICAO_REMOCAO": "DEMOLICAO_REMOCAO",
+        "PROTECAO": "PROTECAO_ESTRUTURAL",
+        "PROTECAO_ESTRUTURAL": "PROTECAO_ESTRUTURAL",
+        "TERRENO": "AQUISICAO_TERRENO_AREA",
+        "AQUISICAO_TERRENO_AREA": "AQUISICAO_TERRENO_AREA",
+        "IMOVEL": "AQUISICAO_IMOVEL_REFORMA_LEILAO",
+        "AQUISICAO_IMOVEL_REFORMA_LEILAO": "AQUISICAO_IMOVEL_REFORMA_LEILAO",
+      };
+
+      // Aplicar mapeamento se necessário
+      if (
+        sanitizedDespesa.categoria &&
+        categoriaMapping[sanitizedDespesa.categoria]
+      ) {
+        const categoriaMapeada = categoriaMapping[sanitizedDespesa.categoria];
+        sanitizedDespesa.categoria = categoriaMapeada;
       }
 
       // ✅ Calcular o custo total (quantidade * valor_unitario)

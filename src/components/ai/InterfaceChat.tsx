@@ -21,7 +21,10 @@ import { aiApi, ChatMessage } from "@/services/aiApi";
 import { obrasApi } from "@/services/api";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/auth";
+import { useTheme } from "@/hooks/use-theme";
 import { toast } from "sonner";
+import LogoImageDark from "@/assets/logo/logo_image_dark.png";
+import LogoImageLight from "@/assets/logo/logo_image_light.png";
 
 interface InterfaceChatProps {
   obraId?: string;
@@ -31,10 +34,23 @@ interface InterfaceChatProps {
 
 const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceChatProps) => {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [message, setMessage] = useState("");
   const selectedObraId = propObraId || null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+
+  // Logo component that switches based on theme
+  const LogoComponent = ({ className = "h-5 w-5" }: { className?: string }) => {
+    const isDark = theme === 'dark';
+    return (
+      <img 
+        src={isDark ? LogoImageDark : LogoImageLight} 
+        alt="ObrasAI" 
+        className={className}
+      />
+    );
+  };
   
   // Carregar obras apenas para exibição do nome, se necessário
   const { data: obras = [] } = useQuery({
@@ -149,8 +165,8 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
       className="flex items-center gap-3 max-w-[80%] p-3 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20"
     >
       <Avatar className="h-8 w-8">
-        <AvatarFallback className="bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold">
-          <Bot className="h-4 w-4" />
+        <AvatarFallback className="bg-transparent p-0">
+          <LogoComponent className="h-7 w-7" />
         </AvatarFallback>
       </Avatar>
       <div className="flex items-center gap-1">
@@ -181,13 +197,13 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
       <CardHeader className="border-b border-border/50">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg">
-              <Sparkles className="h-5 w-5 text-white" />
+            <div className="h-12 w-12 flex items-center justify-center">
+              <LogoComponent className="h-10 w-10" />
             </div>
             <div>
               <h3 className="text-lg font-semibold">
                 Assistente{" "}
-                <span className="bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-[#FF9900]">
                   ObrasAI
                 </span>
               </h3>
@@ -252,34 +268,14 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
               </div>
             </motion.div>
           ) : messages.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center h-full text-center p-6 space-y-6"
-            >
-              <div className="relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="h-20 w-20 rounded-full bg-gradient-to-r from-purple-500/20 to-purple-600/20 flex items-center justify-center"
-                >
-                  <Bot className="h-10 w-10 text-purple-500" />
-                </motion.div>
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-1 -right-1"
-                >
-                  <Sparkles className="h-6 w-6 text-purple-400" />
-                </motion.div>
+            <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-6">
+              <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
+                <LogoComponent className="h-10 w-10" />
               </div>
-              
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold">
-                  Olá! Sou seu assistente{" "}
-                  <span className="bg-gradient-to-r from-purple-500 to-purple-600 bg-clip-text text-transparent">
-                    ObrasAI
-                  </span>
+                  Olá! Sou seu assistente {" "}
+                  <span className="text-[#FF9900]">ObrasAI</span>
                 </h3>
                 <p className="text-muted-foreground max-w-md">
                   {selectedObraId 
@@ -288,26 +284,7 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
                   }
                 </p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-lg">
-                {[
-                  { icon: Brain, text: "Análise de custos", color: "text-blue-500" },
-                  { icon: MessageCircle, text: "Dúvidas técnicas", color: "text-green-500" },
-                  { icon: Zap, text: "Otimização", color: "text-orange-500" },
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.text}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                    className="p-3 rounded-lg bg-muted/30 border border-border/50 text-center"
-                  >
-                    <item.icon className={cn("h-5 w-5 mx-auto mb-2", item.color)} />
-                    <p className="text-xs text-muted-foreground">{item.text}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+            </div>
           ) : (
             <div className="space-y-4">
               <AnimatePresence>
@@ -344,8 +321,8 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
                       <div className="flex justify-start">
                         <div className="flex items-end gap-2 max-w-[80%]">
                           <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold">
-                              <Bot className="h-4 w-4" />
+                            <AvatarFallback className="bg-transparent p-0">
+                              <LogoComponent className="h-7 w-7" />
                             </AvatarFallback>
                           </Avatar>
                           <div className="space-y-1">

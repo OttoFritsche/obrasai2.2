@@ -1,0 +1,8 @@
+<prompt>
+    <descricao>Instruções para análise de arquivos do projeto Pharma.AI</descricao>
+    <passos>
+        <passo ordem="1">Analise os arquivos dentro da pasta .cursor\rules</passo>
+        <passo ordem="2">Analise os arquivos de regras para compreender todas as diretrizes: rules.md e project-rules.mdc.</passo>
+    </passos>
+    <observacao>Nenhuma descrição detalhada é necessária. Ao final, apenas confirme que todos os arquivos foram analisados e que seguirá as regras estabelecidas.</observacao>
+</prompt>

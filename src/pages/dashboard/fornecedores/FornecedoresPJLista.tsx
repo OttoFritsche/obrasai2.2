@@ -65,7 +65,7 @@ const FornecedoresPJLista = () => {
       accessorKey: "razao_social",
       header: "Razão Social",
       cell: ({ row }) => (
-        <div className="font-medium">{row.original.razao_social}</div>
+        <div className="font-medium text-slate-900 dark:text-slate-100">{row.original.razao_social}</div>
       ),
     },
     {
@@ -81,7 +81,7 @@ const FornecedoresPJLista = () => {
       accessorKey: "cnpj",
       header: "CNPJ",
       cell: ({ row }) => (
-        <span className="font-mono text-sm text-slate-700 dark:text-slate-300">{row.original.cnpj}</span>
+        <span className="font-mono text-sm text-slate-600 dark:text-slate-400">{row.original.cnpj}</span>
       ),
     },
     {

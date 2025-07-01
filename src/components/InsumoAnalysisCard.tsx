@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -9,7 +9,7 @@ import useInsumoAnalysis from "@/hooks/useInsumoAnalysis";
 interface InsumoAnalysisCardProps {
   insumoCustomizado: string;
   valorUnitario: number;
-  unidade: string;
+  unidade?: string;
   sinapiReferencia?: SinapiItem;
   onBuscarSinapi?: () => void;
 }
@@ -27,24 +27,40 @@ export function InsumoAnalysisCard({
   // Usar referência fornecida via props ou a melhor correspondência encontrada pelo hook
   const sinapiReferencia = propsSinapiReferencia || analysisResult.melhorCorrespondencia;
 
-  // Analisar insumo quando o componente montar ou quando o insumo mudar
-  useEffect(() => {
-    if (insumoCustomizado && !propsSinapiReferencia) {
-      analisarInsumo(insumoCustomizado);
+  // ✅ Memoizar função de análise para evitar loop infinito
+  const handleAnalisarInsumo = useCallback(async () => {
+    if (insumoCustomizado && insumoCustomizado.length >= 3 && !propsSinapiReferencia) {
+      await analisarInsumo(insumoCustomizado);
     }
   }, [insumoCustomizado, propsSinapiReferencia, analisarInsumo]);
 
-  // Gerar recomendações quando a referência mudar
-  useEffect(() => {
-    if (insumoCustomizado && valorUnitario) {
-      setRecomendacoes(gerarRecomendacoes(insumoCustomizado, valorUnitario, sinapiReferencia));
+  // ✅ Memoizar função de recomendações
+  const handleGerarRecomendacoes = useCallback(() => {
+    if (insumoCustomizado && valorUnitario > 0) {
+      const novasRecomendacoes = gerarRecomendacoes(insumoCustomizado, valorUnitario, sinapiReferencia);
+      setRecomendacoes(novasRecomendacoes);
     }
   }, [insumoCustomizado, valorUnitario, sinapiReferencia, gerarRecomendacoes]);
+
+  // ✅ Analisar insumo quando necessário (dependências otimizadas)
+  useEffect(() => {
+    handleAnalisarInsumo();
+  }, [handleAnalisarInsumo]);
+
+  // ✅ Gerar recomendações quando os dados mudarem (dependências otimizadas)
+  useEffect(() => {
+    handleGerarRecomendacoes();
+  }, [handleGerarRecomendacoes]);
 
   // Calcular variação se houver referência SINAPI
   const variacao = sinapiReferencia ? 
     calcularVariacao(valorUnitario, sinapiReferencia.preco_unitario) : 
     null;
+
+  // ✅ Não renderizar se não houver insumo customizado
+  if (!insumoCustomizado || insumoCustomizado.length < 3) {
+    return null;
+  }
 
   return (
     <Card className="w-full">
@@ -67,7 +83,7 @@ export function InsumoAnalysisCard({
                 <p className="text-sm text-muted-foreground">{insumoCustomizado}</p>
                 <p className="mt-1">
                   <span className="font-bold">R$ {valorUnitario.toFixed(2)}</span>
-                  <span className="text-sm text-muted-foreground ml-2">/{unidade}</span>
+                  {unidade && <span className="text-sm text-muted-foreground ml-2">/{unidade}</span>}
                 </p>
               </div>
               <div className="text-right">

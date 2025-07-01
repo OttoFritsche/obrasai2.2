@@ -197,8 +197,8 @@ export const despesaSchema = z.object({
   sinapi_referencia_id: z.string().nullable().optional(),
   // Etapa (opcional, baseado no enum)
   etapa: EtapaEnum.nullable().optional(),
-  // Categoria (obrigatório, baseado no enum - corrigido)
-  categoria: CategoriaEnum, // Correção: Usar o enum diretamente para obrigatoriedade
+  // Categoria (opcional, baseado no enum)
+  categoria: CategoriaEnum.nullable().optional(),
   // Unidade de medida (opcional)
   unidade: z.string().nullable().optional(),
   // Quantidade (obrigatório, número positivo)
