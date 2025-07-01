@@ -1,38 +1,60 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod@v3.23.8/mod.ts";
 
 // ✅ Headers de segurança
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
 };
 
 // ✅ Rate limiting para prevenir spam
 const rateLimiter = new Map<string, number[]>();
 
-interface LeadData {
-  email: string;
-  nome?: string;
-  telefone?: string;
-  empresa?: string;
-  cargo?: string;
-  tipo_empresa?: 'construtora' | 'engenharia' | 'arquitetura' | 'individual' | 'outro';
-  porte_empresa?: 'micro' | 'pequena' | 'media' | 'grande';
-  numero_obras_mes?: number;
-  principal_desafio?: string;
-  como_conheceu?: string;
-  interesse_nivel?: 'baixo' | 'medio' | 'alto' | 'muito_alto';
-  origem?: string;
-  orcamento_mensal?: number;
-  previsao_inicio?: string;
-  observacoes?: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-}
+// ✅ Schema de validação com Zod
+const leadSchema = z.object({
+  email: z.string({ required_error: "Email é obrigatório" }).email({
+    message: "Formato de email inválido",
+  }),
+  nome: z.string().optional(),
+  telefone: z.string().min(10, {
+    message: "Telefone deve ter no mínimo 10 dígitos",
+  }).optional(),
+  empresa: z.string().optional(),
+  cargo: z.string().optional(),
+  tipo_empresa: z.enum([
+    "construtora",
+    "engenharia",
+    "arquitetura",
+    "individual",
+    "outro",
+  ]).optional(),
+  porte_empresa: z.enum(["micro", "pequena", "media", "grande"]).optional(),
+  numero_obras_mes: z.number().min(0, "Valor deve ser positivo").max(
+    1000,
+    "Valor excede o limite",
+  ).optional(),
+  principal_desafio: z.string().optional(),
+  como_conheceu: z.string().optional(),
+  interesse_nivel: z.enum(["baixo", "medio", "alto", "muito_alto"]).optional(),
+  origem: z.string().optional(),
+  orcamento_mensal: z.number().min(0, "Valor deve ser positivo").max(
+    100000000,
+    "Valor excede o limite",
+  ).optional(),
+  previsao_inicio: z.string().optional(),
+  observacoes: z.string().optional(),
+  utm_source: z.string().optional(),
+  utm_medium: z.string().optional(),
+  utm_campaign: z.string().optional(),
+});
+
+// O tipo é inferido a partir do schema Zod
+type LeadData = z.infer<typeof leadSchema>;
 
 interface LeadRequest {
   lead: LeadData;
@@ -50,82 +72,26 @@ interface LeadRequest {
 const checkRateLimit = (clientId: string): boolean => {
   const now = Date.now();
   const requests = rateLimiter.get(clientId) || [];
-  
+
   // Remove requests mais antigos que 1 hora
-  const recentRequests = requests.filter(time => now - time < 3600000);
-  
+  const recentRequests = requests.filter((time) => now - time < 3600000);
+
   // Limite: 3 leads por hora por IP
   if (recentRequests.length >= 3) {
     return false;
   }
-  
+
   recentRequests.push(now);
   rateLimiter.set(clientId, recentRequests);
   return true;
 };
 
 /**
- * ✅ Validação e sanitização de dados
- */
-const validateLead = (lead: LeadData): { isValid: boolean; errors: string[] } => {
-  const errors: string[] = [];
-
-  // Email obrigatório e válido
-  if (!lead.email) {
-    errors.push('Email é obrigatório');
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
-    errors.push('Email inválido');
-  }
-
-  // Validações opcionais mas quando presentes devem ser válidas
-  if (lead.telefone && !/^[\d\s\-()+]{10,}$/.test(lead.telefone.replace(/\s/g, ''))) {
-    errors.push('Telefone inválido');
-  }
-
-  if (lead.numero_obras_mes && (lead.numero_obras_mes < 0 || lead.numero_obras_mes > 1000)) {
-    errors.push('Número de obras por mês deve ser entre 0 e 1000');
-  }
-
-  if (lead.orcamento_mensal && (lead.orcamento_mensal < 0 || lead.orcamento_mensal > 100000000)) {
-    errors.push('Orçamento mensal inválido');
-  }
-
-  return { isValid: errors.length === 0, errors };
-};
-
-/**
- * 📧 Notificação por email (simulada - pode integrar com SendGrid, etc)
- */
-const notificarNovoLead = async (lead: LeadData): Promise<void> => {
-  try {
-    // Aqui você pode integrar com serviços de email como SendGrid, AWS SES, etc.
-    console.log(`🎯 NOVO LEAD CAPTURADO:`, {
-      email: lead.email,
-      nome: lead.nome || 'Não informado',
-      empresa: lead.empresa || 'Não informada',
-      interesse: lead.interesse_nivel || 'medio',
-      origem: lead.origem || 'landing_page'
-    });
-
-    // Exemplo de integração com webhook/Slack/Discord
-    // await fetch('https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     text: `🎯 Novo lead: ${lead.nome || lead.email} - ${lead.empresa || 'Sem empresa'}`
-    //   })
-    // });
-
-  } catch (error) {
-    console.error('Erro ao notificar novo lead:', error);
-    // Não falhar a operação por causa da notificação
-  }
-};
-
-/**
  * 🧮 Calcular score de qualificação do lead
  */
-const calcularScoreLead = (lead: LeadData): { score: number; prioridade: string } => {
+const calcularScoreLead = (
+  lead: LeadData,
+): { score: number; prioridade: string } => {
   let score = 0;
 
   // Score por dados fornecidos
@@ -135,13 +101,13 @@ const calcularScoreLead = (lead: LeadData): { score: number; prioridade: string 
   if (lead.cargo) score += 10;
 
   // Score por tipo e porte da empresa
-  if (lead.tipo_empresa === 'construtora') score += 30;
-  else if (lead.tipo_empresa === 'engenharia') score += 25;
-  else if (lead.tipo_empresa === 'arquitetura') score += 20;
+  if (lead.tipo_empresa === "construtora") score += 30;
+  else if (lead.tipo_empresa === "engenharia") score += 25;
+  else if (lead.tipo_empresa === "arquitetura") score += 20;
 
-  if (lead.porte_empresa === 'grande') score += 25;
-  else if (lead.porte_empresa === 'media') score += 20;
-  else if (lead.porte_empresa === 'pequena') score += 15;
+  if (lead.porte_empresa === "grande") score += 25;
+  else if (lead.porte_empresa === "media") score += 20;
+  else if (lead.porte_empresa === "pequena") score += 15;
 
   // Score por volume de obras
   if (lead.numero_obras_mes) {
@@ -158,17 +124,45 @@ const calcularScoreLead = (lead: LeadData): { score: number; prioridade: string 
   }
 
   // Score por interesse declarado
-  if (lead.interesse_nivel === 'muito_alto') score += 25;
-  else if (lead.interesse_nivel === 'alto') score += 20;
-  else if (lead.interesse_nivel === 'medio') score += 10;
+  if (lead.interesse_nivel === "muito_alto") score += 25;
+  else if (lead.interesse_nivel === "alto") score += 20;
+  else if (lead.interesse_nivel === "medio") score += 10;
 
   // Determinar prioridade
-  let prioridade = 'normal';
-  if (score >= 100) prioridade = 'urgente';
-  else if (score >= 70) prioridade = 'alta';
-  else if (score < 30) prioridade = 'baixa';
+  let prioridade = "normal";
+  if (score >= 100) prioridade = "urgente";
+  else if (score >= 70) prioridade = "alta";
+  else if (score < 30) prioridade = "baixa";
 
   return { score, prioridade };
+};
+
+/**
+ * 📧 Notificação por email (simulada - pode integrar com SendGrid, etc)
+ */
+const notificarNovoLead = async (lead: LeadData): Promise<void> => {
+  try {
+    // Aqui você pode integrar com serviços de email como SendGrid, AWS SES, etc.
+    console.log(`🎯 NOVO LEAD CAPTURADO:`, {
+      email: lead.email,
+      nome: lead.nome || "Não informado",
+      empresa: lead.empresa || "Não informada",
+      interesse: lead.interesse_nivel || "medio",
+      origem: lead.origem || "landing_page",
+    });
+
+    // Exemplo de integração com webhook/Slack/Discord
+    // await fetch('https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     text: `🎯 Novo lead: ${lead.nome || lead.email} - ${lead.empresa || 'Sem empresa'}`
+    //   })
+    // });
+  } catch (error) {
+    console.error("Erro ao notificar novo lead:", error);
+    // Não falhar a operação por causa da notificação
+  }
 };
 
 /**
@@ -176,18 +170,18 @@ const calcularScoreLead = (lead: LeadData): { score: number; prioridade: string 
  */
 serve(async (req) => {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error('Método não permitido. Use POST.');
+    if (req.method !== "POST") {
+      throw new Error("Método não permitido. Use POST.");
     }
 
     // Inicializar Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parsear dados da requisição
@@ -195,57 +189,60 @@ serve(async (req) => {
     const { lead, context } = body as LeadRequest;
 
     // Rate limiting por IP
-    const clientIp = req.headers.get('x-forwarded-for') || 
-                     req.headers.get('x-real-ip') || 
-                     context?.ip_address || 
-                     'unknown';
-    
+    const clientIp = req.headers.get("x-forwarded-for") ||
+      req.headers.get("x-real-ip") ||
+      context?.ip_address ||
+      "unknown";
+
     if (!checkRateLimit(clientIp)) {
       return new Response(
-        JSON.stringify({ 
-          error: 'Muitas tentativas. Aguarde 1 hora.',
-          type: 'rate_limit'
+        JSON.stringify({
+          error: "Muitas tentativas. Aguarde 1 hora.",
+          type: "rate_limit",
         }),
-        { 
-          status: 429, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
-    // Validar dados do lead
-    const { isValid, errors } = validateLead(lead);
-    if (!isValid) {
+    // Validar dados do lead com Zod
+    const validationResult = leadSchema.safeParse(lead);
+    if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ 
-          error: 'Dados inválidos',
-          details: errors
+        JSON.stringify({
+          error: "Dados inválidos",
+          details: validationResult.error.flatten().fieldErrors,
         }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
+
+    // Usar os dados validados e sanitizados pelo Zod
+    const validatedLead = validationResult.data;
 
     // Calcular score e prioridade
-    const { score, prioridade } = calcularScoreLead(lead);
+    const { score, prioridade } = calcularScoreLead(validatedLead);
 
     // Preparar dados para inserção
     const leadData = {
-      ...lead,
-      email: lead.email.toLowerCase().trim(),
+      ...validatedLead,
+      email: validatedLead.email.toLowerCase().trim(),
       prioridade,
       ip_address: clientIp,
-      user_agent: context?.user_agent || req.headers.get('user-agent'),
-      origem: lead.origem || 'landing_page'
+      user_agent: context?.user_agent || req.headers.get("user-agent"),
+      origem: validatedLead.origem || "landing_page",
     };
 
     // Verificar se já existe um lead com este email
     const { data: existingLead } = await supabase
-      .from('leads')
-      .select('id, email, updated_at')
-      .eq('email', leadData.email)
+      .from("leads")
+      .select("id, email, updated_at")
+      .eq("email", leadData.email)
       .single();
 
     let result;
@@ -253,60 +250,60 @@ serve(async (req) => {
     if (existingLead) {
       // Atualizar lead existente com novos dados
       const { data, error } = await supabase
-        .from('leads')
+        .from("leads")
         .update({
           ...leadData,
-          interesse_nivel: lead.interesse_nivel || 'alto', // Aumentar interesse se voltou
-          updated_at: new Date().toISOString()
+          interesse_nivel: validatedLead.interesse_nivel || "alto", // Aumentar interesse se voltou
+          updated_at: new Date().toISOString(),
         })
-        .eq('email', leadData.email)
+        .eq("email", leadData.email)
         .select()
         .single();
 
       if (error) throw error;
-      result = { type: 'updated', lead: data };
-
+      result = { type: "updated", lead: data };
     } else {
       // Criar novo lead
       const { data, error } = await supabase
-        .from('leads')
+        .from("leads")
         .insert([leadData])
         .select()
         .single();
 
       if (error) throw error;
-      result = { type: 'created', lead: data };
+      result = { type: "created", lead: data };
 
       // Notificar apenas para novos leads
-      await notificarNovoLead(lead);
+      await notificarNovoLead(validatedLead);
     }
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
-        message: result.type === 'created' ? 'Lead cadastrado com sucesso!' : 'Informações atualizadas!',
+        message: result.type === "created"
+          ? "Lead cadastrado com sucesso!"
+          : "Informações atualizadas!",
         lead_id: result.lead.id,
         score,
-        prioridade
+        prioridade,
       }),
-      { 
+      {
         status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
-
   } catch (error) {
-    console.error('Erro no Lead Capture:', error);
-    
+    console.error("Erro no Lead Capture:", error);
+
     return new Response(
-      JSON.stringify({ 
-        error: 'Erro interno do servidor',
-        message: 'Não foi possível processar sua solicitação. Tente novamente.'
+      JSON.stringify({
+        error: "Erro interno do servidor",
+        message: "Não foi possível processar sua solicitação. Tente novamente.",
       }),
-      { 
+      {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 });
