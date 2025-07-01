@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, User, Edit, Trash2, Plus } from "lucide-react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,14 +70,48 @@ const ConstrutorasLista = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Construtoras & Autônomos</h1>
-        <Button onClick={() => navigate("/dashboard/construtoras/nova")}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-          <Plus className="h-4 w-4 mr-2" /> Nova Construtora
-        </Button>
-      </div>
-      <Card className="mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center gap-3"
+          >
+            <div className="h-10 w-10 rounded-lg bg-purple-500/10 dark:bg-purple-400/10 flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-purple-500 dark:text-purple-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Construtoras & Autônomos</h1>
+              <p className="text-sm text-muted-foreground">
+                Gerencie construtoras e profissionais autônomos
+              </p>
+            </div>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Button onClick={() => navigate("/dashboard/construtoras/nova")}
+              className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg transition-all duration-300">
+              <Plus className="h-4 w-4 mr-2" /> Nova Construtora
+            </Button>
+          </motion.div>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="border-purple-200/50 dark:border-purple-700/50 bg-gradient-to-br from-purple-50/50 to-violet-50/50 dark:from-purple-900/10 dark:to-violet-900/10 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Buscar e Filtrar</CardTitle>
         </CardHeader>
@@ -96,12 +131,18 @@ const ConstrutorasLista = () => {
               </TabsList>
             </Tabs>
           </div>
-        </CardContent>
-      </Card>
-      {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Carregando...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          </CardContent>
+          </Card>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          {loading ? (
+            <div className="text-center py-12 text-muted-foreground">Carregando...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.length === 0 && (
             <div className="col-span-full text-center text-muted-foreground py-12">
               Nenhuma construtora encontrada.
@@ -157,8 +198,10 @@ const ConstrutorasLista = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-      )}
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
     </DashboardLayout>
   );
 };

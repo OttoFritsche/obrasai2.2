@@ -14,7 +14,8 @@ import {
   Sparkles,
   Building2,
   LogOut,
-  BarChart3
+  BarChart3,
+  LayoutDashboard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -187,10 +188,35 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center justify-between"
+        >
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center gap-3"
+          >
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
+              <LayoutDashboard className="h-6 w-6 text-blue-500 dark:text-blue-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">
+                Visão geral dos seus projetos e atividades
+              </p>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <DashboardOverview />
         </motion.div>
