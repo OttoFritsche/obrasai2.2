@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
-import { WizardOrcamento } from "@/components/orcamento";
+import { WizardOrcamentoRefactored as WizardOrcamento } from "@/components/orcamento/WizardOrcamentoRefactored";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 
 // ====================================
