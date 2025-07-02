@@ -6,7 +6,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "scripts", "supabase/functions"] },
+  { ignores: ["dist", "scripts", "supabase/functions", "*.config.ts", "*.config.js", "src/types/supabase.ts"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["src/**/*.{ts,tsx}"],
@@ -49,6 +49,7 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"], // Preferir interfaces
       "@typescript-eslint/consistent-type-imports": "error", // Preferir type imports
       "@typescript-eslint/no-inferrable-types": "error", // Evitar tipos desnecessários
+      "@typescript-eslint/no-empty-object-type": ["error", { "allowObjectTypes": "always" }], // Permitir {} em contextos apropriados
       // Regras comentadas - requerem type checking que não está configurado
       // "@typescript-eslint/prefer-optional-chain": "warn", 
       // "@typescript-eslint/no-unnecessary-type-assertion": "error",

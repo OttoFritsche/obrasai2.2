@@ -1,4 +1,4 @@
-import { UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 
 // Tipos para formulários
 export interface BaseFormData {
