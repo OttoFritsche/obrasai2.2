@@ -24,7 +24,7 @@ import { useNotasFiscais } from "@/hooks/useNotasFiscais";
 import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { Link } from "react-router-dom";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
-import { RecentProjects } from "@/components/dashboard/RecentProjects";
+import { RecentProjectsRefactored as RecentProjects } from "@/components/dashboard/RecentProjectsRefactored";
 
 const Dashboard = () => {
   const { obras, isLoading: obrasLoading } = useObras();
