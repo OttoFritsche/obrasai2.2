@@ -66,7 +66,7 @@ import { PlantasIA } from "@/pages/dashboard/PlantasIA";
 import ContratosLista from "@/pages/dashboard/contratos/ContratosLista";
 import NovoContrato from "@/pages/dashboard/contratos/NovoContrato";
 import ContratoDetalhe from "@/pages/dashboard/contratos/ContratoDetalhe";
-import ContratoComIA from "@/pages/dashboard/contratos/ContratoComIA";
+import ContratoComIARefactored from "@/pages/dashboard/contratos/ContratoComIARefactored";
 
 // Admin - Dashboard de Métricas (apenas para administradores do sistema)
 import MetricsDashboard from "@/pages/admin/MetricsDashboard";
@@ -265,12 +265,12 @@ const App = () => {
           } />
           <Route path="dashboard/contratos/novo-ia" element={
             <ProtectedRoute>
-              <ContratoComIA />
+              <ContratoComIARefactored />
             </ProtectedRoute>
           } />
           <Route path="dashboard/contratos/:id/editar-ia" element={
             <ProtectedRoute>
-              <ContratoComIA />
+              <ContratoComIARefactored />
             </ProtectedRoute>
           } />
           <Route path="dashboard/contratos/:id" element={
