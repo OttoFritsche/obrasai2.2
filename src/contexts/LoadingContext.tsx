@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useCallback, useRef, useEffect } from 'react';
+import type { ReactNode} from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
 // Tipos para estados de loading mais específicos
 interface LoadingEntry {
@@ -351,7 +352,7 @@ export const useCrudLoadingStates = (resourceName: string) => {
 // Hook para loading com debounce e opções avançadas
 export const useDebouncedLoading = (
   key: string, 
-  delay: number = 300, 
+  delay = 300, 
   options?: LoadingOptions
 ) => {
   const { setLoading, isLoading } = useLoading();

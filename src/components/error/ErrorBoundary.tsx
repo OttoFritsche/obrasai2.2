@@ -1,5 +1,7 @@
-import React, { Component, ReactNode } from 'react';
-import { ErrorFallback, ErrorFallbackProps } from './ErrorFallback';
+import type { ReactNode } from 'react';
+import React, { Component } from 'react';
+import type { ErrorFallbackProps } from './ErrorFallback';
+import { ErrorFallback } from './ErrorFallback';
 import { secureLogger } from '@/lib/secure-logger';
 
 interface ErrorBoundaryState {

@@ -19,7 +19,6 @@ import { cn } from "@/lib/utils";
 // Novos padrões implementados
 import { FormProvider, useFormContext } from '@/contexts/FormContext';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
-import { useLoading } from '@/contexts/LoadingContext';
 
 import { Constants } from "@/integrations/supabase/types";
 import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";

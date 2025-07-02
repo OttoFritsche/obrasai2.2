@@ -12,38 +12,31 @@
  * @version 2.0.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Bot,
   Brain,
   TrendingUp,
   Lightbulb,
   MessageSquare,
-  BarChart3,
   AlertTriangle,
-  CheckCircle,
   Zap,
   Target,
   Clock,
   Minimize2,
-  Maximize2,
-  X,
   Send,
   RefreshCw,
-  Settings,
   Download,
-  Star,
   ThumbsUp,
   ThumbsDown
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 import { useLoading } from '@/contexts/LoadingContext';
 

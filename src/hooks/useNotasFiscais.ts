@@ -1,6 +1,5 @@
 import { useCrudOperations } from '@/hooks/useCrudOperations';
 import { notasFiscaisApi } from '@/services/api';
-import type { NotaFiscalFormValues } from '@/lib/validations/nota-fiscal';
 
 /**
  * Hook customizado para gerenciamento de notas fiscais multi-tenant.

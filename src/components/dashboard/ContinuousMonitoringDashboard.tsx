@@ -15,21 +15,17 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  BarChart3,
   Activity,
   AlertTriangle,
   CheckCircle,
-  Clock,
   TrendingUp,
   TrendingDown,
-  Zap,
-  RefreshCw,
   Download,
   Settings,
   Eye,
   EyeOff
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useLoading } from '@/contexts/LoadingContext';
 import LoadingMetricsDashboard from './LoadingMetricsDashboard';
 

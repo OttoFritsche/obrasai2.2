@@ -5,7 +5,8 @@
  * de erros do ObrasAI, permitindo customização fácil do comportamento.
  */
 
-import { ErrorSystemConfig, DEFAULT_ERROR_CONFIG } from '../types/error';
+import type { ErrorSystemConfig} from '../types/error';
+import { DEFAULT_ERROR_CONFIG } from '../types/error';
 
 // ============================================================================
 // CONFIGURAÇÃO DO AMBIENTE

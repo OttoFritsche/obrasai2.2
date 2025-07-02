@@ -359,8 +359,8 @@ export class NetworkError extends Error {
   
   constructor(
     message: string,
-    timeout: boolean = false,
-    offline: boolean = false
+    timeout = false,
+    offline = false
   ) {
     super(message);
     this.name = 'NetworkError';

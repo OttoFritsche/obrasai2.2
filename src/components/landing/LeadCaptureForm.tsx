@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { z } from 'zod';
-import { useValidatedForm } from '@/hooks/useFormState';
 import {
   User,
   Mail,
@@ -10,36 +9,28 @@ import {
   Briefcase,
   Calculator,
   Target,
-  ChevronRight,
-  ChevronLeft,
   Check,
-  Loader2,
   Star,
   Building2,
   Users,
   Calendar
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { 
   Wizard,
-  WizardProvider,
   WizardHeader,
   WizardProgress,
   WizardStepper,
   WizardContent,
   WizardNavigation,
-  WizardStep,
-  useWizard,
   useWizardStepValidation
 } from '@/components/wizard/WizardComposition';
-import { FormProvider, useFormContext } from '@/contexts/FormContext';
+import { useFormContext } from '@/contexts/FormContext';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 
 // ✅ Schema de validação por step

@@ -32,7 +32,6 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { FormProvider } from '@/contexts/FormContext';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 import { useLoading } from '@/contexts/LoadingContext';
 import LoadingMetricsDashboard from '@/components/dashboard/LoadingMetricsDashboard';
