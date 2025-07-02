@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       ai_insights: {
@@ -475,6 +475,75 @@ export type Database = {
         };
         Relationships: [];
       };
+      construtoras: {
+        Row: {
+          id: string;
+          tenant_id: string;
+          tipo: string;
+          nome_razao_social: string;
+          nome_fantasia: string | null;
+          documento: string;
+          inscricao_estadual: string | null;
+          email: string | null;
+          telefone: string | null;
+          endereco: string | null;
+          numero: string | null;
+          complemento: string | null;
+          bairro: string | null;
+          cidade: string | null;
+          estado: string | null;
+          cep: string | null;
+          responsavel_tecnico: string | null;
+          documento_responsavel: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id: string;
+          tipo: string;
+          nome_razao_social: string;
+          nome_fantasia?: string | null;
+          documento: string;
+          inscricao_estadual?: string | null;
+          email?: string | null;
+          telefone?: string | null;
+          endereco?: string | null;
+          numero?: string | null;
+          complemento?: string | null;
+          bairro?: string | null;
+          cidade?: string | null;
+          estado?: string | null;
+          cep?: string | null;
+          responsavel_tecnico?: string | null;
+          documento_responsavel?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string;
+          tipo?: string;
+          nome_razao_social?: string;
+          nome_fantasia?: string | null;
+          documento?: string;
+          inscricao_estadual?: string | null;
+          email?: string | null;
+          telefone?: string | null;
+          endereco?: string | null;
+          numero?: string | null;
+          complemento?: string | null;
+          bairro?: string | null;
+          cidade?: string | null;
+          estado?: string | null;
+          cep?: string | null;
+          responsavel_tecnico?: string | null;
+          documento_responsavel?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -560,7 +629,7 @@ export type Database = {
       [_ in never]: never;
     };
   };
-};
+}
 
 type PublicSchema = Database[keyof Database];
 

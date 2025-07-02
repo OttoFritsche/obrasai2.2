@@ -1,9 +1,9 @@
 import React, { createContext, useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Session, User } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserWithProfile, Subscription, AuthContextType } from "./types";
+import type { UserWithProfile, Subscription, AuthContextType } from "./types";
 import { fetchUserProfile, fetchUserSubscription, clearProfileCache } from "./utils";
 import { secureLogger } from "@/lib/secure-logger";
 import { clearCorruptedAuthData, checkAndCleanRefreshToken, initAuthIntegrityCheck } from "@/lib/auth-utils";
@@ -27,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // ✅ Timeout de segurança para garantir que loading seja sempre resolvido
     const safetyTimeout = setTimeout(() => {
-      console.warn('⚠️ loadUserData timeout - forçando loading = false');
+      secureLogger.warn('loadUserData timeout - forçando loading = false');
       setLoading(false);
       loadingRef.current = false;
     }, 5000);
@@ -63,12 +63,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         // ✅ Log todos os eventos para debug
-        console.log('🔄 onAuthStateChange:', event, !!session);
+        secureLogger.debug('onAuthStateChange', { event, hasSession: !!session });
         
         // ✅ Lidar com refresh token inválido/expirado
         if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
           if (import.meta.env.DEV && event === 'TOKEN_REFRESHED' && !session) {
-            console.log('🔄 Token refresh failed');
+            secureLogger.warn('Token refresh failed');
           }
           
           // ✅ Para SIGNED_OUT, limpar dados e redirecionar
@@ -195,7 +195,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // ✅ Timeout de segurança para o login
       const loginTimeout = setTimeout(() => {
-        console.warn('⚠️ Login timeout - forçando loading = false');
         setLoading(false);
       }, 10000);
       

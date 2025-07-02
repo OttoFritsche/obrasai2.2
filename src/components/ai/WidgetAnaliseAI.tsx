@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatDateBR } from "@/lib/i18n";
 
-type InsightData = {
+interface InsightData {
   detalhe?: string;
   recomendacao?: string;
   valor_estimado?: number;
@@ -12,15 +12,15 @@ type InsightData = {
   impacto?: string;
   prioridade?: 'alta' | 'media' | 'baixa';
   [key: string]: unknown;
-};
+}
 
-type WidgetAnaliseAIProps = {
+interface WidgetAnaliseAIProps {
   titulo: string;
   resumo: string;
   tipo_insight: string;
   dados_insight?: InsightData;
   data_geracao?: string;
-};
+}
 
 const WidgetAnaliseAI = ({
   titulo,

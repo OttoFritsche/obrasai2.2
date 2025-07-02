@@ -1,9 +1,13 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/contexts/auth/ProtectedRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/contexts/auth/AuthContext";
+import { TenantProvider } from "@/contexts/TenantContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
+import { LoadingProvider } from "@/contexts/LoadingContext";
 
 import Index from "@/pages/Index";
 import Dashboard from "@/pages/Dashboard";
@@ -77,6 +81,13 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutos - dados não são considerados stale por 5 min
+      gcTime: 10 * 60 * 1000, // 10 minutos - cache mantido por 10 min
+      refetchOnReconnect: 'always',
+      refetchOnMount: true,
+    },
+    mutations: {
+      retry: 1,
     },
   },
 });
@@ -86,6 +97,9 @@ const App = () => {
     <ThemeProvider defaultTheme="dark" storageKey="obrasai-theme">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <TenantProvider>
+            <NotificationProvider>
+              <LoadingProvider>
         <Routes>
           {/* Rotas públicas */}
           <Route index element={<Index />} />
@@ -304,6 +318,10 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
           <Toaster position="top-center" />
+          <ReactQueryDevtools initialIsOpen={false} />
+              </LoadingProvider>
+            </NotificationProvider>
+          </TenantProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>

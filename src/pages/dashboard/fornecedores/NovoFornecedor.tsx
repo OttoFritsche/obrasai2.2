@@ -20,13 +20,18 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { FormProvider, useFormContext } from "@/contexts/FormContext";
+import { useAsyncOperation } from "@/hooks/useAsyncOperation";
+import { useLoading } from "@/contexts/LoadingContext";
 
-import { 
-  fornecedorPJSchema, 
-  fornecedorPFSchema,
+import type {
   FornecedorPJFormValues,
   FornecedorPFFormValues,
   FornecedorType
+} from "@/lib/validations/fornecedor";
+import { 
+  fornecedorPJSchema, 
+  fornecedorPFSchema
 } from "@/lib/validations/fornecedor";
 import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
@@ -58,9 +63,11 @@ import {
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { toast } from "sonner";
 
-const NovoFornecedor = () => {
+// Componente interno que usa o FormContext
+const NovoFornecedorForm: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setLoading, isLoading } = useLoading();
   const [fornecedorType, setFornecedorType] = useState<FornecedorType>("pj");
   const { lookupCNPJ, isLoading: isLoadingCNPJ, data: cnpjData, reset: resetCNPJ } = useCNPJLookup();
   
@@ -71,8 +78,9 @@ const NovoFornecedor = () => {
   const tenantId = user?.profile?.tenant_id;
   const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
   
-  const pjForm = useForm<FornecedorPJFormValues>({
-    resolver: zodResolver(fornecedorPJSchema),
+  // Form para PJ usando FormContext
+  const pjFormContext = useFormContext<FornecedorPJFormValues>({
+    schema: fornecedorPJSchema,
     defaultValues: {
       cnpj: "",
       razao_social: "",
@@ -89,8 +97,9 @@ const NovoFornecedor = () => {
     },
   });
 
-  const pfForm = useForm<FornecedorPFFormValues>({
-    resolver: zodResolver(fornecedorPFSchema),
+  // Form para PF usando FormContext
+  const pfFormContext = useFormContext<FornecedorPFFormValues>({
+    schema: fornecedorPFSchema,
     defaultValues: {
       cpf: "",
       nome: "",
@@ -99,6 +108,9 @@ const NovoFornecedor = () => {
       data_nascimento: null,
     },
   });
+
+  const { form: pjForm } = pjFormContext;
+  const { form: pfForm } = pfFormContext;
 
   // Watch do campo CNPJ para busca automática
   const cnpjValue = pjForm.watch("cnpj");
@@ -187,8 +199,9 @@ const NovoFornecedor = () => {
     }
   }, [cnpjValue]);
 
-  const pjMutation = useMutation({
-    mutationFn: (values: FornecedorPJFormValues) => {
+  // Operações assíncronas usando useAsyncOperation
+  const { execute: createPJFornecedor, isLoading: isCreatingPJ } = useAsyncOperation({
+    operation: async (values: FornecedorPJFormValues) => {
       if (!validTenantId) {
         throw new Error('Tenant ID não encontrado');
       }
@@ -204,8 +217,8 @@ const NovoFornecedor = () => {
     },
   });
 
-  const pfMutation = useMutation({
-    mutationFn: (values: FornecedorPFFormValues) => {
+  const { execute: createPFFornecedor, isLoading: isCreatingPF } = useAsyncOperation({
+    operation: async (values: FornecedorPFFormValues) => {
       if (!validTenantId) {
         throw new Error('Tenant ID não encontrado');
       }
@@ -221,12 +234,12 @@ const NovoFornecedor = () => {
     },
   });
 
-  const onSubmitPJ = (values: FornecedorPJFormValues) => {
-    pjMutation.mutate(values);
+  const onSubmitPJ = async (values: FornecedorPJFormValues) => {
+    await createPJFornecedor(values);
   };
 
-  const onSubmitPF = (values: FornecedorPFFormValues) => {
-    pfMutation.mutate(values);
+  const onSubmitPF = async (values: FornecedorPFFormValues) => {
+    await createPFFornecedor(values);
   };
 
   // Função para buscar CNPJ manualmente
@@ -822,13 +835,13 @@ const NovoFornecedor = () => {
                             type="button"
                             variant="outline"
                             onClick={() => navigate("/dashboard/fornecedores/pj")}
-                            disabled={pjMutation.isPending}
+                            disabled={isCreatingPJ}
                           >
                             Cancelar
                           </Button>
                           <Button 
                             type="submit" 
-                            disabled={pjMutation.isPending || isLoadingCNPJ}
+                            disabled={isCreatingPJ || isLoadingCNPJ}
                             className={cn(
                               "min-w-[140px]",
                               "bg-gradient-to-r from-green-500 to-green-600",
@@ -837,7 +850,7 @@ const NovoFornecedor = () => {
                               "transition-all duration-300"
                             )}
                           >
-                            {pjMutation.isPending ? (
+                            {isCreatingPJ ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Salvando...
@@ -1013,13 +1026,13 @@ const NovoFornecedor = () => {
                             type="button"
                             variant="outline"
                             onClick={() => navigate("/dashboard/fornecedores/pf")}
-                            disabled={pfMutation.isPending}
+                            disabled={isCreatingPF}
                           >
                             Cancelar
                           </Button>
                           <Button 
                             type="submit" 
-                            disabled={pfMutation.isPending}
+                            disabled={isCreatingPF}
                             className={cn(
                               "min-w-[140px]",
                               "bg-gradient-to-r from-green-500 to-green-600",
@@ -1028,7 +1041,7 @@ const NovoFornecedor = () => {
                               "transition-all duration-300"
                             )}
                           >
-                            {pfMutation.isPending ? (
+                            {isCreatingPF ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 Salvando...
@@ -1051,6 +1064,15 @@ const NovoFornecedor = () => {
         </motion.div>
       </motion.div>
     </DashboardLayout>
+  );
+};
+
+// Componente principal com providers
+const NovoFornecedor: React.FC = () => {
+  return (
+    <FormProvider>
+      <NovoFornecedorForm />
+    </FormProvider>
   );
 };
 

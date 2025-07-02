@@ -8,7 +8,7 @@ import DOMPurify from 'dompurify';
 /**
  * Configuração do DOMPurify para diferentes contextos
  */
-const createDOMPurifyConfig = (strict: boolean = false) => ({
+const createDOMPurifyConfig = (strict = false) => ({
   ALLOWED_TAGS: strict 
     ? [] // Nenhuma tag HTML permitida
     : ['b', 'i', 'em', 'strong', 'p', 'br'], // Tags básicas permitidas

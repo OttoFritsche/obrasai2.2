@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { ArrowDown, ArrowUp, Minus, AlertTriangle, Search } from "lucide-react";
-import { SinapiItem } from "@/hooks/useSinapiDespesas";
+import type { SinapiItem } from "@/hooks/useSinapiDespesas";
 import useInsumoAnalysis from "@/hooks/useInsumoAnalysis";
 
 interface InsumoAnalysisCardProps {

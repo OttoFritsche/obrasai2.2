@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { sanitizeFormData } from "@/lib/input-sanitizer";
 import { secureLogger } from "@/lib/secure-logger";
 import { analytics } from "@/services/analyticsApi";
-import {
+import type {
   OrcamentoParametrico,
   ItemOrcamento,
   BaseCustoRegional,
@@ -411,13 +411,13 @@ export const calculoOrcamentoApi = {
           };
         }
 
-        console.warn('⚠️ Edge Function falhou, tentando fallback...');
+        console.warn('Edge Function falhou, tentando fallback...');
       } catch (v9Error) {
-        console.warn('⚠️ Edge Function não disponível, usando fallback:', v9Error);
+        console.warn('Edge Function não disponível, usando fallback:', v9Error);
       }
 
       // FALLBACK: Usar ai-calculate-budget (função estável)
-      console.log('🔄 Usando Edge Function fallback (ai-calculate-budget)...');
+      console.log('Usando Edge Function fallback (ai-calculate-budget)...');
       
       const { data, error } = await supabase.functions.invoke('ai-calculate-budget', {
         body: {

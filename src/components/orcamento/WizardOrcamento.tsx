@@ -11,7 +11,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import type { z } from "zod";
 import { ChevronLeft, ChevronRight, Calculator, Building, MapPin, Ruler, Settings, Sparkles, CheckCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,12 +23,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
+import type {
+  WizardCompleto} from "@/lib/validations/orcamento";
 import {
   WizardEtapa1Schema,
   WizardEtapa2Schema, 
   WizardEtapa3Schema,
   WizardEtapa4Schema,
-  WizardCompleto,
   WizardCompletoSchema,
   TIPO_OBRA_LABELS,
   PADRAO_OBRA_LABELS,
@@ -322,7 +323,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
           );
         } else {
           toast.success("✨ Orçamento calculado com sucesso!");
-          console.warn("⚠️ Custo estimado não disponível na resposta:", resultado);
+          console.warn("Custo estimado não disponível na resposta:", resultado);
         }
       }
 

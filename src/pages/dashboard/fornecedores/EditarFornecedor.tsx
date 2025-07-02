@@ -17,12 +17,14 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import { 
-  fornecedorPJSchema, 
-  fornecedorPFSchema,
+import type {
   FornecedorPJFormValues,
   FornecedorPFFormValues,
   FornecedorType
+} from "@/lib/validations/fornecedor";
+import { 
+  fornecedorPJSchema, 
+  fornecedorPFSchema
 } from "@/lib/validations/fornecedor";
 import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
@@ -138,7 +140,7 @@ const EditarFornecedor = () => {
   // Preencher formulário quando dados carregarem
   useEffect(() => {
     if (fornecedorPJ && tipoDetectado === "pj") {
-      console.log("🔄 Preenchendo formulário PJ com dados:", fornecedorPJ);
+      console.log("Preenchendo formulário PJ com dados:", fornecedorPJ);
       pjForm.reset({
         cnpj: fornecedorPJ.cnpj,
         razao_social: fornecedorPJ.razao_social,
@@ -152,7 +154,7 @@ const EditarFornecedor = () => {
 
   useEffect(() => {
     if (fornecedorPF && tipoDetectado === "pf") {
-      console.log("🔄 Preenchendo formulário PF com dados:", fornecedorPF);
+      console.log("Preenchendo formulário PF com dados:", fornecedorPF);
       pfForm.reset({
         cpf: fornecedorPF.cpf,
         nome: fornecedorPF.nome,
@@ -678,4 +680,4 @@ const EditarFornecedor = () => {
   );
 };
 
-export default EditarFornecedor; 
+export default EditarFornecedor;

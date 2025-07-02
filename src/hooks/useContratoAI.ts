@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useReducer, useCallback, useRef } from 'react';
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -69,11 +69,93 @@ interface ContratoAIState {
   averageResponseTime: number;
 }
 
+// Actions para o reducer
+type ContratoAIAction =
+  | { type: 'START_CHAT' }
+  | { type: 'ADD_USER_MESSAGE'; payload: ChatMessage }
+  | { type: 'CHAT_SUCCESS'; payload: { assistantMessage: ChatMessage; responseTime: number } }
+  | { type: 'CHAT_ERROR'; payload: string }
+  | { type: 'APPLY_SUGGESTION'; payload: AISuggestion }
+  | { type: 'CLEAR_CONVERSATION' }
+  | { type: 'SET_LOADING'; payload: boolean };
+
+// Reducer para gerenciar estado
+const contratoAIReducer = (state: ContratoAIState, action: ContratoAIAction): ContratoAIState => {
+  switch (action.type) {
+    case 'START_CHAT':
+      return {
+        ...state,
+        chatLoading: true,
+        lastError: null,
+      };
+    
+    case 'ADD_USER_MESSAGE':
+      return {
+        ...state,
+        messages: [...state.messages, action.payload],
+      };
+    
+    case 'CHAT_SUCCESS':
+      return {
+        ...state,
+        chatLoading: false,
+        messages: [...state.messages, action.payload.assistantMessage],
+        suggestions: action.payload.assistantMessage.suggestions || [],
+        currentResponse: action.payload.assistantMessage.content,
+        totalInteractions: state.totalInteractions + 1,
+        averageResponseTime: state.totalInteractions > 0 
+          ? (state.averageResponseTime + action.payload.responseTime) / 2
+          : action.payload.responseTime,
+        lastError: null,
+      };
+    
+    case 'CHAT_ERROR':
+      return {
+        ...state,
+        chatLoading: false,
+        lastError: action.payload,
+      };
+    
+    case 'APPLY_SUGGESTION':
+      return {
+        ...state,
+        suggestions: state.suggestions.map(s => 
+          s === action.payload ? { ...s, aplicado: true } : s
+        ),
+      };
+    
+    case 'CLEAR_CONVERSATION':
+      return {
+        ...state,
+        messages: [
+          {
+            role: "assistant",
+            content: "Olá! Sou seu assistente especializado em contratos de construção civil. Como posso ajudar você a criar um contrato profissional e completo?",
+            timestamp: new Date(),
+          },
+        ],
+        suggestions: [],
+        currentResponse: "",
+        lastError: null,
+      };
+    
+    case 'SET_LOADING':
+      return {
+        ...state,
+        chatLoading: action.payload,
+      };
+    
+    default:
+      return state;
+  }
+};
+
 export function useContratoAI() {
   const { user } = useAuth();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const stateRef = useRef<ContratoAIState>();
 
-  const [state, setState] = useState<ContratoAIState>({
+  const initialState: ContratoAIState = {
     chatLoading: false,
     messages: [
       {
@@ -87,7 +169,12 @@ export function useContratoAI() {
     lastError: null,
     totalInteractions: 0,
     averageResponseTime: 0,
-  });
+  };
+
+  const [state, dispatch] = useReducer(contratoAIReducer, initialState);
+  
+  // Manter referência atualizada do estado
+  stateRef.current = state;
 
   // Mutation para chamar a IA
   const contratoAI = useMutation({
@@ -121,16 +208,13 @@ export function useContratoAI() {
         suggestions: response.sugestoes,
       };
 
-      setState(prev => ({
-        ...prev,
-        chatLoading: false,
-        messages: [...prev.messages, assistantMessage],
-        suggestions: response.sugestoes,
-        currentResponse: response.resposta,
-        totalInteractions: prev.totalInteractions + 1,
-        averageResponseTime: (prev.averageResponseTime + response.tempo_resposta_ms) / 2,
-        lastError: null,
-      }));
+      dispatch({
+        type: 'CHAT_SUCCESS',
+        payload: {
+          assistantMessage,
+          responseTime: response.tempo_resposta_ms,
+        },
+      });
 
       toast.success(`Resposta gerada em ${response.tempo_resposta_ms}ms com ${response.confianca * 100}% de confiança`);
     },
@@ -142,11 +226,10 @@ export function useContratoAI() {
 
       console.error('❌ Erro na IA de contratos:', error);
       
-      setState(prev => ({
-        ...prev,
-        chatLoading: false,
-        lastError: error.message || 'Erro desconhecido',
-      }));
+      dispatch({
+        type: 'CHAT_ERROR',
+        payload: error.message || 'Erro desconhecido',
+      });
 
       toast.error(`Erro na IA: ${error.message || 'Erro desconhecido'}`);
     },
@@ -166,29 +249,23 @@ export function useContratoAI() {
       timestamp: new Date(),
     };
 
-    setState(prev => ({
-      ...prev,
-      chatLoading: true,
-      messages: [...prev.messages, userMessage],
-      lastError: null,
-    }));
+    dispatch({ type: 'START_CHAT' });
+    dispatch({ type: 'ADD_USER_MESSAGE', payload: userMessage });
 
+    // Usar stateRef para evitar stale closure
+    const currentMessages = stateRef.current?.messages || [];
+    
     await contratoAI.mutateAsync({
       pergunta_usuario: message,
       contexto_contrato: contextoContrato,
-      historico_conversa: state.messages.slice(-5), // Últimas 5 mensagens
+      historico_conversa: [...currentMessages, userMessage].slice(-5), // Últimas 5 mensagens incluindo a nova
       contrato_id: contratoId,
     });
-  }, [contratoAI, state.messages]);
+  }, [contratoAI]); // Dependências corretas sem stale closure
 
   // Função para aplicar sugestão
   const applySuggestion = useCallback((suggestion: AISuggestion, field: string) => {
-    setState(prev => ({
-      ...prev,
-      suggestions: prev.suggestions.map(s => 
-        s === suggestion ? { ...s, aplicado: true } : s
-      ),
-    }));
+    dispatch({ type: 'APPLY_SUGGESTION', payload: suggestion });
 
     toast.success(`Sugestão aplicada ao campo ${field}`);
     
@@ -247,20 +324,7 @@ export function useContratoAI() {
 
   // Função para limpar conversa
   const clearConversation = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      messages: [
-        {
-          role: "assistant",
-          content: "Olá! Sou seu assistente especializado em contratos de construção civil. Como posso ajudar você a criar um contrato profissional e completo?",
-          timestamp: new Date(),
-        },
-      ],
-      suggestions: [],
-      currentResponse: "",
-      lastError: null,
-    }));
-
+    dispatch({ type: 'CLEAR_CONVERSATION' });
     toast.success("Conversa limpa com sucesso!");
   }, []);
 
@@ -268,10 +332,7 @@ export function useContratoAI() {
   const cancelCurrentOperation = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      setState(prev => ({
-        ...prev,
-        chatLoading: false,
-      }));
+      dispatch({ type: 'SET_LOADING', payload: false });
       
       toast.info("Operação cancelada");
     }

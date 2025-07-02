@@ -132,7 +132,7 @@ export const useCNPJLookup = () => {
         response = result.data;
         functionError = result.error;
       } catch (authError) {
-        console.warn('⚠️ Falha na consulta autenticada, tentando sem autenticação...');
+        console.warn('Falha na consulta autenticada, tentando sem autenticação...');
         
         // Se falhar com autenticação, tentar chamada HTTP direta
         try {
@@ -238,4 +238,4 @@ export const useCNPJLookup = () => {
     cacheSize: localCache.size,
     hasCache: (cnpj: string) => localCache.has(cleanCNPJ(cnpj)),
   };
-}; 
+};

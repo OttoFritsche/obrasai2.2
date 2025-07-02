@@ -1,16 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/services/analyticsApi";
 
-export type ChatMessage = {
+export interface ChatMessage {
   id: string;
   usuario_id: string;
   obra_id?: string | null;
   mensagem: string;
   resposta_bot: string | null;
   created_at: string;
-};
+}
 
-export type AIInsight = {
+export interface AIInsight {
   id: string;
   obra_id: string;
   insight_type: string;
@@ -26,7 +26,7 @@ export type AIInsight = {
   summary_ptbr: string | null;
   generated_at: string;
   created_at: string;
-};
+}
 
 export const aiApi = {
   // Chat Messages

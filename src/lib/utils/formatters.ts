@@ -57,6 +57,20 @@ export const formatCEP = (cep: string): string => {
     .substring(0, 9);
 };
 
+// Função para formatar Inscrição Estadual
+export const formatInscricaoEstadual = (ie: string): string => {
+  // Remove todos os caracteres não numéricos
+  const cleaned = ie.replace(/\D/g, '');
+  
+  // Aplica uma formatação básica para IE (pode variar por estado)
+  // Formato genérico: 000.000.000.000
+  return cleaned
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3.$4')
+    .substring(0, 15); // Limita ao tamanho máximo
+};
+
 // Função para remover formatação (apenas números)
 export const unformat = (value: string): string => {
   return value.replace(/\D/g, '');
@@ -78,4 +92,4 @@ export const isComplete = (value: string, type: 'cnpj' | 'cpf' | 'phone' | 'cep'
     default:
       return false;
   }
-}; 
+};

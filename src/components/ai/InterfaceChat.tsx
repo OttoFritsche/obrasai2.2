@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { aiApi, ChatMessage } from "@/services/aiApi";
+import type { ChatMessage } from "@/services/aiApi";
+import { aiApi } from "@/services/aiApi";
 import { obrasApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
 import { useTheme } from "@/hooks/use-theme";

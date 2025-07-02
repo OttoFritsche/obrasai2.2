@@ -5,14 +5,14 @@ import { encryptData, decryptData } from "@/lib/secure-storage"
 type Theme = "dark" | "light" | "system"
 
 // Contexto do tema
-type ThemeProviderProps = {
+interface ThemeProviderProps {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
 }
 
 // Estado do contexto
-type ThemeProviderState = {
+interface ThemeProviderState {
   theme: Theme
   setTheme: (theme: Theme) => void
 }

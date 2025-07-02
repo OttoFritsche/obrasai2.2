@@ -238,7 +238,7 @@ export function useGerarPDF(contratoId: string) {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (preview: boolean = false) => {
+    mutationFn: async (preview = false) => {
       const { data, error } = await supabase.functions.invoke('gerar-contrato-pdf', {
         body: { 
           contrato_id: contratoId,

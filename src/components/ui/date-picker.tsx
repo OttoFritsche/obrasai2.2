@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CaptionLayout } from 'react-day-picker';
+import type { CaptionLayout } from 'react-day-picker';
 
 interface DatePickerProps {
   date: Date | undefined;

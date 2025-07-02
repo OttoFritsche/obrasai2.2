@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
-import { resetPasswordSchema, ResetPasswordFormValues, checkPasswordStrength } from "@/lib/validations/auth";
+import type { ResetPasswordFormValues} from "@/lib/validations/auth";
+import { resetPasswordSchema, checkPasswordStrength } from "@/lib/validations/auth";
 import { Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 

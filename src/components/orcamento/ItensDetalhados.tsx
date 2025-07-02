@@ -46,7 +46,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-import { ItemOrcamento } from "@/lib/validations/orcamento";
+import type { ItemOrcamento } from "@/lib/validations/orcamento";
 import { orcamentoUtils } from "@/services/orcamentoApi";
 import { cn } from "@/lib/utils";
 

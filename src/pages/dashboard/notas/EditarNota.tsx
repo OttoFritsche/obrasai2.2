@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, DragEvent, useEffect } from "react";
+import type { DragEvent} from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import { notaFiscalSchema, NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
+import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
+import { notaFiscalSchema } from "@/lib/validations/nota-fiscal";
 import { notasFiscaisApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useNotasFiscais } from "@/hooks/useNotasFiscais";
 import { useDespesas } from "@/hooks/useDespesas";

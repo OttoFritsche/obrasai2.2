@@ -32,7 +32,7 @@ novo. Utilizar componentes e hooks reutilizáveis." -
 para TypeScript no React, incluindo nomenclatura, organização de componentes e
 hooks." - "convencoes_edge_functions: Seguir as melhores práticas para Supabase
 Edge Functions, incluindo tratamento de erros, validação de dados e resposta
-padronizada."
+padronizada." - "limite_tamanho_arquivos: CRÍTICO - Arquivos não devem exceder 400-500 linhas de código. Arquivos maiores devem ser refatorados em módulos menores para facilitar manutenção, legibilidade e evitar complexidade excessiva. Aplicar divisão por responsabilidade única."
 
 seguranca: prioridade: critica diretrizes: -
 "priorizacao_seguranca_dados_sensiveis: Ao implementar recursos que envolvam

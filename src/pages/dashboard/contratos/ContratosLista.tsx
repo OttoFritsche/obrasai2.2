@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { 
   FileText, 
   Plus, 
@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/ui/metric-card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -77,6 +78,8 @@ const ContratosLista = () => {
   const [selectedObraId, setSelectedObraId] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [contratoToDelete, setContratoToDelete] = useState<string | null>(null);
+  const [selectedContratos, setSelectedContratos] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
   const { contratos, isLoading, error, deleteContrato } = useContratos();
   const { obras } = useObras();
@@ -121,7 +124,57 @@ const ContratosLista = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    for (const contratoId of selectedContratos) {
+      await deleteContrato.mutateAsync(contratoId);
+    }
+    setSelectedContratos([]);
+    setShowBulkDeleteDialog(false);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = filteredContratos?.map(contrato => contrato.id) || [];
+      setSelectedContratos(allIds);
+    } else {
+      setSelectedContratos([]);
+    }
+  };
+
+  const handleSelectContrato = (contratoId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedContratos(prev => [...prev, contratoId]);
+    } else {
+      setSelectedContratos(prev => prev.filter(id => id !== contratoId));
+    }
+  };
+
   const columns: ColumnDef<Contrato>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => {
+            table.toggleAllPageRowsSelected(!!value);
+            handleSelectAll(!!value);
+          }}
+          aria-label="Selecionar todos"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedContratos.includes(row.original.id)}
+          onCheckedChange={(value) => {
+            row.toggleSelected(!!value);
+            handleSelectContrato(row.original.id, !!value);
+          }}
+          aria-label="Selecionar linha"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "numero_contrato",
       header: "Número",
@@ -312,6 +365,16 @@ const ContratosLista = () => {
             animate={{ opacity: 1, x: 0 }}
             className="flex gap-2"
           >
+            {selectedContratos.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowBulkDeleteDialog(true)}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir Selecionados ({selectedContratos.length})
+              </Button>
+            )}
             <Button 
               asChild 
               className={cn(
@@ -477,6 +540,27 @@ const ContratosLista = () => {
                 className="bg-red-500 hover:bg-red-600"
               >
                 Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Modal de confirmação de exclusão em massa */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão em massa</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir {selectedContratos.length} contrato(s) selecionado(s)? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleBulkDelete}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Excluir {selectedContratos.length} contrato(s)
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

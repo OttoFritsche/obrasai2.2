@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { 
   Pencil, 
   Trash2, 
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,7 +36,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fornecedoresPFApi } from "@/services/api";
 import { formatDateBR } from "@/lib/i18n";
 
-type FornecedorPF = {
+interface FornecedorPF {
   id: string;
   nome: string;
   cpf: string;
@@ -43,11 +44,13 @@ type FornecedorPF = {
   email: string | null;
   telefone_principal: string | null;
   data_nascimento: string | null;
-};
+}
 
 const FornecedoresPFLista = () => {
   const navigate = useNavigate();
   const [fornecedorToDelete, setFornecedorToDelete] = useState<string | null>(null);
+  const [selectedFornecedores, setSelectedFornecedores] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
@@ -85,7 +88,57 @@ const FornecedoresPFLista = () => {
     deleteMutation.mutate(fornecedorToDelete);
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedFornecedores.length === 0) return;
+    
+    try {
+      for (const id of selectedFornecedores) {
+        await fornecedoresPFApi.delete(id);
+      }
+      queryClient.invalidateQueries(["fornecedores_pf", validTenantId]);
+      setSelectedFornecedores([]);
+      setShowBulkDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting fornecedores:", error);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedFornecedores(fornecedores?.map(f => f.id) || []);
+    } else {
+      setSelectedFornecedores([]);
+    }
+  };
+
+  const handleSelectFornecedor = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedFornecedores(prev => [...prev, id]);
+    } else {
+      setSelectedFornecedores(prev => prev.filter(fId => fId !== id));
+    }
+  };
+
   const columns: ColumnDef<FornecedorPF>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={selectedFornecedores.length === fornecedores?.length && fornecedores?.length > 0}
+          onCheckedChange={(checked) => handleSelectAll(!!checked)}
+          aria-label="Selecionar todos"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedFornecedores.includes(row.original.id)}
+          onCheckedChange={(checked) => handleSelectFornecedor(row.original.id, !!checked)}
+          aria-label="Selecionar linha"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "nome",
       header: "Nome",
@@ -239,6 +292,16 @@ const FornecedoresPFLista = () => {
             transition={{ delay: 0.2 }}
             className="flex gap-2"
           >
+            {selectedFornecedores.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowBulkDeleteDialog(true)}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir Selecionados ({selectedFornecedores.length})
+              </Button>
+            )}
             <Button 
               asChild 
               className={cn(
@@ -317,6 +380,27 @@ const FornecedoresPFLista = () => {
                 className="bg-red-500 hover:bg-red-600"
               >
                 Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Modal de confirmação de exclusão em massa */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão em massa</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir {selectedFornecedores.length} fornecedor(es) selecionado(s)? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleBulkDelete}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Excluir Todos
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

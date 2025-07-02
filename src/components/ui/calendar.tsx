@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, CaptionProps, useDayPicker, useNavigation } from "react-day-picker";
+import type { CaptionProps} from "react-day-picker";
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

@@ -1,4 +1,4 @@
-import { User, Session } from "@supabase/supabase-js";
+import type { User, Session } from "@supabase/supabase-js";
 
 // Define the user type with profile
 export interface UserWithProfile extends User {

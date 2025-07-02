@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth";
-import { forgotPasswordSchema, ForgotPasswordFormValues } from "@/lib/validations/auth";
+import type { ForgotPasswordFormValues } from "@/lib/validations/auth";
+import { forgotPasswordSchema } from "@/lib/validations/auth";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 

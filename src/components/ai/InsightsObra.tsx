@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 
-type InsightObraProps = {
+interface InsightObraProps {
   obraId: string;
-};
+}
 
 // Define tipos mais específicos para insight_data
-type InsightData = {
+interface InsightData {
   detalhe?: string;
   recomendacao?: string;
   valor_estimado?: number;
@@ -19,7 +19,7 @@ type InsightData = {
   impacto?: string;
   prioridade?: 'alta' | 'media' | 'baixa';
   [key: string]: unknown;
-};
+}
 
 interface Insight {
   id: string;

@@ -82,7 +82,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
   };
 
   // Função para simular efeito de digitação
-  const typeMessage = async (message: string, delay: number = 50) => {
+  const typeMessage = async (message: string, delay = 50) => {
     return new Promise<void>((resolve) => {
       setIsTyping(true);
       setTypingMessage('');
@@ -163,7 +163,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
   const sendLeadToWebhook = async (leadData: LeadData) => {
     try {
       if (import.meta.env.DEV) {
-        console.log('🔄 Enviando lead para n8n...');
+        console.log('Enviando lead para n8n...');
       }
       
       const webhookData = {
@@ -259,7 +259,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
         const currentStepData = leadFlow[currentStep as keyof typeof leadFlow];
         
         if (import.meta.env.DEV) {
-          console.log(`🔄 Step: ${currentStep} -> ${currentInput}`);
+          console.log(`Step: ${currentStep} -> ${currentInput}`);
         }
         
         if (currentStepData && currentStepData.validation && !currentStepData.validation(currentInput)) {
@@ -345,7 +345,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
           const nextStep = currentStepData?.nextStep || 'completed';
           
           if (import.meta.env.DEV) {
-            console.log(`➡️ ${currentStep} -> ${nextStep}`);
+            console.log(`${currentStep} -> ${nextStep}`);
           }
           
           setCurrentStep(nextStep);
@@ -641,4 +641,4 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default LeadChatbot; 
+export default LeadChatbot;

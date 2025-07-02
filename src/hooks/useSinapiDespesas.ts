@@ -59,7 +59,7 @@ export const useSinapiDespesas = () => {
   }, [])
   
   // Hook para buscar com termo específico
-  const useBuscarSinapi = (termo: string, limite: number = 10) => {
+  const useBuscarSinapi = (termo: string, limite = 10) => {
     return useQuery({
       queryKey: ['sinapi-busca', termo, limite],
       queryFn: async () => {

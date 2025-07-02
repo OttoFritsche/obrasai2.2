@@ -3,7 +3,8 @@ import { Search, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { useSinapiDespesas, SinapiItem } from '@/hooks/useSinapiDespesas'
+import type { SinapiItem } from '@/hooks/useSinapiDespesas';
+import { useSinapiDespesas } from '@/hooks/useSinapiDespesas'
 
 interface SinapiSelectorDespesasProps {
   onSelect: (item: SinapiItem) => void

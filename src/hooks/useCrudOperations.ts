@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTenantValidation } from './useTenantValidation';
 import { useTenantListQuery } from './useTenantQuery';
+import { queryKeys } from '@/lib/query-keys';
 
 /**
  * Hook genérico para operações CRUD
@@ -51,9 +52,36 @@ export function useCrudOperations<TEntity, TCreateData, TUpdateData>(
     queryFn: api.getAll,
   });
 
-  // Função para invalidar queries
-  const invalidateQueries = () => {
-    queryClient.invalidateQueries({ queryKey: [resource] });
+  // Função para invalidar queries usando invalidação otimizada
+  const invalidateQueries = (operation: 'create' | 'update' | 'delete', id?: string) => {
+    if (!validTenantId) return;
+    
+    // Usar query keys padronizadas baseadas no resource
+    const resourceKey = resource.replace('-', '') as keyof typeof queryKeys;
+    if (queryKeys[resourceKey] && typeof queryKeys[resourceKey] === 'function') {
+      // Invalidação específica baseada na operação
+      if (operation === 'delete' && id) {
+        // Para delete, remover a query específica e invalidar lista
+        queryClient.removeQueries({ 
+          queryKey: (queryKeys[resourceKey] as any)(id, validTenantId) 
+        });
+      }
+      
+      // Invalidar lista do recurso
+      queryClient.invalidateQueries({ 
+        queryKey: (queryKeys[resourceKey] as any)(validTenantId) 
+      });
+      
+      // Invalidar métricas se for um recurso que afeta métricas
+      if (['obras', 'despesas', 'contratos'].includes(resource)) {
+        queryClient.invalidateQueries({ 
+          queryKey: queryKeys.metricas(validTenantId)
+        });
+      }
+    } else {
+      // Fallback para o comportamento anterior
+      queryClient.invalidateQueries({ queryKey: [resource, validTenantId] });
+    }
   };
 
   // Mutation para criar
@@ -66,7 +94,7 @@ export function useCrudOperations<TEntity, TCreateData, TUpdateData>(
     },
     onSuccess: () => {
       toast.success(defaultMessages.createSuccess);
-      invalidateQueries();
+      invalidateQueries('create');
     },
     onError: (error) => {
       console.error(`Error creating ${resource}:`, error);
@@ -82,9 +110,9 @@ export function useCrudOperations<TEntity, TCreateData, TUpdateData>(
       }
       return api.update(id, data, validTenantId);
     },
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       toast.success(defaultMessages.updateSuccess);
-      invalidateQueries();
+      invalidateQueries('update', id);
     },
     onError: (error) => {
       console.error(`Error updating ${resource}:`, error);
@@ -100,9 +128,9 @@ export function useCrudOperations<TEntity, TCreateData, TUpdateData>(
       }
       return api.delete(id, validTenantId);
     },
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       toast.success(defaultMessages.deleteSuccess);
-      invalidateQueries();
+      invalidateQueries('delete', id);
     },
     onError: (error) => {
       console.error(`Error deleting ${resource}:`, error);

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
   Receipt, 
@@ -15,13 +13,18 @@ import {
   Loader2,
   AlertTriangle
 } from "lucide-react";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+// Novos padrões implementados
+import { FormProvider, useFormContext } from '@/contexts/FormContext';
+import { useAsyncOperation } from '@/hooks/useAsyncOperation';
+import { useLoading } from '@/contexts/LoadingContext';
+
 import { Constants } from "@/integrations/supabase/types";
 import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";
-import { despesaSchema, DespesaFormValues, formasPagamento } from "@/lib/validations/despesa";
+import type { DespesaFormValues} from "@/lib/validations/despesa";
+import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
 import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
 import { formatDate } from "@/lib/utils";
@@ -49,10 +52,12 @@ import {
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 
-const EditarDespesa = () => {
+// Componente interno que usa FormContext
+const EditarDespesaForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { form } = useFormContext<DespesaFormValues>();
   
   // Obter tenant_id corretamente
   const tenantId = user?.profile?.tenant_id;
@@ -61,18 +66,8 @@ const EditarDespesa = () => {
   // Estado para controlar o tipo de insumo (SINAPI ou manual)
   const [tipoInsumo, setTipoInsumo] = useState<'sinapi' | 'manual'>('sinapi');
   
-  const form = useForm<DespesaFormValues>({
-    resolver: zodResolver(despesaSchema),
-    defaultValues: {
-      descricao: "",
-      data_despesa: new Date(),
-      quantidade: 1,
-      valor_unitario: 0,
-      pago: false,
-      data_pagamento: null,
-      forma_pagamento: null,
-    },
-  });
+  // Operação assíncrona para atualização da despesa
+  const { executeAsync, isLoading: isUpdating } = useAsyncOperation();
 
   // Query para carregar dados da despesa
   const { data: despesa, isLoading, isError } = useQuery({
@@ -145,28 +140,11 @@ const EditarDespesa = () => {
     }
   }, [despesa, form]);
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (values: DespesaFormValues) => {
-      if (!id) throw new Error('ID não encontrado');
-      return despesasApi.update(id, values);
-    },
-    onSuccess: (data, variables) => {
-      if (variables.pago && variables.data_pagamento && variables.forma_pagamento) {
-        toast.success(
-          `Despesa atualizada como paga em ${formatDate(variables.data_pagamento)} via ${variables.forma_pagamento}`
-        );
-      } else {
-        toast.success("Despesa atualizada com sucesso!");
-      }
-      navigate("/dashboard/despesas");
-    },
-    onError: (error) => {
-      console.error("Error updating despesa:", error);
-      toast.error("Erro ao atualizar despesa");
-    },
-  });
+  const onSubmit = async (values: DespesaFormValues) => {
+    if (!id) {
+      throw new Error('ID da despesa não encontrado');
+    }
 
-  const onSubmit = (values: DespesaFormValues) => {
     const submissionData = { ...values };
 
     if (!submissionData.pago) {
@@ -174,10 +152,21 @@ const EditarDespesa = () => {
       submissionData.forma_pagamento = null;
     }
     
-    mutate(submissionData);
+    await executeAsync(
+      () => despesasApi.update(id, submissionData),
+      {
+        loadingKey: 'update-despesa',
+        successMessage: submissionData.pago && submissionData.data_pagamento && submissionData.forma_pagamento
+          ? `Despesa atualizada como paga em ${formatDate(submissionData.data_pagamento)} via ${submissionData.forma_pagamento}`
+          : 'Despesa atualizada com sucesso!',
+        errorMessage: 'Erro ao atualizar despesa',
+        onSuccess: () => navigate('/dashboard/despesas')
+      }
+    );
   };
 
   const isLoadingData = isLoading || isLoadingObras || isLoadingPJ || isLoadingPF;
+  const isFormLoading = isUpdating || isLoadingData;
 
   if (isLoadingData) {
     return (
@@ -816,7 +805,7 @@ const EditarDespesa = () => {
                      <Button
                       type="button"
                       variant="outline"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                       onClick={() => navigate("/dashboard/despesas")}
                       className="border-border/50"
                     >
@@ -824,7 +813,7 @@ const EditarDespesa = () => {
                     </Button>
                     <Button 
                       type="submit" 
-                      disabled={isPending}
+                      disabled={isFormLoading}
                       className={cn(
                         "bg-gradient-to-r from-green-500 to-green-600",
                         "hover:from-green-600 hover:to-green-700",
@@ -832,7 +821,7 @@ const EditarDespesa = () => {
                         "transition-all duration-300"
                       )}
                     >
-                      {isPending ? (
+                      {isFormLoading ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                           Salvando...
@@ -852,6 +841,27 @@ const EditarDespesa = () => {
         </motion.div>
       </motion.div>
     </DashboardLayout>
+  );
+};
+
+// Componente principal com FormProvider
+const EditarDespesa: React.FC = () => {
+  return (
+    <FormProvider
+      schema={despesaSchema}
+      defaultValues={{
+        descricao: "",
+        data_despesa: new Date(),
+        quantidade: 1,
+        valor_unitario: 0,
+        pago: false,
+        data_pagamento: null,
+        forma_pagamento: null,
+      }}
+      onSubmit={() => Promise.resolve()} // Será sobrescrito pelo componente interno
+    >
+      <EditarDespesaForm />
+    </FormProvider>
   );
 };
 

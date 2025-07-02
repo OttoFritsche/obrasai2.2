@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useSinapiDespesas, SinapiItem } from '@/hooks/useSinapiDespesas';
+import type { SinapiItem } from '@/hooks/useSinapiDespesas';
+import { useSinapiDespesas } from '@/hooks/useSinapiDespesas';
 import { cn } from '@/lib/utils';
 
 interface SinapiSelectorDespesasProps {

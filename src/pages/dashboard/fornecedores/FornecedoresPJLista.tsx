@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { 
   Pencil, 
   Trash2, 
@@ -18,6 +18,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,18 +32,20 @@ import {
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useFornecedoresPJ } from "@/hooks/useFornecedoresPJ";
 
-type FornecedorPJ = {
+interface FornecedorPJ {
   id: string;
   razao_social: string;
   nome_fantasia: string | null;
   cnpj: string;
   email: string | null;
   telefone_principal: string | null;
-};
+}
 
 const FornecedoresPJLista = () => {
   const navigate = useNavigate();
   const [fornecedorToDelete, setFornecedorToDelete] = useState<string | null>(null);
+  const [selectedFornecedores, setSelectedFornecedores] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
   const { fornecedoresPJ, isLoading, error, refetch, deleteFornecedorPJ } = useFornecedoresPJ();
 
@@ -57,7 +60,56 @@ const FornecedoresPJLista = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedFornecedores.length === 0) return;
+    
+    try {
+      for (const id of selectedFornecedores) {
+        await deleteFornecedorPJ.mutateAsync(id);
+      }
+      setSelectedFornecedores([]);
+      setShowBulkDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting fornecedores:", error);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedFornecedores(fornecedoresPJ?.map(f => f.id) || []);
+    } else {
+      setSelectedFornecedores([]);
+    }
+  };
+
+  const handleSelectFornecedor = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedFornecedores(prev => [...prev, id]);
+    } else {
+      setSelectedFornecedores(prev => prev.filter(fId => fId !== id));
+    }
+  };
+
   const columns: ColumnDef<FornecedorPJ>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={selectedFornecedores.length === fornecedoresPJ?.length && fornecedoresPJ?.length > 0}
+          onCheckedChange={(checked) => handleSelectAll(!!checked)}
+          aria-label="Selecionar todos"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedFornecedores.includes(row.original.id)}
+          onCheckedChange={(checked) => handleSelectFornecedor(row.original.id, !!checked)}
+          aria-label="Selecionar linha"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "razao_social",
       header: "Razão Social",
@@ -216,6 +268,34 @@ const FornecedoresPJLista = () => {
           </motion.div>
         </div>
 
+        {/* Botão de exclusão em massa */}
+        {selectedFornecedores.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex items-center justify-between bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
+                <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+              </div>
+              <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                {selectedFornecedores.length} fornecedor(es) selecionado(s)
+              </span>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowBulkDeleteDialog(true)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir Selecionados
+            </Button>
+          </motion.div>
+        )}
+
         {/* Tabs para alternar entre PF e PJ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -277,6 +357,27 @@ const FornecedoresPJLista = () => {
                 className="bg-red-500 hover:bg-red-600"
               >
                 Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Modal de confirmação de exclusão em massa */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão em massa</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir {selectedFornecedores.length} fornecedor(es) selecionado(s)? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleBulkDelete}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Excluir Todos
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

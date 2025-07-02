@@ -63,9 +63,10 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import ItensDetalhados from "@/components/orcamento/ItensDetalhados";
 import { orcamentosParametricosApi, itensOrcamentoApi, calculoOrcamentoApi, orcamentoUtils } from "@/services/orcamentoApi";
 import { useObras } from "@/hooks/useObras";
-import { 
+import type { 
   OrcamentoParametrico,
-  ItemOrcamento,
+  ItemOrcamento} from "@/lib/validations/orcamento";
+import {
   TIPO_OBRA_LABELS,
   PADRAO_OBRA_LABELS,
   STATUS_ORCAMENTO_LABELS,

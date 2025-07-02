@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCEPOperation } from './useAsyncOperation';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CEPData {
@@ -23,8 +23,7 @@ interface CEPResponse {
 }
 
 export const useCEP = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const asyncOperation = useCEPOperation();
 
   /**
    * Busca informações de endereço pelo CEP
@@ -33,14 +32,10 @@ export const useCEP = () => {
    */
   const buscarCEP = async (cep: string): Promise<CEPData | null> => {
     if (!cep || cep.length < 8) {
-      setError('CEP deve ter pelo menos 8 dígitos');
-      return null;
+      throw new Error('CEP deve ter pelo menos 8 dígitos');
     }
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
+    return await asyncOperation.execute(async () => {
       // Chama a Edge Function de validação de documentos
       const { data, error: functionError } = await supabase.functions.invoke('document-validator', {
         body: {
@@ -51,31 +46,21 @@ export const useCEP = () => {
 
       if (functionError) {
         console.error('Erro na Edge Function:', functionError);
-        setError('Erro ao consultar CEP. Tente novamente.');
-        return null;
+        throw new Error('Erro ao consultar CEP. Tente novamente.');
       }
 
       const response = data as CEPResponse;
 
       if (!response.valido) {
-        setError(response.erro || 'CEP inválido');
-        return null;
+        throw new Error(response.erro || 'CEP inválido');
       }
 
       if (response.dados) {
         return response.dados;
       }
 
-      setError('Dados do CEP não encontrados');
-      return null;
-
-    } catch (err) {
-      console.error('Erro ao buscar CEP:', err);
-      setError('Erro ao consultar CEP. Verifique sua conexão.');
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
+      throw new Error('Dados do CEP não encontrados');
+    });
   };
 
   /**
@@ -104,8 +89,9 @@ export const useCEP = () => {
     buscarCEP,
     formatarCEP,
     limparCEP,
-    isLoading,
-    error,
-    clearError: () => setError(null)
+    isLoading: asyncOperation.isLoading,
+    error: asyncOperation.error,
+    data: asyncOperation.data,
+    reset: asyncOperation.reset
   };
-}; 
+};

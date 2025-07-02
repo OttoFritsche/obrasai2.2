@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { SinapiItem, useSinapiDespesas } from "./useSinapiDespesas";
+import type { SinapiItem} from "./useSinapiDespesas";
+import { useSinapiDespesas } from "./useSinapiDespesas";
 
 interface InsumoAnalysisResult {
   sugestoesSinapi: SinapiItem[];

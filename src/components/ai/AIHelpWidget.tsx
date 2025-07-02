@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { MessageCircle, X, Minimize2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,40 +9,37 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { AIChatSidebar } from './AIChatSidebar';
-import { getWidgetConfig, shouldShowWidget, type WidgetConfig } from '@/config/aiWidgetConfig';
+import { getWidgetConfig, shouldShowWidget } from '@/config/aiWidgetConfig';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAIWidget } from '@/contexts/AIWidgetContext';
 
 export function AIHelpWidget() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [widgetConfig, setWidgetConfig] = useState<WidgetConfig | null>(null);
+  const { state, toggleWidget, closeWidget, toggleMinimize, updateConfig } = useAIWidget();
   const location = useLocation();
 
   // Atualizar configuração baseada na rota
   useEffect(() => {
-    const config = getWidgetConfig(location.pathname);
-    setWidgetConfig(config);
-  }, [location.pathname]);
+    const routeConfig = getWidgetConfig(location.pathname);
+    if (routeConfig) {
+      updateConfig({
+        showWelcomeMessage: routeConfig.showWelcomeMessage,
+        welcomeMessage: routeConfig.welcomeMessage || state.config.welcomeMessage,
+        placeholder: routeConfig.placeholder || state.config.placeholder
+      });
+    }
+  }, [location.pathname, updateConfig, state.config.welcomeMessage, state.config.placeholder]);
 
   // Verificar se deve mostrar o widget
-  if (!shouldShowWidget(location.pathname) || !widgetConfig) {
+  if (!shouldShowWidget(location.pathname) || !state.config.isEnabled) {
     return null;
   }
 
-  const toggleWidget = () => {
-    if (isOpen && !isMinimized) {
-      setIsMinimized(true);
-    } else if (isOpen && isMinimized) {
-      setIsMinimized(false);
+  const handleToggle = () => {
+    if (state.isOpen && !state.isMinimized) {
+      toggleMinimize();
     } else {
-      setIsOpen(true);
-      setIsMinimized(false);
+      toggleWidget();
     }
-  };
-
-  const closeWidget = () => {
-    setIsOpen(false);
-    setIsMinimized(false);
   };
   return (
     <>
@@ -56,25 +53,33 @@ export function AIHelpWidget() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                onClick={toggleWidget}
+                onClick={handleToggle}
                 className={`
                   w-14 h-14 rounded-full shadow-lg transition-all duration-300
-                  ${isOpen 
+                  ${state.isOpen 
                     ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                     : 'bg-white hover:bg-gray-50 text-blue-600 border border-blue-200'
                   }
                   hover:scale-105 active:scale-95
+                  ${state.unreadCount > 0 ? 'animate-pulse' : ''}
                 `}
               >
-                {isOpen ? (
-                  isMinimized ? <Minimize2 className="h-6 w-6" /> : <X className="h-6 w-6" />
+                {state.isOpen ? (
+                  state.isMinimized ? <Minimize2 className="h-6 w-6" /> : <X className="h-6 w-6" />
                 ) : (
-                  <MessageCircle className="h-6 w-6" />
+                  <>
+                    <MessageCircle className="h-6 w-6" />
+                    {state.unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {state.unreadCount > 9 ? '9+' : state.unreadCount}
+                      </span>
+                    )}
+                  </>
                 )}
               </Button>
             </TooltipTrigger>
             <TooltipContent side="left">
-              <p>{isOpen ? 'Fechar ajuda' : widgetConfig.title}</p>
+              <p>{state.isOpen ? 'Fechar ajuda' : 'Ajuda AI'}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -82,12 +87,12 @@ export function AIHelpWidget() {
 
       {/* Sidebar do Chat */}
       <AnimatePresence>
-        {isOpen && !isMinimized && (
+        {state.isOpen && !state.isMinimized && (
           <AIChatSidebar
-            config={widgetConfig}
+            config={state.config}
             onClose={closeWidget}
-            onToggleMinimize={() => setIsMinimized(!isMinimized)}
-            isMinimized={isMinimized}
+            onToggleMinimize={toggleMinimize}
+            isMinimized={state.isMinimized}
           />
         )}
       </AnimatePresence>

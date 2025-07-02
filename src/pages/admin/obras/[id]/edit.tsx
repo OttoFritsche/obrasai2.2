@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ObraFormValues, obraSchema } from '@/lib/validations/obra';
+import type { ObraFormValues} from '@/lib/validations/obra';
+import { obraSchema } from '@/lib/validations/obra';
 import { useObras } from '@/hooks/useObras';
 import { useNavigate, useParams } from 'react-router-dom';
 

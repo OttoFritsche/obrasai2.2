@@ -17,12 +17,13 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import {
-  construtoraPJSchema,
-  construtoraPFSchema,
+import type {
   ConstrutoraPJFormValues,
   ConstrutoraPFFormValues,
-  ConstrutoraType,
+  ConstrutoraType} from "@/lib/validations/construtora";
+import {
+  construtoraPJSchema,
+  construtoraPFSchema
 } from "@/lib/validations/construtora";
 import { useCNPJLookup } from "@/hooks/useCNPJLookup";
 import { formatCNPJ, formatCPF, formatPhone, formatCEP, isComplete } from "@/lib/utils/formatters";
@@ -50,17 +51,17 @@ import {
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth";
+import { useTenantValidation } from "@/hooks/useTenantValidation";
 import { supabase } from "@/integrations/supabase/client";
 
 const EditarConstrutora = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { validTenantId } = useTenantValidation();
   const [construtoraType, setConstrutoraType] = useState<ConstrutoraType>("pj");
   const { lookupCNPJ, isLoading: isLoadingCNPJ, data: cnpjData, reset: resetCNPJ } = useCNPJLookup();
   const filledFromCNPJRef = useRef<string | null>(null);
-  const tenantId = user?.profile?.tenant_id;
-  const validTenantId = tenantId && typeof tenantId === "string" ? tenantId : null;
   const [loading, setLoading] = useState(true);
   const [showDelete, setShowDelete] = useState(false);
 
@@ -121,10 +122,43 @@ const EditarConstrutora = () => {
         }
         if (data.tipo === "pj") {
           setConstrutoraType("pj");
-          pjForm.reset(data);
+          // Mapear campos do banco para o formulário PJ
+          const pjData = {
+            documento: data.documento,
+            nome_razao_social: data.nome_razao_social,
+            nome_fantasia: data.nome_fantasia || "",
+            email: data.email || "",
+            telefone: data.telefone || "",
+            endereco: data.endereco || "",
+            numero: data.numero || "",
+            complemento: data.complemento || "",
+            bairro: data.bairro || "",
+            cidade: data.cidade || "",
+            estado: data.estado || "",
+            cep: data.cep || "",
+            responsavel_tecnico: data.responsavel_tecnico || "",
+            documento_responsavel: data.documento_responsavel || ""
+          };
+          pjForm.reset(pjData);
         } else {
           setConstrutoraType("pf");
-          pfForm.reset(data);
+          // Mapear campos do banco para o formulário PF
+          const pfData = {
+            cpf: data.documento, // 'documento' do banco vai para 'cpf' do formulário
+            nome: data.nome_razao_social, // 'nome_razao_social' do banco vai para 'nome' do formulário
+            email: data.email || "",
+            telefone: data.telefone || "",
+            endereco: data.endereco || "",
+            numero: data.numero || "",
+            complemento: data.complemento || "",
+            bairro: data.bairro || "",
+            cidade: data.cidade || "",
+            estado: data.estado || "",
+            cep: data.cep || "",
+            responsavel_tecnico: data.responsavel_tecnico || "",
+            documento_responsavel: data.documento_responsavel || ""
+          };
+          pfForm.reset(pfData);
         }
         setLoading(false);
       });
@@ -206,9 +240,29 @@ const EditarConstrutora = () => {
   const pfMutation = useMutation({
     mutationFn: async (values: ConstrutoraPFFormValues) => {
       if (!validTenantId) throw new Error("Tenant ID não encontrado");
+      
+      // Mapear campos do formulário para o banco de dados
+      const construtoraData = {
+        documento: values.cpf, // CPF vai para o campo 'documento'
+        nome_razao_social: values.nome, // Nome vai para 'nome_razao_social'
+        email: values.email,
+        telefone: values.telefone,
+        endereco: values.endereco,
+        numero: values.numero,
+        complemento: values.complemento,
+        bairro: values.bairro,
+        cidade: values.cidade,
+        estado: values.estado,
+        cep: values.cep,
+        responsavel_tecnico: values.responsavel_tecnico,
+        documento_responsavel: values.documento_responsavel,
+        tipo: "pf",
+        tenant_id: validTenantId
+      };
+      
       const { error } = await supabase
         .from("construtoras")
-        .update({ ...values, tipo: "pf", tenant_id: validTenantId })
+        .update(construtoraData)
         .eq("id", id!);
       if (error) throw error;
     },
@@ -1172,4 +1226,4 @@ const EditarConstrutora = () => {
   );
 };
 
-export default EditarConstrutora; 
+export default EditarConstrutora;

@@ -105,14 +105,17 @@ export function calculateNotasMetrics(notasFiscais: unknown[], filteredNotas: Ar
  * @param data Array de dados com campo de data
  * @param valueField Campo que contém o valor a ser calculado
  * @param dateField Campo que contém a data
- * @returns Tendência calculada
+ * @returns Tendência calculada ou undefined se não há dados suficientes
  */
 export function calculatePeriodTrend(
   data: Array<Record<string, unknown>>, 
   valueField: string, 
-  dateField: string = 'created_at'
+  dateField = 'created_at'
 ): TrendData | undefined {
-  if (!data || data.length === 0) return undefined;
+  // Se não há dados suficientes, não mostra tendência
+  if (!data || data.length === 0) {
+    return undefined;
+  }
 
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -120,8 +123,18 @@ export function calculatePeriodTrend(
   
   // Dados do mês atual
   const currentMonthData = data.filter(item => {
-    const itemDate = new Date(item[dateField]);
-    return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+    const dateValue = item[dateField];
+    if (!dateValue) return false;
+    
+    try {
+      const itemDate = new Date(dateValue as string);
+      // Verifica se a data é válida
+      if (isNaN(itemDate.getTime())) return false;
+      
+      return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+    } catch {
+      return false;
+    }
   });
   
   // Dados do mês anterior
@@ -129,9 +142,29 @@ export function calculatePeriodTrend(
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
   
   const previousMonthData = data.filter(item => {
-    const itemDate = new Date(item[dateField]);
-    return itemDate.getMonth() === previousMonth && itemDate.getFullYear() === previousYear;
+    const dateValue = item[dateField];
+    if (!dateValue) return false;
+    
+    try {
+      const itemDate = new Date(dateValue as string);
+      // Verifica se a data é válida
+      if (isNaN(itemDate.getTime())) return false;
+      
+      return itemDate.getMonth() === previousMonth && itemDate.getFullYear() === previousYear;
+    } catch {
+      return false;
+    }
   });
+  
+  // Se não há dados do mês anterior, não mostra tendência
+  if (previousMonthData.length === 0) {
+    return undefined;
+  }
+  
+  // Se não há dados do mês atual, também não mostra tendência
+  if (currentMonthData.length === 0) {
+    return undefined;
+  }
   
   // Calcula valores
   const currentValue = currentMonthData.reduce((sum, item) => {
@@ -144,5 +177,10 @@ export function calculatePeriodTrend(
     return sum + value;
   }, 0);
   
+  // Se ambos os valores são zero, não mostra tendência
+  if (currentValue === 0 && previousValue === 0) {
+    return undefined;
+  }
+  
   return calculateTrend(currentValue, previousValue);
-} 
+}

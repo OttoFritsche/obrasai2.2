@@ -29,11 +29,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { changePasswordSchema } from "@/lib/validations/auth";
 
-type PasswordFormValues = {
+interface PasswordFormValues {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
-};
+}
 
 export function AccountForm() {
   const [isLoading, setIsLoading] = useState(false);

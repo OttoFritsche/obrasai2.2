@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Constants } from "@/integrations/supabase/types";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { 
   Pencil, 
   Trash2, 
@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Receipt
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,7 @@ import { useDespesas } from "@/hooks/useDespesas";
 import { useObras } from "@/hooks/useObras";
 import { calculateDespesasMetrics, calculatePeriodTrend } from "@/lib/utils/metrics";
 
-type Despesa = {
+interface Despesa {
   id: string;
   descricao: string;
   obra_id: string;
@@ -56,11 +57,13 @@ type Despesa = {
   data_despesa: string;
   pago: boolean;
   data_pagamento: string | null;
-};
+}
 
 const DespesasLista = () => {
   const navigate = useNavigate();
   const [despesaToDelete, setDespesaToDelete] = useState<string | null>(null);
+  const [selectedDespesas, setSelectedDespesas] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [selectedObraId, setSelectedObraId] = useState<string>("all");
   const [selectedCategoria, setSelectedCategoria] = useState<string>("all");
   const [selectedEtapa, setSelectedEtapa] = useState<string>("all");
@@ -97,7 +100,60 @@ const DespesasLista = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedDespesas.length === 0) return;
+
+    try {
+      // Delete each selected despesa
+      for (const despesaId of selectedDespesas) {
+        await deleteDespesa.mutateAsync(despesaId);
+      }
+      setSelectedDespesas([]);
+      setShowBulkDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting despesas:", error);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = filteredDespesas?.map(despesa => despesa.id) || [];
+      setSelectedDespesas(allIds);
+    } else {
+      setSelectedDespesas([]);
+    }
+  };
+
+  const handleSelectDespesa = (despesaId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedDespesas(prev => [...prev, despesaId]);
+    } else {
+      setSelectedDespesas(prev => prev.filter(id => id !== despesaId));
+    }
+  };
+
   const columns: ColumnDef<Despesa>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={selectedDespesas.length === filteredDespesas?.length && filteredDespesas?.length > 0}
+          onCheckedChange={(value) => handleSelectAll(!!value)}
+          aria-label="Selecionar todas"
+          className="border-slate-300 dark:border-slate-600"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedDespesas.includes(row.original.id)}
+          onCheckedChange={(value) => handleSelectDespesa(row.original.id, !!value)}
+          aria-label="Selecionar linha"
+          className="border-slate-300 dark:border-slate-600"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "descricao",
       header: "Descrição",
@@ -265,7 +321,18 @@ const DespesasLista = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex items-center gap-3"
           >
+            {selectedDespesas.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowBulkDeleteDialog(true)}
+                className="bg-red-500 hover:bg-red-600 text-white shadow-lg transition-all duration-300"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir Selecionadas ({selectedDespesas.length})
+              </Button>
+            )}
             <Button 
               asChild 
               className={cn(
@@ -415,7 +482,7 @@ const DespesasLista = () => {
           </Card>
         </motion.div>
 
-        {/* Modal de confirmação de exclusão */}
+        {/* Modal de confirmação de exclusão individual */}
         <AlertDialog open={!!despesaToDelete} onOpenChange={() => setDespesaToDelete(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -431,6 +498,27 @@ const DespesasLista = () => {
                 className="bg-red-500 hover:bg-red-600"
               >
                 Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Modal de confirmação de exclusão em lote */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão em lote</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir {selectedDespesas.length} despesa(s) selecionada(s)? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleBulkDelete}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Excluir {selectedDespesas.length} despesa(s)
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

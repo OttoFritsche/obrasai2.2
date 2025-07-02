@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { 
   Pencil, 
   Trash2, 
@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Eye
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -46,7 +47,7 @@ import { useObras } from "@/hooks/useObras";
 import { calculateNotasMetrics, calculatePeriodTrend } from "@/lib/utils/metrics";
 
 // Updated type definition to properly handle potential query errors
-type NotaFiscal = {
+interface NotaFiscal {
   id: string;
   numero: string | null;
   obra_id: string;
@@ -71,12 +72,14 @@ type NotaFiscal = {
   created_at?: string;
   updated_at?: string;
   usuario_upload_id?: string | null;
-};
+}
 
 const NotasLista = () => {
   const navigate = useNavigate();
   const [notaToDelete, setNotaToDelete] = useState<string | null>(null);
   const [selectedObraId, setSelectedObraId] = useState<string>("all");
+  const [selectedNotas, setSelectedNotas] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [fileViewerState, setFileViewerState] = useState<{
     isOpen: boolean;
     fileUrl: string;
@@ -118,6 +121,35 @@ const NotasLista = () => {
       setNotaToDelete(null);
     } catch (error) {
       console.error("Error deleting nota fiscal:", error);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      for (const notaId of selectedNotas) {
+        await deleteNotaFiscal.mutateAsync(notaId);
+      }
+      setSelectedNotas([]);
+      setShowBulkDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting notas fiscais:", error);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allNotaIds = filteredNotas?.map(nota => nota.id) || [];
+      setSelectedNotas(allNotaIds);
+    } else {
+      setSelectedNotas([]);
+    }
+  };
+
+  const handleSelectNota = (notaId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedNotas(prev => [...prev, notaId]);
+    } else {
+      setSelectedNotas(prev => prev.filter(id => id !== notaId));
     }
   };
 
@@ -172,6 +204,31 @@ const NotasLista = () => {
   };
 
   const columns: ColumnDef<NotaFiscal>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => {
+            table.toggleAllPageRowsSelected(!!value);
+            handleSelectAll(!!value);
+          }}
+          aria-label="Selecionar todas"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedNotas.includes(row.original.id)}
+          onCheckedChange={(value) => {
+            row.toggleSelected(!!value);
+            handleSelectNota(row.original.id, !!value);
+          }}
+          aria-label="Selecionar linha"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "numero",
       header: "Número",
@@ -347,7 +404,18 @@ const NotasLista = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
+            className="flex gap-2"
           >
+            {selectedNotas.length > 0 && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowBulkDeleteDialog(true)}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir Selecionados ({selectedNotas.length})
+              </Button>
+            )}
             <Button 
               asChild 
               className={cn(
@@ -475,6 +543,27 @@ const NotasLista = () => {
                 className="bg-red-500 hover:bg-red-600"
               >
                 Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Modal de confirmação de exclusão em massa */}
+        <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão em massa</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza de que deseja excluir {selectedNotas.length} nota(s) fiscal(is) selecionada(s)? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleBulkDelete}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                Excluir {selectedNotas.length} nota(s)
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

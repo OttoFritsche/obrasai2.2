@@ -15,7 +15,8 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import { obraSchema, ObraFormValues } from "@/lib/validations/obra";
+import type { ObraFormValues } from "@/lib/validations/obra";
+import { obraSchema } from "@/lib/validations/obra";
 import { obrasApi } from "@/services/api";
 import { brazilianStates } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";

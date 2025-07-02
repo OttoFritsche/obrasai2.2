@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Table, 
   TableBody, 
@@ -57,14 +58,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { orcamentosParametricosApi, orcamentoUtils, itensOrcamentoApi } from "@/services/orcamentoApi";
-import { 
+import type { 
   OrcamentoParametrico, 
   StatusOrcamento,
   TipoObra,
-  PadraoObra,
+  PadraoObra} from "@/lib/validations/orcamento";
+import {
   TIPO_OBRA_LABELS,
   PADRAO_OBRA_LABELS,
   STATUS_ORCAMENTO_LABELS,
@@ -94,6 +106,8 @@ const OrcamentosLista: React.FC = () => {
     busca: "",
   });
   const [orcamentoParaExcluir, setOrcamentoParaExcluir] = useState<string | null>(null);
+  const [selectedOrcamentos, setSelectedOrcamentos] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
   // Query dos orçamentos
   const { 
@@ -170,6 +184,48 @@ const OrcamentosLista: React.FC = () => {
     } catch (error) {
       console.error("Erro ao excluir orçamento:", error);
       toast.error("❌ Erro ao excluir orçamento");
+    }
+  };
+
+  /**
+   * Exclusão em massa de orçamentos
+   */
+  const handleBulkDelete = async () => {
+    if (selectedOrcamentos.length === 0) return;
+    
+    try {
+      for (const id of selectedOrcamentos) {
+        await orcamentosParametricosApi.delete(id);
+      }
+      toast.success(`🗑️ ${selectedOrcamentos.length} orçamento(s) excluído(s) com sucesso!`);
+      setSelectedOrcamentos([]);
+      setShowBulkDeleteDialog(false);
+      refetch();
+    } catch (error) {
+      console.error("Erro ao excluir orçamentos:", error);
+      toast.error("❌ Erro ao excluir orçamentos");
+    }
+  };
+
+  /**
+   * Selecionar todos os orçamentos
+   */
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedOrcamentos(orcamentosEnriquecidos.map(o => o.id));
+    } else {
+      setSelectedOrcamentos([]);
+    }
+  };
+
+  /**
+   * Selecionar/deselecionar orçamento individual
+   */
+  const handleSelectOrcamento = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedOrcamentos(prev => [...prev, id]);
+    } else {
+      setSelectedOrcamentos(prev => prev.filter(oId => oId !== id));
     }
   };
 
@@ -518,11 +574,26 @@ const OrcamentosLista: React.FC = () => {
         >
           <Card className="border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white/95 to-slate-50/95 dark:from-slate-900/95 dark:to-slate-800/95 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>Lista de Orçamentos ({orcamentosEnriquecidos.length})</CardTitle>
-              <CardDescription>
-                Visualize e gerencie todos os seus orçamentos paramétricos
-                {/* Funcionalidade de composição detalhada removida */}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Lista de Orçamentos ({orcamentosEnriquecidos.length})</CardTitle>
+                  <CardDescription>
+                    Visualize e gerencie todos os seus orçamentos paramétricos
+                    {/* Funcionalidade de composição detalhada removida */}
+                  </CardDescription>
+                </div>
+                {selectedOrcamentos.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowBulkDeleteDialog(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Excluir Selecionados ({selectedOrcamentos.length})
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-6">
               {orcamentosEnriquecidos.length === 0 ? (
@@ -544,6 +615,13 @@ const OrcamentosLista: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedOrcamentos.length === orcamentosEnriquecidos.length && orcamentosEnriquecidos.length > 0}
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Selecionar todos"
+                        />
+                      </TableHead>
                       <TableHead>Orçamento</TableHead>
                       <TableHead>Localização</TableHead>
                       <TableHead>Tipo/Padrão</TableHead>
@@ -558,6 +636,13 @@ const OrcamentosLista: React.FC = () => {
                   <TableBody>
                     {orcamentosEnriquecidos.map((orcamento) => (
                       <TableRow key={orcamento.id} className="hover:bg-muted/50">
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedOrcamentos.includes(orcamento.id)}
+                            onCheckedChange={(checked) => handleSelectOrcamento(orcamento.id, checked as boolean)}
+                            aria-label={`Selecionar ${orcamento.nome_orcamento}`}
+                          />
+                        </TableCell>
                         <TableCell>
                           <div>
                             <p className="font-medium">{orcamento.nome_orcamento}</p>
@@ -696,6 +781,30 @@ const OrcamentosLista: React.FC = () => {
           </Card>
         </div>
       )}
+
+      {/* Modal de confirmação de exclusão em massa */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Orçamentos Selecionados</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você está prestes a excluir {selectedOrcamentos.length} orçamento(s). 
+              Esta ação não pode ser desfeita e todos os dados serão perdidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowBulkDeleteDialog(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Excluir {selectedOrcamentos.length} Orçamento(s)
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };

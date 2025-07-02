@@ -33,14 +33,12 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     // Se não há sessão ativa, redirecionar imediatamente
     if (!session && !loading) {
-      console.log('🔒 ProtectedRoute: Sem sessão, redirecionando para login');
       navigate('/login', { replace: true });
       return;
     }
 
     // Se não há usuário mas loading está false, redirecionar
     if (!loading && !user) {
-      console.log('🔒 ProtectedRoute: Sem usuário, redirecionando para login');
       navigate('/login', { replace: true });
       return;
     }
@@ -50,7 +48,6 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (loading) {
       const timeoutId = setTimeout(() => {
-        console.log('⚠️ ProtectedRoute: Loading timeout - forçando redirecionamento');
         if (!user || !session) {
           window.location.href = '/login';
         }

@@ -15,9 +15,9 @@ import logoImageDark from "@/assets/logo/logo_image_dark.png";
 import logoImageLight from "@/assets/logo/logo_image_light.png";
 
 
-type DashboardLayoutProps = {
+interface DashboardLayoutProps {
   children: React.ReactNode;
-};
+}
 
 // Configuração dos itens do menu com cores profissionais da construção civil
 const menuItems = [
@@ -125,7 +125,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       
       // ✅ Timeout de segurança - se não sair em 2s, forçar redirecionamento
       const emergencyExit = setTimeout(() => {
-        console.log("🚨 DashboardLayout: Logout timeout - redirecionamento de emergência");
+        console.log("DashboardLayout: Logout timeout - redirecionamento de emergência");
         window.location.href = '/login';
       }, 2000);
       
@@ -137,7 +137,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       toast.error(t("messages.error"));
       
       // ✅ Fallback de emergência
-      console.log("🚨 DashboardLayout: Erro no logout - redirecionamento de emergência");
+      console.log("DashboardLayout: Erro no logout - redirecionamento de emergência");
       window.location.href = '/login';
     }
   };

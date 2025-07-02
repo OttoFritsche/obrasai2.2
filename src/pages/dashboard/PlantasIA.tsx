@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Building2, History, Clock, FileText, Upload, Zap, CheckCircle, AlertTriangle, Loader2, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,261 +8,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { MetricCard } from '@/components/ui/metric-card'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
-import { supabase } from '@/integrations/supabase/client'
-import { useToast } from '@/hooks/use-toast'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
-
-interface PlantaAnalysis {
-  id: string
-  filename: string
-  analysis_data: {
-    summary: string
-    areas: Array<{
-      nome: string
-      area: number
-      uso: string
-    }>
-    issues: string[]
-    recommendations: string[]
-    total_area: number
-    api_used?: 'openai' | 'fallback'
-  }
-  created_at: string
-  obra_nome?: string
-}
-
-interface Obra {
-  id: string
-  nome: string
-  endereco?: string
-  created_at: string
-}
+import { usePlantaAnalyzer } from '@/hooks/usePlantaAnalyzer'
 
 export function PlantasIA() {
-  const [file, setFile] = useState<File | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysis, setAnalysis] = useState<PlantaAnalysis | null>(null)
-  const [history, setHistory] = useState<PlantaAnalysis[]>([])
-  const [loading, setLoading] = useState(true)
-  const [obras, setObras] = useState<Obra[]>([])
-  const [selectedObraId, setSelectedObraId] = useState<string>('')
-  const { toast } = useToast()
-
-  useEffect(() => {
-    loadObras()
-    loadHistory()
-  }, [])
-
-  const loadObras = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('obras')
-        .select('id, nome, endereco, created_at')
-        .order('created_at', { ascending: false })
-        .limit(50)
-
-      if (error) throw error
-      setObras(data || [])
-    } catch (error) {
-      console.error('Erro ao carregar obras:', error)
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar as obras",
-        variant: "destructive"
-      })
-    }
-  }
-
-  const loadHistory = async () => {
-    setLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('planta_analyses')
-        .select('id, filename, created_at, analysis_data')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (error) throw error
-      setHistory(data || [])
-    } catch (error) {
-      console.error('Erro ao carregar histórico:', error)
-      toast({
-        title: "Erro ao carregar histórico",
-        description: "Não foi possível carregar as análises anteriores.",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+  const {
+    // Estado
+    file,
+    isAnalyzing,
+    analysis,
+    history,
+    loading,
+    obras,
+    selectedObraId,
+    error,
+    
+    // Funções
+    setFile,
+    setSelectedObraId,
+    analyzeFile,
+    deleteAllAnalyses,
+    selectAnalysis,
+    formatDate,
+    
+    // Métricas
+    metrics,
+    
+    // Estados computados
+    canAnalyze,
+    hasHistory,
+    hasAnalysis,
+  } = usePlantaAnalyzer()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0]
-      
-      const allowedTypes = [
-        'application/pdf',
-        'image/jpeg',
-        'image/jpg', 
-        'image/png',
-        'image/webp'
-      ]
-      
-      if (!allowedTypes.includes(selectedFile.type)) {
-        toast({
-          title: "Arquivo inválido",
-          description: "Por favor, selecione um arquivo PDF ou imagem (JPG, PNG, WebP)",
-          variant: "destructive"
-        })
-        return
-      }
-
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "O arquivo deve ter no máximo 10MB",
-          variant: "destructive"
-        })
-        return
-      }
-
-      setFile(selectedFile)
-      setAnalysis(null)
+      setFile(e.target.files[0])
     }
   }
-
-  const analyzeFile = async () => {
-    if (!file) return
-
-    if (!selectedObraId) {
-      toast({
-        title: "Obra necessária",
-        description: "Por favor, selecione uma obra para associar a análise",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setIsAnalyzing(true)
-    
-    try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          const result = reader.result as string
-          const base64Data = result.split(',')[1]
-          resolve(base64Data)
-        }
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-
-      const { data, error } = await supabase.functions.invoke('analyze-planta', {
-        body: {
-          file: base64,
-          filename: file.name,
-          fileType: file.type,
-          obra_id: selectedObraId
-        }
-      })
-
-      if (error) throw error
-
-      setAnalysis(data)
-      await loadHistory()
-      
-      const apiUsed = data.analysis_data?.api_used || 'fallback'
-      toast({
-        title: "Análise concluída!",
-        description: apiUsed === 'openai' 
-          ? "Análise realizada com GPT-4o Vision ✨" 
-          : "Análise realizada com sistema interno",
-        variant: "default"
-      })
-
-    } catch (error: Error & { message?: string }) {
-      console.error('Erro na análise:', error)
-      toast({
-        title: "Erro na análise",
-        description: error.message || "Ocorreu um erro durante a análise",
-        variant: "destructive"
-      })
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
-  const deleteAllAnalyses = async () => {
-    if (history.length === 0) {
-      toast({
-        title: "Nenhuma análise",
-        description: "Não há análises para excluir.",
-        variant: "default"
-      })
-      return
-    }
-
-    // Confirmação forte antes de excluir TUDO
-    const confirmDelete = window.confirm(
-      `⚠️ ATENÇÃO: Você está prestes a excluir TODAS as ${history.length} análises!\n\nEsta ação é IRREVERSÍVEL e não pode ser desfeita.\n\nTem certeza absoluta que deseja continuar?`
-    )
-    
-    if (!confirmDelete) return
-
-    // Segunda confirmação para ter certeza
-    const doubleConfirm = window.confirm(
-      `Última confirmação: Excluir todas as ${history.length} análises de plantas?\n\nDigite SIM para confirmar ou cancele.`
-    )
-    
-    if (!doubleConfirm) return
-
-    try {
-      // Deletar todas as análises do usuário atual
-      const { error } = await supabase
-        .from('planta_analyses')
-        .delete()
-        .not('id', 'is', null) // Deleta todos os registros do usuário
-
-      if (error) throw error
-
-      // Limpar estado local
-      setHistory([])
-      setAnalysis(null)
-
-      toast({
-        title: "Todas as análises excluídas",
-        description: `${history.length} análises foram excluídas permanentemente.`,
-        variant: "default"
-      })
-
-    } catch (error: Error & { message?: string }) {
-      console.error('Erro ao excluir todas as análises:', error)
-      toast({
-        title: "Erro ao excluir",
-        description: error.message || "Não foi possível excluir as análises",
-        variant: "destructive"
-      })
-    }
-  }
-
-  // Calcular métricas para os cards
-  const totalAnalises = history.length
-  const analisesGPT4o = history.filter(h => h.analysis_data.api_used === 'openai').length
-  const totalAreas = history.reduce((sum, h) => sum + (h.analysis_data.total_area || 0), 0)
-  const mediaAmbientes = history.length > 0 
-    ? Math.round(history.reduce((sum, h) => sum + (h.analysis_data.areas?.length || 0), 0) / history.length)
-    : 0
 
   if (loading) {
     return (
@@ -318,7 +101,7 @@ export function PlantasIA() {
         >
           <MetricCard
             title="Total de Análises"
-            value={totalAnalises.toString()}
+            value={metrics.totalAnalises.toString()}
             icon={FileText}
             trend={{ value: 0, isPositive: true }}
             iconColor="primary"
@@ -326,7 +109,7 @@ export function PlantasIA() {
           />
           <MetricCard
             title="Análises GPT-4o"
-            value={analisesGPT4o.toString()}
+            value={metrics.analisesGPT4o.toString()}
             icon={Zap}
             trend={{ value: 0, isPositive: true }}
             iconColor="success"
@@ -334,7 +117,7 @@ export function PlantasIA() {
           />
           <MetricCard
             title="Área Total"
-            value={`${totalAreas.toFixed(0)} m²`}
+            value={`${metrics.totalAreas.toFixed(0)} m²`}
             icon={Building2}
             trend={{ value: 0, isPositive: true }}
             iconColor="info"
@@ -342,7 +125,7 @@ export function PlantasIA() {
           />
           <MetricCard
             title="Média Ambientes"
-            value={mediaAmbientes.toString()}
+            value={metrics.mediaAmbientes.toString()}
             icon={CheckCircle}
             trend={{ value: 0, isPositive: true }}
             iconColor="warning"
@@ -431,7 +214,7 @@ export function PlantasIA() {
 
                 <Button
                   onClick={analyzeFile}
-                  disabled={!file || isAnalyzing || !selectedObraId}
+                  disabled={!canAnalyze}
                   className={cn(
                     "w-full bg-gradient-to-r from-emerald-500 to-green-600",
                     "hover:from-emerald-600 hover:to-green-700",
@@ -505,7 +288,7 @@ export function PlantasIA() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className="p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-600"
-                        onClick={() => setAnalysis(item)}
+                        onClick={() => selectAnalysis(item)}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">

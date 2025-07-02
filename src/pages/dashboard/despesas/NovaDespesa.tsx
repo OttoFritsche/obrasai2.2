@@ -19,10 +19,12 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 import { Constants } from "@/integrations/supabase/types";
-import { despesaSchema, DespesaFormValues, formasPagamento } from "@/lib/validations/despesa";
+import type { DespesaFormValues} from "@/lib/validations/despesa";
+import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
 import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
-import { useSinapiDespesas, SinapiItem } from "@/hooks/useSinapiDespesas";
+import type { SinapiItem } from "@/hooks/useSinapiDespesas";
+import { useSinapiDespesas } from "@/hooks/useSinapiDespesas";
 import { SinapiSelectorDespesas } from "@/components/SinapiSelectorDespesas";
 import { VariacaoSinapiIndicator } from "@/components/VariacaoSinapiIndicator";
 import { formatDate } from "@/lib/utils";

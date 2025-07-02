@@ -43,7 +43,6 @@ const Login = () => {
     if (hasRedirectedRef.current) return;
     
     hasRedirectedRef.current = true;
-    console.log("🔄 Redirecionando para dashboard...");
     navigate("/dashboard", { replace: true });
   });
 
@@ -65,17 +64,14 @@ const Login = () => {
     const checkRedirect = setTimeout(() => {
       // Condição principal: usuário autenticado e session ativa
       if (session?.user && !loading) {
-        console.log("Session ativa detectada, redirecionando...");
         performRedirect.current();
         return;
       }
 
       // Condição de segurança: se session existe mas loading está stuck
       if (session?.user && loading) {
-        console.log("Session ativa mas loading stuck, forçando redirecionamento em 2s...");
         redirectTimeoutRef.current = setTimeout(() => {
           if (session?.user) {
-            console.log("Timeout de segurança atingido, forçando redirecionamento");
             performRedirect.current();
           }
         }, 2000);
@@ -101,7 +97,6 @@ const Login = () => {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         
         if (currentSession?.user && !hasRedirectedRef.current) {
-          console.log("Session detectada via Supabase direto, redirecionando...");
           performRedirect.current();
         }
       } catch (error) {
@@ -143,7 +138,6 @@ const Login = () => {
         if (!hasRedirectedRef.current) {
           const { data: { session: currentSession } } = await supabase.auth.getSession();
           if (currentSession?.user) {
-            console.log("Redirecionamento backup após login bem-sucedido");
             performRedirect.current();
           }
         }

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { useTenantValidation } from '@/hooks/useTenantValidation';
 
 /**
  * Hook genérico para mutações de formulário com padrões comuns
@@ -29,10 +30,7 @@ export function useFormMutation<TData, TVariables>({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  
-  // Validação de tenantId reutilizável
-  const tenantId = user?.profile?.tenant_id;
-  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
+  const { validTenantId } = useTenantValidation();
 
   const mutation = useMutation({
     mutationFn: (variables: TVariables) => {

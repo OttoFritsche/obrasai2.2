@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign, Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +31,7 @@ import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
 
 
-type Obra = {
+interface Obra {
   id: string;
   nome: string;
   endereco: string;
@@ -41,11 +42,13 @@ type Obra = {
   data_inicio: string | null;
   data_prevista_termino: string | null;
   created_at: string;
-};
+}
 
 const ObrasLista = () => {
   const navigate = useNavigate();
   const [obraToDelete, setObraToDelete] = useState<string | null>(null);
+  const [selectedObras, setSelectedObras] = useState<string[]>([]);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
 
   const { obras, isLoading, error: isError, refetch, deleteObra } = useObras();
 
@@ -57,6 +60,36 @@ const ObrasLista = () => {
       setObraToDelete(null);
     } catch (error) {
       console.error("Error deleting obra:", error);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedObras.length === 0) return;
+    
+    try {
+      for (const id of selectedObras) {
+        await deleteObra.mutateAsync(id);
+      }
+      setSelectedObras([]);
+      setShowBulkDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting obras:", error);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedObras(obras?.map(o => o.id) || []);
+    } else {
+      setSelectedObras([]);
+    }
+  };
+
+  const handleSelectObra = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedObras(prev => [...prev, id]);
+    } else {
+      setSelectedObras(prev => prev.filter(oId => oId !== id));
     }
   };
 
@@ -73,6 +106,25 @@ const ObrasLista = () => {
   };
 
   const columns: ColumnDef<Obra>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={selectedObras.length === obras?.length && obras?.length > 0}
+          onCheckedChange={(checked) => handleSelectAll(!!checked)}
+          aria-label="Selecionar todos"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedObras.includes(row.original.id)}
+          onCheckedChange={(checked) => handleSelectObra(row.original.id, !!checked)}
+          aria-label="Selecionar linha"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "nome",
       header: t("obras.name"),
@@ -313,6 +365,29 @@ const ObrasLista = () => {
           </motion.div>
         </div>
         
+        {/* Bulk Delete Button */}
+        {selectedObras.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+          >
+            <span className="text-sm text-blue-700 dark:text-blue-300">
+              {selectedObras.length} obra(s) selecionada(s)
+            </span>
+            <Button
+              onClick={() => setShowBulkDeleteDialog(true)}
+              variant="destructive"
+              size="sm"
+              className="bg-red-500 hover:bg-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir Selecionadas
+            </Button>
+          </motion.div>
+        )}
+        
         {/* Estatísticas rápidas */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -419,6 +494,28 @@ const ObrasLista = () => {
               className="bg-destructive hover:bg-destructive/90"
             >
               {t("actions.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão em Massa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir {selectedObras.length} obra(s) selecionada(s)? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleBulkDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Excluir Todas
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

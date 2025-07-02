@@ -1,11 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
-import { ObraFormValues } from "@/lib/validations/obra";
-import {
+import type { ObraFormValues } from "@/lib/validations/obra";
+import type {
   FornecedorPFFormValues,
   FornecedorPJFormValues,
 } from "@/lib/validations/fornecedor";
-import { DespesaFormValues } from "@/lib/validations/despesa";
-import { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
+import type { DespesaFormValues } from "@/lib/validations/despesa";
+import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
 import { sanitizeFormData } from "@/lib/input-sanitizer";
 import { secureLogger } from "@/lib/secure-logger";
 import { unformat } from "@/lib/utils/formatters";

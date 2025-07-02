@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
   Building, 
@@ -17,7 +15,12 @@ import {
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import { obraSchema, ObraFormValues } from "@/lib/validations/obra";
+// Novos padrões implementados
+import { FormProvider, useFormContext } from '@/contexts/FormContext';
+import { useAsyncOperation } from '@/hooks/useAsyncOperation';
+
+import type { ObraFormValues } from "@/lib/validations/obra";
+import { obraSchema } from "@/lib/validations/obra";
 import { obrasApi } from "@/services/api";
 import { brazilianStates } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -47,29 +50,20 @@ import { useCEP } from "@/hooks/useCEP";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
 
-const EditarObra = () => {
+// Componente interno que usa FormContext
+const EditarObraForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   const { user } = useAuth();
+  const { form } = useFormContext<ObraFormValues>();
   const tenantId = user?.profile?.tenant_id;
   const [construtoras, setConstrutoras] = useState<{ id: string; tipo: string; nome_razao_social: string; nome_fantasia?: string; documento: string }[]>([]);
   const [loadingConstrutoras, setLoadingConstrutoras] = useState(true);
   
-  const form = useForm<ObraFormValues>({
-    resolver: zodResolver(obraSchema),
-    defaultValues: {
-      nome: "",
-      endereco: "",
-      cidade: "",
-      estado: "",
-      cep: "",
-      orcamento: 0,
-      data_inicio: null,
-      data_prevista_termino: null,
-    },
-  });
+  // Operação assíncrona para atualização da obra
+  const { executeAsync, isLoading: isUpdating } = useAsyncOperation();
 
   const { data: obra, isLoading, isError } = useQuery({
     queryKey: ["obra", id],
@@ -110,26 +104,28 @@ const EditarObra = () => {
       });
   }, [tenantId]);
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (values: ObraFormValues) => obrasApi.update(id as string, values),
-    onSuccess: () => {
-      // ✅ Invalidar cache da obra específica E todas as obras
-      queryClient.invalidateQueries({ queryKey: ["obra", id] });
-      queryClient.invalidateQueries({ queryKey: ["obras"] });
-      
-      console.log("🔄 Cache invalidado após atualização da obra");
-      toast.success("Obra atualizada com sucesso!");
-      // ✅ Voltar para a página de detalhes da obra ao invés da lista
-      navigate(`/dashboard/obras/${id}`);
-    },
-    onError: (error) => {
-      console.error("Error updating obra:", error);
-      toast.error("Erro ao atualizar obra. Tente novamente.");
-    },
-  });
+  const onSubmit = async (values: ObraFormValues) => {
+    if (!id) {
+      throw new Error('ID da obra não encontrado');
+    }
 
-  const onSubmit = (values: ObraFormValues) => {
-    mutate(values);
+    await executeAsync(
+      () => obrasApi.update(id, values),
+      {
+        loadingKey: 'update-obra',
+        successMessage: 'Obra atualizada com sucesso!',
+        errorMessage: 'Erro ao atualizar obra. Tente novamente.',
+        onSuccess: () => {
+          // ✅ Invalidar cache da obra específica E todas as obras
+          queryClient.invalidateQueries({ queryKey: ["obra", id] });
+          queryClient.invalidateQueries({ queryKey: ["obras"] });
+          
+          console.log("Cache invalidado após atualização da obra");
+          // ✅ Voltar para a página de detalhes da obra ao invés da lista
+          navigate(`/dashboard/obras/${id}`);
+        }
+      }
+    );
   };
 
   // Função para buscar endereço automaticamente quando CEP for preenchido
@@ -151,10 +147,13 @@ const EditarObra = () => {
         
         toast.success("Endereço atualizado automaticamente!");
       } else if (cepError) {
-        toast.error(cepError);
+        // Usar toast do FormContext se disponível
+        console.error('Erro CEP:', cepError);
       }
     }
   };
+
+  const isFormLoading = isLoading || isUpdating || loadingConstrutoras;
 
   if (isLoading) {
     return (
@@ -527,7 +526,7 @@ const EditarObra = () => {
                       type="button"
                       variant="outline"
                       onClick={() => navigate(`/dashboard/obras/${id}`)}
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     >
                       Cancelar
                     </Button>
@@ -542,7 +541,7 @@ const EditarObra = () => {
                         "transition-all duration-300"
                       )}
                     >
-                      {isPending ? (
+                      {isFormLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Salvando...
@@ -562,6 +561,28 @@ const EditarObra = () => {
         </motion.div>
       </motion.div>
     </DashboardLayout>
+  );
+};
+
+// Componente principal com FormProvider
+const EditarObra: React.FC = () => {
+  return (
+    <FormProvider
+      schema={obraSchema}
+      defaultValues={{
+        nome: "",
+        endereco: "",
+        cidade: "",
+        estado: "",
+        cep: "",
+        orcamento: 0,
+        data_inicio: null,
+        data_prevista_termino: null,
+      }}
+      onSubmit={() => Promise.resolve()} // Será sobrescrito pelo componente interno
+    >
+      <EditarObraForm />
+    </FormProvider>
   );
 };
 

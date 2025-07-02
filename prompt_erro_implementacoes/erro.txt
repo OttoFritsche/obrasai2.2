@@ -1,40 +1,107 @@
 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
 AuthContext.tsx:66 🔄 onAuthStateChange: SIGNED_IN true
 AuthContext.tsx:66 🔄 onAuthStateChange: INITIAL_SESSION true
-useCrudOperations.ts:33 Uncaught TypeError: Cannot destructure property 'resource' of 'undefined' as it is undefined.
-    at useCrudOperations (useCrudOperations.ts:33:5)
-    at useObras (useObras.ts:22:7)
-    at AnaliseIntegrada (AnaliseIntegrada.tsx:108:46)
-useCrudOperations.ts:33 Uncaught TypeError: Cannot destructure property 'resource' of 'undefined' as it is undefined.
-    at useCrudOperations (useCrudOperations.ts:33:5)
-    at useObras (useObras.ts:22:7)
-    at AnaliseIntegrada (AnaliseIntegrada.tsx:108:46)
-chunk-NFC5BX5N.js?v=b226c3d5:14032 The above error occurred in the <AnaliseIntegrada> component:
-
-    at AnaliseIntegrada (http://localhost:8080/src/pages/dashboard/AnaliseIntegrada.tsx?t=1751411641165:54:22)
-    at ProtectedRoute (http://localhost:8080/src/contexts/auth/ProtectedRoutes.tsx:26:34)
-    at RenderedRoute (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=b226c3d5:4088:5)
-    at Routes (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=b226c3d5:4558:5)
-    at AuthProvider (http://localhost:8080/src/contexts/auth/AuthContext.tsx:32:32)
-    at QueryClientProvider (http://localhost:8080/node_modules/.vite/deps/@tanstack_react-query.js?v=b226c3d5:2933:3)
-    at ThemeProvider (http://localhost:8080/src/providers/theme-provider.tsx:32:33)
-    at App
-    at Router (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=b226c3d5:4501:15)
-    at BrowserRouter (http://localhost:8080/node_modules/.vite/deps/react-router-dom.js?v=b226c3d5:5247:5)
-
-Consider adding an error boundary to your tree to customize error handling behavior.
-Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
-chunk-NFC5BX5N.js?v=b226c3d5:19413 Uncaught TypeError: Cannot destructure property 'resource' of 'undefined' as it is undefined.
-    at useCrudOperations (useCrudOperations.ts:33:5)
-    at useObras (useObras.ts:22:7)
-    at AnaliseIntegrada (AnaliseIntegrada.tsx:108:46)
-﻿
-
-Modify and save CSS changes to your workspace with Gemini
-You can now ask Gemini to modify your CSS and, with a connected workspace folder, automatically save changes back to source files.
-
-Annotate performance findings with Gemini
-With a click of a button, ask Gemini to generate annotations about events in the performance trace.
-
-Ask Gemini about performance insights
-Several performance insights now have an 'Ask AI' button, so you can start a chat with Gemini about them.
+client:602 
+            
+            
+           GET http://localhost:8080/src/App.tsx?t=1751423210859 net::ERR_ABORTED 500 (Internal Server Error)
+importUpdatedModule @ client:602
+fetchUpdate @ client:211
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+client:176 [hmr] Failed to reload /src/App.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+warnFailedUpdate @ client:176
+fetchUpdate @ client:213
+await in fetchUpdate
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+@react-refresh:383 
+            
+            
+           GET https://anrphijuostbgbscxmzx.supabase.co/rest/v1/construtoras?select=*&tenant_id=eq.a88331a3-a339-4c5e-9cec-ee9479aaebdd&order=nome.asc 400 (Bad Request)
+(anonymous) @ @supabase_supabase-js.js?v=b13b0519:3916
+(anonymous) @ @supabase_supabase-js.js?v=b13b0519:3937
+fulfilled @ @supabase_supabase-js.js?v=b13b0519:3889
+Promise.then
+step @ @supabase_supabase-js.js?v=b13b0519:3902
+(anonymous) @ @supabase_supabase-js.js?v=b13b0519:3904
+__awaiter6 @ @supabase_supabase-js.js?v=b13b0519:3886
+(anonymous) @ @supabase_supabase-js.js?v=b13b0519:3927
+then @ @supabase_supabase-js.js?v=b13b0519:89
+setTimeout
+(anonymous) @ @react-refresh:383
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:422
+(anonymous) @ App.tsx?t=1751423204692:1804
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+TenantContext.tsx:58 Erro ao buscar tenants: {code: '42703', details: null, hint: null, message: 'column construtoras.nome does not exist'}
+fetchTenants @ TenantContext.tsx:58
+await in fetchTenants
+(anonymous) @ TenantContext.tsx:89
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=b13b0519:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=b13b0519:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=b13b0519:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=b13b0519:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=b13b0519:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=b13b0519:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=b13b0519:19447
+commitRootImpl @ chunk-NFC5BX5N.js?v=b13b0519:19416
+commitRoot @ chunk-NFC5BX5N.js?v=b13b0519:19277
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=b13b0519:18895
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=b13b0519:9119
+flushSync @ chunk-NFC5BX5N.js?v=b13b0519:18959
+scheduleRefresh @ chunk-NFC5BX5N.js?v=b13b0519:20004
+(anonymous) @ @react-refresh:160
+performReactRefresh @ @react-refresh:150
+(anonymous) @ @react-refresh:392
+setTimeout
+(anonymous) @ @react-refresh:383
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:422
+(anonymous) @ App.tsx?t=1751423204692:1804
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+client:602 
+            
+            
+           GET http://localhost:8080/src/App.tsx?t=1751423383773 net::ERR_ABORTED 500 (Internal Server Error)
+importUpdatedModule @ client:602
+fetchUpdate @ client:211
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+client:176 [hmr] Failed to reload /src/App.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+warnFailedUpdate @ client:176
+fetchUpdate @ client:213
+await in fetchUpdate
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+client:602 
+            
+            
+           GET http://localhost:8080/src/App.tsx?t=1751423492252 net::ERR_ABORTED 500 (Internal Server Error)
+importUpdatedModule @ client:602
+fetchUpdate @ client:211
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+client:176 [hmr] Failed to reload /src/App.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)

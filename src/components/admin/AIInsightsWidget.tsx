@@ -23,6 +23,8 @@ import {
   BarChart3
 } from 'lucide-react'
 import { aiInsights, type AIInsight, type MetricsData } from '@/services/aiInsightsApi'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { useLoading } from '@/contexts/LoadingContext'
 
 interface ChatMessage {
   id: string
@@ -43,15 +45,18 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
   onToggle
 }) => {
   const [insights, setInsights] = useState<AIInsight[]>([])
-  const [loading, setLoading] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [lastAnalysis, setLastAnalysis] = useState<string>('')
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [currentMessage, setCurrentMessage] = useState('')
-  const [chatLoading, setChatLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'insights' | 'chat'>('insights')
   const chatRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // Hooks otimizados
+  const { isLoading } = useLoading()
+  const { executeAsync: analyzeMetricsAsync, isLoading: isAnalyzing } = useAsyncOperation()
+  const { executeAsync: sendChatAsync, isLoading: isChatLoading } = useAsyncOperation()
 
   // 🔄 Analisar métricas quando mudarem
   useEffect(() => {
@@ -81,16 +86,18 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
   const analyzeMetrics = async () => {
     if (!metrics) return
 
-    setLoading(true)
-    try {
-      const newInsights = await aiInsights.analyzeMetrics(metrics)
-      setInsights(newInsights)
-      setLastAnalysis(new Date().toLocaleTimeString())
-    } catch (error) {
-      console.error('Erro ao analisar métricas:', error)
-    } finally {
-      setLoading(false)
-    }
+    await analyzeMetricsAsync(
+      async () => {
+        const newInsights = await aiInsights.analyzeMetrics(metrics)
+        setInsights(newInsights)
+        setLastAnalysis(new Date().toLocaleTimeString())
+        return newInsights
+      },
+      {
+        loadingKey: 'ai-insights-analysis',
+        errorMessage: 'Erro ao analisar métricas'
+      }
+    )
   }
 
   // 💬 Enviar mensagem no chat
@@ -104,37 +111,40 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
       timestamp: new Date()
     }
 
+    const messageToSend = currentMessage.trim()
     setChatMessages(prev => [...prev, userMessage])
     setCurrentMessage('')
-    setChatLoading(true)
 
-    try {
-      // Gerar resposta da IA
-      const aiResponse = await aiInsights.chatWithMetrics(currentMessage.trim(), metrics)
-      
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: aiResponse,
-        timestamp: new Date()
+    await sendChatAsync(
+      async () => {
+        // Gerar resposta da IA
+        const aiResponse = await aiInsights.chatWithMetrics(messageToSend, metrics)
+        
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'ai',
+          content: aiResponse,
+          timestamp: new Date()
+        }
+
+        setChatMessages(prev => [...prev, aiMessage])
+        return aiResponse
+      },
+      {
+        loadingKey: 'ai-chat-response',
+        errorMessage: 'Erro no chat',
+        onError: () => {
+          // Resposta de fallback
+          const fallbackMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            type: 'ai',
+            content: 'Desculpe, não consegui processar sua mensagem no momento. Tente novamente ou verifique se a OpenAI API está configurada.',
+            timestamp: new Date()
+          }
+          setChatMessages(prev => [...prev, fallbackMessage])
+        }
       }
-
-      setChatMessages(prev => [...prev, aiMessage])
-    } catch (error) {
-      console.error('Erro no chat:', error)
-      
-      // Resposta de fallback
-      const fallbackMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: 'Desculpe, não consegui processar sua mensagem no momento. Tente novamente ou verifique se a OpenAI API está configurada.',
-        timestamp: new Date()
-      }
-
-      setChatMessages(prev => [...prev, fallbackMessage])
-    } finally {
-      setChatLoading(false)
-    }
+    )
   }
 
   // ⌨️ Enviar com Enter
@@ -215,10 +225,10 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={analyzeMetrics}
-                  disabled={loading || !metrics}
+                  disabled={isAnalyzing || !metrics}
                   className="h-8 w-8 p-0"
                 >
-                  <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`h-3 w-3 ${isAnalyzing ? 'animate-spin' : ''}`} />
                 </Button>
                 
                 <Button
@@ -278,7 +288,7 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
           {/* 📊 Conteúdo */}
           {!isMinimized && (
             <CardContent className="p-0">
-              {loading ? (
+              {isAnalyzing ? (
                 <div className="flex items-center justify-center h-40">
                   <div className="text-center">
                     <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-purple-500" />
@@ -404,7 +414,7 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
                                 </div>
                               </motion.div>
                             ))}
-                            {chatLoading && (
+                            {isChatLoading && (
                               <div className="flex justify-start">
                                 <div className="bg-muted rounded-lg p-3">
                                   <div className="flex items-center gap-2">
@@ -431,13 +441,13 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            disabled={chatLoading || !metrics}
+                            disabled={isChatLoading || !metrics}
                             className="flex-1 min-h-[40px] max-h-[100px] resize-none"
                             rows={1}
                           />
                           <Button
                             onClick={sendChatMessage}
-                            disabled={!currentMessage.trim() || chatLoading || !metrics}
+                            disabled={!currentMessage.trim() || isChatLoading || !metrics}
                             size="sm"
                             className="h-10 w-10 p-0"
                           >
@@ -455,4 +465,4 @@ export const AIInsightsWidget: React.FC<AIInsightsWidgetProps> = ({
       </motion.div>
     </AnimatePresence>
   )
-} 
+}

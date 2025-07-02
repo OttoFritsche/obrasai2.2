@@ -9,7 +9,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth";
 import { t } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
-import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
+import type { RegisterFormValues } from "@/lib/validations/auth";
+import { registerSchema } from "@/lib/validations/auth";
 import { useAnalytics } from "@/services/analyticsApi";
 
 export const RegisterForm = () => {

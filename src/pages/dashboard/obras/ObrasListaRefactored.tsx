@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign, Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,7 @@ import { useObras } from "@/hooks/useObras";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { GradientCard } from "@/components/ui/GradientCard";
 
-type Obra = {
+interface Obra {
   id: string;
   nome: string;
   endereco: string;
@@ -44,7 +44,7 @@ type Obra = {
   data_inicio: string | null;
   data_prevista_termino: string | null;
   created_at: string;
-};
+}
 
 const ObrasListaRefactored = () => {
   const navigate = useNavigate();

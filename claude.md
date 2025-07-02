@@ -25,6 +25,10 @@ Este documento centraliza as informações, regras e convenções para o desenvo
 - **Pagamentos:** Stripe.
 - **Tipagem:** Sistema robusto de tipos TypeScript com arquivos centralizados e ESLint configurado.
 
+## 🚨 Regra Crítica de Arquitetura
+
+- **Limite de Tamanho de Arquivos:** Arquivos não devem exceder **400-500 linhas de código**. Arquivos maiores devem ser **obrigatoriamente refatorados** em módulos menores para facilitar manutenção, legibilidade e evitar complexidade excessiva. Aplicar princípio da responsabilidade única.
+
 ---
 
 ## 🏗️ Arquitetura e Estrutura
