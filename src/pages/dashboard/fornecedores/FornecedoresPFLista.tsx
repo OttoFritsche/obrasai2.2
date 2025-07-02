@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +33,7 @@ import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useAuth } from "@/contexts/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fornecedoresPFApi } from "@/services/api";
-import { t, formatDateBR } from "@/lib/i18n";
+import { formatDateBR } from "@/lib/i18n";
 
 type FornecedorPF = {
   id: string;

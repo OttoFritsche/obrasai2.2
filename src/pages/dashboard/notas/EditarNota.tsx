@@ -6,13 +6,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { 
   FileText, 
   ArrowLeft, 
-  Upload, 
   UploadCloud, 
   Save,
   Building2,
   Receipt,
-  Users,
-  Calendar,
   DollarSign,
   Hash,
   Key,
@@ -36,7 +33,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import FileViewer from "@/components/ui/file-viewer";
 import {
   Form,

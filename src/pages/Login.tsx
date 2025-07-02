@@ -13,13 +13,10 @@ import { t } from "@/lib/i18n";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import Logo from "@/components/ui/Logo";
-import logoImage from "@/assets/logo/ObrasAI_dark.png";
 import { supabase } from "@/integrations/supabase/client";
 import loginBg from "@/assets/images/4d142594-a29e-4e94-bd77-48cf91ebcfac.png";
-// ✅ Comentar temporariamente o painel de debug
-// import AuthDebugPanel from "@/components/debug/AuthDebugPanel";
+
 
 // Esquema de validação do formulário
 const loginSchema = z.object({
@@ -41,7 +38,7 @@ const Login = () => {
   const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasRedirectedRef = useRef(false);
 
-  // ✅ Função robusta de redirecionamento com timeout de segurança
+  // Função de redirecionamento com timeout de segurança
   const performRedirect = useRef(() => {
     if (hasRedirectedRef.current) return;
     
@@ -50,7 +47,7 @@ const Login = () => {
     navigate("/dashboard", { replace: true });
   });
 
-  // ✅ Cleanup de timeout ao desmontar
+  // Cleanup de timeout ao desmontar
   useEffect(() => {
     return () => {
       if (redirectTimeoutRef.current) {
@@ -59,26 +56,26 @@ const Login = () => {
     };
   }, []);
 
-  // ✅ Redirecionamento robusto com múltiplas condições de segurança
+  // Redirecionamento com múltiplas condições de segurança
   useEffect(() => {
     // Se já redirecionou, não fazer nada
     if (hasRedirectedRef.current) return;
 
-    // ✅ Aguardar um momento para garantir que logout foi processado
+    // Aguardar um momento para garantir que logout foi processado
     const checkRedirect = setTimeout(() => {
       // Condição principal: usuário autenticado e session ativa
       if (session?.user && !loading) {
-        console.log("✅ Session ativa detectada, redirecionando...");
+        console.log("Session ativa detectada, redirecionando...");
         performRedirect.current();
         return;
       }
 
       // Condição de segurança: se session existe mas loading está stuck
       if (session?.user && loading) {
-        console.log("⚠️ Session ativa mas loading stuck, forçando redirecionamento em 2s...");
+        console.log("Session ativa mas loading stuck, forçando redirecionamento em 2s...");
         redirectTimeoutRef.current = setTimeout(() => {
           if (session?.user) {
-            console.log("🔧 Timeout de segurança atingido, forçando redirecionamento");
+            console.log("Timeout de segurança atingido, forçando redirecionamento");
             performRedirect.current();
           }
         }, 2000);
@@ -95,7 +92,7 @@ const Login = () => {
     };
   }, [session, loading, navigate]);
 
-  // ✅ Detectar login bem-sucedido mesmo que o AuthContext tenha problemas
+  // Detectar login bem-sucedido mesmo que o AuthContext tenha problemas
   useEffect(() => {
     if (hasRedirectedRef.current) return;
 
@@ -104,7 +101,7 @@ const Login = () => {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         
         if (currentSession?.user && !hasRedirectedRef.current) {
-          console.log("🔍 Session detectada via Supabase direto, redirecionando...");
+          console.log("Session detectada via Supabase direto, redirecionando...");
           performRedirect.current();
         }
       } catch (error) {
@@ -141,12 +138,12 @@ const Login = () => {
       
       toast.success(t("messages.loginSuccess"));
       
-      // ✅ Backup de redirecionamento imediato após login bem-sucedido
+      // Backup de redirecionamento imediato após login bem-sucedido
       setTimeout(async () => {
         if (!hasRedirectedRef.current) {
           const { data: { session: currentSession } } = await supabase.auth.getSession();
           if (currentSession?.user) {
-            console.log("🚀 Redirecionamento backup após login bem-sucedido");
+            console.log("Redirecionamento backup após login bem-sucedido");
             performRedirect.current();
           }
         }
@@ -171,7 +168,7 @@ const Login = () => {
       />
       <div className="absolute inset-0 bg-black/70 z-10" />
       
-      {/* ✅ Restaurar layout original sem debug panel */}
+
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

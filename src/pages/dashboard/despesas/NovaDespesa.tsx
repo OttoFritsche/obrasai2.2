@@ -7,15 +7,12 @@ import {
   Receipt, 
   ArrowLeft, 
   Building2, 
-  Calendar, 
   DollarSign, 
   User, 
   FileText, 
   Plus,
   Loader2,
-  AlertTriangle,
-  Search,
-  Package
+  Search
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -28,7 +25,6 @@ import { useAuth } from "@/contexts/auth";
 import { useSinapiDespesas, SinapiItem } from "@/hooks/useSinapiDespesas";
 import { SinapiSelectorDespesas } from "@/components/SinapiSelectorDespesas";
 import { VariacaoSinapiIndicator } from "@/components/VariacaoSinapiIndicator";
-import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";
 import { formatDate } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";

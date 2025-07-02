@@ -7,7 +7,6 @@ import {
   Building, 
   ArrowLeft, 
   MapPin, 
-  Calendar, 
   DollarSign,
   Save,
   Info,
@@ -20,13 +19,12 @@ import { cn } from "@/lib/utils";
 
 import { obraSchema, ObraFormValues } from "@/lib/validations/obra";
 import { obrasApi } from "@/services/api";
-import { t, brazilianStates } from "@/lib/i18n";
+import { brazilianStates } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Spinner } from "@/components/ui/spinner";
 import {
   Form,
   FormControl,

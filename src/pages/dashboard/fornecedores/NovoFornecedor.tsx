@@ -4,14 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { 
-  Users, 
   User, 
   ArrowLeft, 
   Save, 
   Building2, 
   Mail, 
-  Phone, 
-  Calendar,
+  Phone,
   MapPin,
   FileText,
   Loader2,
@@ -33,8 +31,8 @@ import {
 import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
 import { useCNPJLookup } from "@/hooks/useCNPJLookup";
-import { formatCNPJ, formatCPF, formatPhone, formatCEP, unformat, isComplete } from "@/lib/utils/formatters";
-import { t, brazilianStates } from "@/lib/i18n";
+import { formatCNPJ, formatCPF, formatPhone, formatCEP, isComplete } from "@/lib/utils/formatters";
+import { brazilianStates } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

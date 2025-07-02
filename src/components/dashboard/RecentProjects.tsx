@@ -1,10 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDateBR, formatCurrencyBR } from "@/lib/i18n";
-import { Ellipsis, Building } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { formatCurrencyBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
-import { Link } from "react-router-dom";
 
 // Definir tipo para obra
 interface Obra {

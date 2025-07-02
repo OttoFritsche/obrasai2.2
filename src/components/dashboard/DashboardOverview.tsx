@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { t } from "@/lib/i18n";
 import { formatCurrencyBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
 import { useDespesas } from "@/hooks/useDespesas";

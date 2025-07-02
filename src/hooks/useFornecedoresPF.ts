@@ -1,79 +1,46 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fornecedoresPFApi } from '@/services/api';
-import { useAuth } from '@/contexts/auth';
-import { FornecedorPFFormValues } from '@/lib/validations/fornecedor';
+import { useCrudOperations } from '@/hooks/useCrudOperations';
+import { fornecedoresPFApi } from '@/lib/api/fornecedoresPF';
+import type { FornecedorPF, FornecedorPFFormValues } from '@/types/fornecedor';
 
 /**
- * Hook customizado para gerenciamento de fornecedores PF multi-tenant.
- * Busca, cria, edita e deleta fornecedores PF do tenant logado.
+ * Hook para gerenciar fornecedores PF
+ * Refatorado para usar o hook genérico useCrudOperations
  */
-export const useFornecedoresPF = () => {
-  const { user } = useAuth();
-  const tenantId = user?.profile?.tenant_id;
-  const queryClient = useQueryClient();
-
-  // Validação do tenantId para evitar [object Object]
-  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
-
-  // Busca todos os fornecedores PF do tenant
+export function useFornecedoresPF() {
   const {
     data: fornecedoresPF,
     isLoading,
     error,
-    refetch,
-  } = useQuery({
-    queryKey: ['fornecedores-pf', validTenantId],
-    queryFn: () => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado ou inválido');
-      }
-      return fornecedoresPFApi.getAll(validTenantId);
-    },
-    enabled: !!validTenantId,
-    retry: (failureCount, error) => {
-      return failureCount < 1; // Máximo 1 tentativa
-    },
-  });
-
-  // Criação de fornecedor PF
-  const createFornecedorPF = useMutation({
-    mutationFn: (fornecedor: FornecedorPFFormValues) => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado');
-      }
-      return fornecedoresPFApi.create(fornecedor, validTenantId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['fornecedores-pf', validTenantId]);
-    },
-  });
-
-  // Edição de fornecedor PF
-  const updateFornecedorPF = useMutation({
-    mutationFn: ({ id, fornecedor }: { id: string; fornecedor: Partial<FornecedorPFFormValues> }) => fornecedoresPFApi.update(id, fornecedor),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['fornecedores-pf', validTenantId]);
-    },
-  });
-
-  // Deleção de fornecedor PF
-  const deleteFornecedorPF = useMutation({
-    mutationFn: (id: string) => fornecedoresPFApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['fornecedores-pf', validTenantId]);
-    },
-  });
+    create: createFornecedor,
+    update: updateFornecedor,
+    delete: deleteFornecedor,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  } = useCrudOperations<FornecedorPF, FornecedorPFFormValues, Partial<FornecedorPFFormValues>>(
+    fornecedoresPFApi,
+    {
+      resource: 'fornecedores_pf',
+      messages: {
+        createSuccess: 'Fornecedor PF criado com sucesso!',
+        updateSuccess: 'Fornecedor PF atualizado com sucesso!',
+        deleteSuccess: 'Fornecedor PF excluído com sucesso!',
+        createError: 'Erro ao criar fornecedor PF',
+        updateError: 'Erro ao atualizar fornecedor PF',
+        deleteError: 'Erro ao excluir fornecedor PF',
+      },
+    }
+  );
 
   return {
     fornecedoresPF,
     isLoading,
     error,
-    refetch,
-    createFornecedorPF,
-    updateFornecedorPF,
-    deleteFornecedorPF,
-    // Informações úteis para debug
-    tenantId: validTenantId,
-    hasValidTenant: !!validTenantId,
+    createFornecedor,
+    updateFornecedor,
+    deleteFornecedor,
+    isCreating,
+    isUpdating,
+    isDeleting,
   };
-}; 
+}

@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { useAdvancedAlerts, ConfiguracaoAlertaAvancada } from '@/hooks/useAdvancedAlerts';
 import { useToast } from '@/hooks/use-toast';
 import { 

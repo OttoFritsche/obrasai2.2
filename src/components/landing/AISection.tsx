@@ -4,7 +4,6 @@ import {
   Brain, 
   MessageSquare, 
   BarChart3, 
-  Sparkles, 
   Zap, 
   Target,
   TrendingUp,

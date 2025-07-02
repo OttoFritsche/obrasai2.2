@@ -10,7 +10,6 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { formatDateBR } from "@/lib/i18n";
 
 
 export const DashboardHeader = () => {

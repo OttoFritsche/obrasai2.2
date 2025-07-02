@@ -16,14 +16,12 @@ import { ChevronLeft, ChevronRight, Calculator, Building, MapPin, Ruler, Setting
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 
 import {
   WizardEtapa1Schema,
@@ -32,8 +30,6 @@ import {
   WizardEtapa4Schema,
   WizardCompleto,
   WizardCompletoSchema,
-  TipoObra,
-  PadraoObra,
   TIPO_OBRA_LABELS,
   PADRAO_OBRA_LABELS,
   ESTADOS_BRASILEIROS
@@ -392,7 +388,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-lg font-semibold text-gray-900 dark:text-gray-100">Tipo de Obra *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-12 text-base border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-lg">
                         <SelectValue placeholder="Selecione o tipo" />
@@ -419,7 +415,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-lg font-semibold text-gray-900 dark:text-gray-100">Padrão Construtivo *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger className="h-12 text-base border-2 border-blue-200 dark:border-blue-700 focus:border-blue-500 dark:focus:border-blue-400 rounded-lg">
                         <SelectValue placeholder="Selecione o padrão" />

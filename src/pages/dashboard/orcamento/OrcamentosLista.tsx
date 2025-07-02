@@ -9,17 +9,15 @@
  */
 
 import React, { useState, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
   Calculator, 
   Plus, 
   Eye,
-  Edit,
   Copy,
   Trash2,
-  Download,
   Filter,
   Search,
   Building,
@@ -29,9 +27,7 @@ import {
   Sparkles,
   Layers,
   AlertCircle,
-  CheckCircle,
-  Users,
-  Hammer
+  CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -40,7 +36,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   Table, 
   TableBody, 

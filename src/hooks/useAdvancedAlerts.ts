@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../integrations/supabase/client";
 import { useToast } from "./use-toast";
+import type { SupabaseSubscription } from "@/types/supabase";
+import type { Json } from "@/types/supabase";
 
 export interface ConfiguracaoAlertaAvancada {
   id?: string;
@@ -32,7 +34,7 @@ export interface NotificacaoAlerta {
   status: "PENDENTE" | "ENVIADA" | "ERRO" | "LIDA";
   titulo: string;
   mensagem: string;
-  dados_extras?: any;
+  dados_extras?: Json;
   tentativas: number;
   max_tentativas: number;
   enviada_em?: string;
@@ -499,7 +501,7 @@ export const useAdvancedAlerts = () => {
 
   // Configurar subscription para notificações em tempo real
   useEffect(() => {
-    let subscription: any;
+    let subscription: SupabaseSubscription | null = null;
 
     const setupSubscription = async () => {
       try {
@@ -510,7 +512,7 @@ export const useAdvancedAlerts = () => {
           const channelName =
             `notificacoes_alertas_${userData.user.id}_${Date.now()}`;
 
-          subscription = supabase
+          const channel = supabase
             .channel(channelName)
             .on(
               "postgres_changes",
@@ -526,6 +528,11 @@ export const useAdvancedAlerts = () => {
               },
             )
             .subscribe();
+
+          subscription = {
+            channel,
+            unsubscribe: () => channel.unsubscribe()
+          };
         }
       } catch (error) {
         console.error("Erro ao configurar subscription:", error);

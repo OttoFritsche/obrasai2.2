@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Zap, ChevronDown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useTheme } from "@/providers/theme-provider";
 import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
 import logoLightHorizon from "@/assets/logo/logo_light_horizon.png";

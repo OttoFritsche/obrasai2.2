@@ -1,17 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { CheckIcon, XIcon, CreditCard, Crown, Zap, Sparkles } from "lucide-react";
-import { useState, useEffect } from "react";
+import { CheckIcon, CreditCard, Crown, Zap, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/formatters";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Check, X, Calendar } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 // Planos de assinatura
 const subscriptionPlans = [
@@ -89,12 +85,7 @@ const Subscription = () => {
     setIsLoading(true);
     
     try {
-      // Em uma implementação real, chamaria a função do Edge para criar uma sessão de checkout do Stripe
-      // const { data, error } = await supabaseClient.functions.invoke('create-checkout', {
-      //   body: { priceId: getPriceIdFromPlanId(planId) }
-      // });
-      
-      // Simulação para demonstração
+      // TODO: Implementar integração com Stripe
       console.log(`Iniciando checkout para o plano: ${planId}`);
       
       setTimeout(() => {
@@ -119,10 +110,7 @@ const Subscription = () => {
     setIsLoading(true);
     
     try {
-      // Em uma implementação real, chamaria a função do Edge para criar uma sessão do portal do cliente do Stripe
-      // const { data, error } = await supabaseClient.functions.invoke('customer-portal');
-      
-      // Simulação para demonstração
+      // TODO: Implementar portal do cliente Stripe
       console.log("Abrindo portal de gerenciamento de assinatura");
       
       setTimeout(() => {

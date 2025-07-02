@@ -16,9 +16,7 @@ import { cn } from "@/lib/utils";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -31,7 +29,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { t } from "@/lib/i18n";
 import { useFornecedoresPJ } from "@/hooks/useFornecedoresPJ";
 
 type FornecedorPJ = {

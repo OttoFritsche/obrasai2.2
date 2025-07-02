@@ -5,13 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Bot, 
   Brain, 
-  TrendingUp, 
   AlertTriangle, 
   CheckCircle, 
   Info, 
@@ -22,7 +20,6 @@ import {
   Sparkles,
   MessageCircle,
   Send,
-  User,
   BarChart3
 } from 'lucide-react'
 import { aiInsights, type AIInsight, type MetricsData } from '@/services/aiInsightsApi'

@@ -6,7 +6,6 @@ import {
   Trash2, 
   FileText, 
   Plus, 
-  Check, 
   Filter,
   Loader2,
   AlertTriangle,

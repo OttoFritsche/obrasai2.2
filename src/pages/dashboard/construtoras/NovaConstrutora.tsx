@@ -28,11 +28,10 @@ import {
   ConstrutoraType,
 } from "@/lib/validations/construtora";
 import { useCNPJLookup } from "@/hooks/useCNPJLookup";
-import { formatCNPJ, formatCPF, formatPhone, formatCEP, unformat, isComplete } from "@/lib/utils/formatters";
+import { formatCNPJ, formatCPF, formatPhone, formatCEP, isComplete } from "@/lib/utils/formatters";
 import { brazilianStates } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {

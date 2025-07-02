@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { t } from "@/lib/i18n";
 import { unformat } from "@/lib/utils/formatters";
 
 export type FornecedorType = "pj" | "pf";

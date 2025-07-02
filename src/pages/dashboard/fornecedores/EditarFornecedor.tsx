@@ -4,15 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { 
-  Users, 
   User, 
   ArrowLeft, 
   Save, 
   Building2, 
   Mail, 
-  Phone, 
-  Calendar,
-  MapPin,
+  Phone,
   FileText,
   Loader2,
   AlertTriangle
@@ -29,13 +26,10 @@ import {
 } from "@/lib/validations/fornecedor";
 import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useAuth } from "@/contexts/auth";
-import { t, brazilianStates } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -45,13 +39,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { toast } from "sonner";
 

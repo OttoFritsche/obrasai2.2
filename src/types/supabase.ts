@@ -589,3 +589,47 @@ export interface SinapiSearchResult {
   total: number
   hasMore: boolean
 }
+
+// Tipos para Supabase Realtime
+import type { RealtimeChannel } from '@supabase/supabase-js';
+
+export interface SupabaseSubscription {
+  channel: RealtimeChannel;
+  unsubscribe: () => void;
+}
+
+export interface RealtimePayload<T = Record<string, unknown>> {
+  schema: string;
+  table: string;
+  commit_timestamp: string;
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: T;
+  old: T;
+  errors: string[] | null;
+}
+
+export interface SupabaseRealtimeOptions {
+  event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+  schema?: string;
+  table?: string;
+  filter?: string;
+}
+
+// Tipos para hooks customizados
+export interface UseSupabaseSubscriptionOptions<T> {
+  table: string;
+  event?: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+  filter?: string;
+  schema?: string;
+  onReceive?: (payload: RealtimePayload<T>) => void;
+  onError?: (error: Error) => void;
+  enabled?: boolean;
+}
+
+export interface UseSupabaseSubscriptionReturn {
+  subscription: SupabaseSubscription | null;
+  isConnected: boolean;
+  error: Error | null;
+  disconnect: () => void;
+  reconnect: () => void;
+}

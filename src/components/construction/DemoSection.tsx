@@ -1,5 +1,4 @@
 
-import { t } from "@/lib/i18n";
 
 export const DemoSection = () => {
   return <div id="demo" className="bg-construction-dark py-20">

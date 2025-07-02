@@ -13,7 +13,6 @@ import { sanitizeFormData } from "@/lib/input-sanitizer";
 import { secureLogger } from "@/lib/secure-logger";
 import { analytics } from "@/services/analyticsApi";
 import {
-  OrcamentoParametricoInput,
   OrcamentoParametrico,
   ItemOrcamento,
   BaseCustoRegional,
@@ -28,6 +27,11 @@ import {
   PadraoObra,
   StatusOrcamento
 } from "@/lib/validations/orcamento";
+import type { 
+  ApiResponse, 
+  ConversaoOrcamentoDespesa, 
+  ConversaoOrcamentoDespesaResult 
+} from "@/types/api";
 
 // ====================================
 // 🎯 TIPOS AUXILIARES
@@ -38,13 +42,6 @@ interface PaginatedResponse<T> {
   total: number;
   page: number;
   totalPages: number;
-}
-
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
 }
 
 // ====================================
@@ -217,7 +214,7 @@ export const orcamentosParametricosApi = {
       const sanitizedData = sanitizeFormData(orcamentoData);
 
       // Preparar dados para atualização (apenas campos fornecidos)
-      const updateData: Record<string, unknown> = {};
+      const updateData: Partial<AtualizarOrcamentoRequest> = {};
       
       if (sanitizedData.nome_orcamento !== undefined) updateData.nome_orcamento = sanitizedData.nome_orcamento;
       if (sanitizedData.descricao !== undefined) updateData.descricao = sanitizedData.descricao;
@@ -891,7 +888,11 @@ export const orcamentoUtils = {
   /**
    * Converte um orçamento paramétrico em despesas para uma obra
    */
-  converterParaDespesas: async (orcamentoId: string, obraId: string, configuracao?: any): Promise<ApiResponse<any>> => {
+  converterParaDespesas: async (
+    orcamentoId: string, 
+    obraId: string, 
+    configuracao?: Record<string, unknown>
+  ): Promise<ApiResponse<ConversaoOrcamentoDespesaResult>> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -1045,7 +1046,7 @@ export const orcamentoUtils = {
   /**
    * Lista conversões de orçamento para despesas
    */
-  listarConversoes: async (filtros: { obra_id?: string; status?: string } = {}): Promise<ApiResponse<any[]>> => {
+  listarConversoes: async (filtros: { obra_id?: string; status?: string } = {}): Promise<ApiResponse<ConversaoOrcamentoDespesa[]>> => {
     try {
       let query = supabase
         .from("conversoes_orcamento_despesa")

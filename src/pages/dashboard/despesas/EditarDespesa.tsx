@@ -20,7 +20,6 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 import { Constants } from "@/integrations/supabase/types";
-import { SinapiSelectorDespesas } from "@/components/SinapiSelectorDespesas";
 import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";
 import { despesaSchema, DespesaFormValues, formasPagamento } from "@/lib/validations/despesa";
 import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";

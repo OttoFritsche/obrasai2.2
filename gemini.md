@@ -23,6 +23,7 @@ Este documento centraliza as informações, regras e convenções para o desenvo
 - **Automação:** n8n Cloud para workflows (ex: captura de leads).
 - **APIs de IA:** DeepSeek API.
 - **Pagamentos:** Stripe.
+- **Tipagem:** Sistema robusto de tipos TypeScript com arquivos centralizados e ESLint configurado.
 
 ---
 
@@ -35,6 +36,7 @@ Este documento centraliza as informações, regras e convenções para o desenvo
 - `services/`: Comunicação com APIs externas (Supabase, IA, etc.).
 - `lib/`: Utilitários, validações e configurações.
 - `contexts/`: Contextos globais da aplicação.
+- `types/`: **Sistema centralizado de tipos TypeScript** (`forms.ts`, `api.ts`, `alerts.ts`, `supabase.ts`, `index.ts`).
 
 ### Backend (`supabase/`)
 - `functions/`: Mais de 27 Edge Functions para lógicas específicas (ex: `ai-chat`, `contrato-ai-assistant`, `gerar-contrato-pdf`).
@@ -55,6 +57,9 @@ Este documento centraliza as informações, regras e convenções para o desenvo
 - **Instalar dependências:** `npm install`
 - **Rodar ambiente de desenvolvimento:** `npm run dev`
 - **Build para produção:** `npm run build`
+- **Verificar qualidade do código:** `npm run lint`
+- **Verificar tipagem TypeScript:** `npm run type-check`
+- **Corrigir problemas automaticamente:** `npm run lint -- --fix`
 - **Criar uma nova migração Supabase:** `supabase migration new <nome_da_migracao>`
 - **Aplicar migrações no banco local:** `supabase db push`
 - **Deploy de uma Edge Function:** `supabase functions deploy <nome_da_funcao>`
@@ -87,3 +92,68 @@ Este documento centraliza as informações, regras e convenções para o desenvo
 4.  **Foco na Simplicidade e Manutenibilidade:** Propor soluções claras, eficientes e fáceis de manter, alinhadas com os princípios do projeto.
 5.  **Segurança em Primeiro Lugar:** Ser proativo na identificação e implementação de práticas de segurança, especialmente RLS e validação de dados.
 6.  **Testes:** Para novas funcionalidades, sempre sugerir uma estratégia de teste prática, mesmo que manual, para validar o fluxo completo (ex: testar a captura de um lead desde o chatbot até o recebimento do email).
+
+---
+
+## 📝 Convenções de Tipagem TypeScript
+
+### **Estrutura de Tipos:**
+- **`src/types/forms.ts`**: Tipos para formulários, props e validação
+- **`src/types/api.ts`**: Tipos para APIs, responses e requests
+- **`src/types/alerts.ts`**: Sistema completo de alertas avançados
+- **`src/types/supabase.ts`**: Tipos específicos do Supabase e realtime
+- **`src/types/index.ts`**: Exportação central e utility types
+
+### **Padrões de Nomenclatura:**
+- **Interface para props:** `interface ComponentProps { ... }`
+- **Interface para objetos:** `interface UserData { ... }`
+- **Type para unions:** `type Status = 'pending' | 'completed' | 'error'`
+- **Type para aliases:** `type WithId<T> = T & { id: string }`
+
+### **Regras Essenciais:**
+- **Proibido uso de `any`** - sempre usar tipos específicos
+- **Preferir `interface`** para definições de objetos
+- **Usar `type`** para union types e aliases
+- **Importar tipos** com `import type` quando possível
+- **FormWrapper genérico** com `<T = Record<string, unknown>>`
+
+### **ESLint Configurado:**
+```javascript
+"@typescript-eslint/no-explicit-any": "error"
+"@typescript-eslint/consistent-type-definitions": ["error", "interface"]
+"@typescript-eslint/consistent-type-imports": "error"
+```
+
+### **Utility Types Disponíveis:**
+- `WithId<T>`: Adiciona campo id
+- `WithTimestamps<T>`: Adiciona created_at/updated_at  
+- `WithUser<T>`: Adiciona usuario_id/tenant_id
+- `DatabaseEntity<T>`: Combinação completa para entidades do banco
+- `CreateInput<T>`: Remove campos auto-gerados para criação
+- `UpdateInput<T>`: Campos opcionais para atualização
+
+### **Exemplos de Uso:**
+```typescript
+// ✅ Correto - Interface para props
+interface ObraFormProps {
+  onSubmit: (data: ObraFormData) => void;
+  initialData?: Partial<ObraFormData>;
+  isLoading?: boolean;
+}
+
+// ✅ Correto - FormWrapper genérico
+<FormWrapper<ObraFormData>
+  form={form}
+  onSubmit={handleSubmit}
+  title="Nova Obra"
+>
+  {/* campos do formulário */}
+</FormWrapper>
+
+// ✅ Correto - Utility types
+type NovaObra = CreateInput<ObraFormData>;
+type AtualizarObra = UpdateInput<ObraFormData>;
+
+// ❌ Incorreto - uso de any
+// const handleSubmit = (data: any) => { ... }
+```

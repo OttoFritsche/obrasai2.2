@@ -8,7 +8,7 @@
  * @version 1.0.0
  */
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -40,7 +39,6 @@ import {
   RotateCcw,
   Download,
   Eye,
-  Calendar,
   Database,
   TrendingUp,
   AlertCircle,

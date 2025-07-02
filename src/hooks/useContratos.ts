@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth";
+import { useCrudOperations } from './useCrudOperations';
 
 interface Contrato {
   id: string;
@@ -77,105 +78,91 @@ interface Template {
   ativo: boolean;
 }
 
+// API específica para contratos com lógica customizada
+const contratosApi = {
+  getAll: async (tenantId: string) => {
+    const { data, error } = await supabase
+      .from("contratos")
+      .select(`
+        *,
+        obras(id, nome, endereco, cidade, estado),
+        templates_contratos(id, nome, template_html, clausulas_obrigatorias)
+      `)
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Erro ao buscar contratos:", error);
+      throw error;
+    }
+
+    return data as Contrato[];
+  },
+  create: async (novoContrato: Partial<Contrato>, tenantId: string) => {
+    // Gerar número único do contrato
+    const numeroContrato = `CTR-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+    
+    const { data, error } = await supabase
+      .from("contratos")
+      .insert([{
+        ...novoContrato,
+        tenant_id: tenantId,
+        numero_contrato: numeroContrato,
+        status: 'RASCUNHO',
+        progresso_execucao: 0
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+  update: async (id: string, updates: Partial<Contrato>) => {
+    const { data, error } = await supabase
+      .from("contratos")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+  delete: async (id: string) => {
+    const { error } = await supabase
+      .from("contratos")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+  },
+};
+
 export function useContratos() {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const contratosApiCrud = {
+    getAll: contratosApi.getAll,
+    getById: async () => { throw new Error('Not implemented'); },
+    create: contratosApi.create,
+    update: contratosApi.update,
+    delete: contratosApi.delete,
+  };
 
   const {
     data: contratos,
     isLoading,
     error,
-    refetch
-  } = useQuery({
-    queryKey: ["contratos", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("contratos")
-        .select(`
-          *,
-          obras(id, nome, endereco, cidade, estado),
-          templates_contratos(id, nome, template_html, clausulas_obrigatorias)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Erro ao buscar contratos:", error);
-        throw error;
-      }
-
-      return data as Contrato[];
-    },
-    enabled: !!user,
-  });
-
-  const createContrato = useMutation({
-    mutationFn: async (novoContrato: Partial<Contrato>) => {
-      // Gerar número único do contrato
-      const numeroContrato = `CTR-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-      
-      const { data, error } = await supabase
-        .from("contratos")
-        .insert([{
-          ...novoContrato,
-          tenant_id: user?.id,
-          numero_contrato: numeroContrato,
-          status: 'RASCUNHO',
-          progresso_execucao: 0
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contratos"] });
-      toast.success("Contrato criado com sucesso!");
-    },
-    onError: (error: Error) => {
-      console.error("Erro ao criar contrato:", error);
-      toast.error("Erro ao criar contrato");
-    },
-  });
-
-  const updateContrato = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Contrato> & { id: string }) => {
-      const { data, error } = await supabase
-        .from("contratos")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contratos"] });
-      toast.success("Contrato atualizado com sucesso!");
-    },
-    onError: (error: Error) => {
-      console.error("Erro ao atualizar contrato:", error);
-      toast.error("Erro ao atualizar contrato");
-    },
-  });
-
-  const deleteContrato = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("contratos")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["contratos"] });
-      toast.success("Contrato excluído com sucesso!");
-    },
-    onError: (error: Error) => {
-      console.error("Erro ao excluir contrato:", error);
-      toast.error("Erro ao excluir contrato");
+    createMutation: createContrato,
+    updateMutation: updateContrato,
+    deleteMutation: deleteContrato,
+  } = useCrudOperations(contratosApiCrud, {
+    resource: 'contratos',
+    messages: {
+      createSuccess: 'Contrato criado com sucesso!',
+      updateSuccess: 'Contrato atualizado com sucesso!',
+      deleteSuccess: 'Contrato excluído com sucesso!',
+      createError: 'Erro ao criar contrato',
+      updateError: 'Erro ao atualizar contrato',
+      deleteError: 'Erro ao excluir contrato',
     },
   });
 
@@ -183,7 +170,6 @@ export function useContratos() {
     contratos,
     isLoading,
     error,
-    refetch,
     createContrato,
     updateContrato,
     deleteContrato,

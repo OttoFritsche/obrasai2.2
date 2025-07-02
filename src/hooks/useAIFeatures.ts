@@ -218,23 +218,24 @@ export function useAIFeatures() {
         throw new Error(response.error || 'Erro na busca semântica');
       }
 
-    } catch (error: Error & { name?: string }) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.log('🚫 Busca cancelada pelo usuário');
         return [];
       }
 
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       console.error('❌ Erro na busca semântica:', error);
       
       setState(prev => ({
         ...prev,
         searchLoading: false,
-        lastError: error.message
+        lastError: errorMessage
       }));
 
       toast({
         title: "❌ Erro na busca",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive"
       });
 
@@ -303,23 +304,24 @@ export function useAIFeatures() {
         throw new Error(response.error || 'Erro no chat IA');
       }
 
-    } catch (error: Error & { name?: string }) {
-      if (error.name === 'AbortError') {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.log('🚫 Chat cancelado pelo usuário');
         return '';
       }
 
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       console.error('❌ Erro no chat IA:', error);
       
       setState(prev => ({
         ...prev,
         chatLoading: false,
-        lastError: error.message
+        lastError: errorMessage
       }));
 
       toast({
         title: "❌ Erro no chat IA",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive"
       });
 

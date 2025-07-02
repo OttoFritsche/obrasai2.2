@@ -7,12 +7,10 @@ import {
   FileText, 
   ArrowLeft, 
   Upload, 
-  UploadCloud, 
-  Save,
+  UploadCloud,
   Building2,
   Receipt,
   Users,
-  Calendar,
   DollarSign,
   Hash,
   Key,
@@ -25,12 +23,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import { Constants } from "@/integrations/supabase/types";
 import { notaFiscalSchema, NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
 import { obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
 import { useNotasFiscais } from "@/hooks/useNotasFiscais";
 import { useDespesas } from "@/hooks/useDespesas";
-import { t } from "@/lib/i18n";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

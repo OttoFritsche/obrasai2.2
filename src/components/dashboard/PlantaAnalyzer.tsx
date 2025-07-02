@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react'
-import { Upload, FileText, Zap, AlertCircle, CheckCircle, Building2, Calculator, Lightbulb } from 'lucide-react'
+import { Upload, FileText, Zap, CheckCircle, Building2, Calculator, Lightbulb } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 

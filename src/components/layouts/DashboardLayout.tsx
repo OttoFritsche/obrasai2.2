@@ -1,16 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { HelpCircle, Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Sun, Moon, Calculator, Building2, FileSignature, BarChart3, AlertTriangle, Bell } from "lucide-react";
+import { Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Calculator, Building2, FileSignature, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import Logo from "@/components/ui/Logo";
 import { useTheme } from "@/providers/theme-provider";
 import obrasAIDark from "@/assets/logo/logo_dark_horizon.png";
 import obrasAILight from "@/assets/logo/logo_light_horizon.png";

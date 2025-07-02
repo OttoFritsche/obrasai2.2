@@ -11,7 +11,6 @@ import {
   Image as ImageIcon,
   Loader2,
   AlertTriangle,
-  Maximize2,
   RotateCw
 } from "lucide-react";
 

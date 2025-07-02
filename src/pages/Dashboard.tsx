@@ -1,19 +1,14 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Building, 
   DollarSign, 
   TrendingUp, 
-  Clock, 
   FileText, 
-  CheckCircle, 
-  Calendar, 
   AlertCircle,
   Receipt,
   Users,
   Sparkles,
   Building2,
-  LogOut,
   BarChart3,
   LayoutDashboard
 } from "lucide-react";
@@ -21,18 +16,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { MetricCard } from "@/components/ui/metric-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { useObras } from "@/hooks/useObras";
 import { useDespesas } from "@/hooks/useDespesas";
 import { useNotasFiscais } from "@/hooks/useNotasFiscais";
 import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { Link } from "react-router-dom";
-import { t } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { RecentProjects } from "@/components/dashboard/RecentProjects";
 

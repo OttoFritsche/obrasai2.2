@@ -5,7 +5,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { 
   Pencil, 
   Trash2, 
-  FileText, 
   Plus, 
   Check, 
   Filter,
@@ -18,7 +17,6 @@ import { cn } from "@/lib/utils";
 
 import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -40,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useDespesas } from "@/hooks/useDespesas";
 import { useObras } from "@/hooks/useObras";
 import { calculateDespesasMetrics, calculatePeriodTrend } from "@/lib/utils/metrics";

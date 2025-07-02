@@ -1,20 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ArrowRight, 
-  Play,
+  ArrowRight,
   Building2, 
   Shield,
   TrendingUp,
   Clock,
-  Award,
   CheckCircle,
   Users,
-  BarChart3,
-  Calculator
+  BarChart3
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
 import { VideoModal } from "./VideoModal";

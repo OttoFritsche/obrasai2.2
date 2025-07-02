@@ -41,7 +41,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { useSinapiHistorico } from "@/hooks/useSinapiManutencoes";
-import type { SinapiManutencao } from "@/services/sinapiManutencoes";
 import { ManutencaoIndicator } from "./ManutencaoIndicator";
 import { cn } from "@/lib/utils";
 

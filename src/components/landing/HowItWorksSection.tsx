@@ -6,7 +6,6 @@ import {
   Upload, 
   BarChart3, 
   CheckCircle,
-  ArrowRight,
   Play,
   Calendar,
   FileText,

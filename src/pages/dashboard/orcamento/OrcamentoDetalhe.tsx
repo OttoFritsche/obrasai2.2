@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
@@ -20,18 +20,14 @@ import {
   Ruler,
   DollarSign,
   Sparkles,
-  TrendingUp,
   Clock,
   CheckCircle,
   AlertCircle,
   Download,
   Copy,
-  Edit,
   RefreshCcw,
-  BarChart3,
   PieChart,
   FileText,
-  Eye,
   Layers,
   ArrowRight,
   Building2,
@@ -43,17 +39,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+
+
 import {
   Dialog,
   DialogContent,

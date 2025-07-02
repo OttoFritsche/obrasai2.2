@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Executar linting antes do commit
+npm run lint
+
+# Se houver erros de linting, tentar corrigir automaticamente
+if [ $? -ne 0 ]; then
+  echo "❌ Erros de linting encontrados. Tentando corrigir automaticamente..."
+  npm run lint:fix
+  
+  # Verificar novamente após correção
+  npm run lint
+  
+  if [ $? -ne 0 ]; then
+    echo "❌ Ainda há erros de linting que precisam ser corrigidos manualmente."
+    echo "Por favor, execute 'npm run lint:fix' e corrija os erros restantes."
+    exit 1
+  else
+    echo "✅ Erros de linting corrigidos automaticamente."
+    echo "⚠️  Arquivos foram modificados. Por favor, adicione as mudanças e faça commit novamente."
+    exit 1
+  fi
+fi
+
+echo "✅ Linting passou com sucesso!"

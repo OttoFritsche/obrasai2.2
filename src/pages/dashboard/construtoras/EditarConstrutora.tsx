@@ -9,8 +9,6 @@ import {
   ArrowLeft,
   Save,
   Trash2,
-  Mail,
-  Phone,
   Loader2,
   Search,
   CheckCircle,
@@ -31,7 +29,6 @@ import { formatCNPJ, formatCPF, formatPhone, formatCEP, isComplete } from "@/lib
 import { brazilianStates } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {

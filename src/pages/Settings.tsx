@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useState } from "react";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { ProfileForm } from "@/components/settings/ProfileForm";
@@ -14,7 +14,7 @@ import {
   Smartphone,
   Key
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 const Settings = () => {

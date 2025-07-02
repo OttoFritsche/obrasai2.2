@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -11,7 +10,6 @@ import { useAuth } from "@/contexts/auth";
 import { t } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
-import { motion } from "framer-motion";
 import { useAnalytics } from "@/services/analyticsApi";
 
 export const RegisterForm = () => {

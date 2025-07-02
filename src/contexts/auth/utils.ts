@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { UserWithProfile, Subscription } from "./types";
+import { Subscription } from "./types";
 
 // Cache simples para dados de perfil - usando unknown ao invés de any
 const profileCache = new Map<string, unknown>();

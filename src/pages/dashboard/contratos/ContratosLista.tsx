@@ -52,7 +52,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
-import { useContratos, useGerarPDF } from "@/hooks/useContratos";
+import { useContratos } from "@/hooks/useContratos";
 import { useObras } from "@/hooks/useObras";
 
 

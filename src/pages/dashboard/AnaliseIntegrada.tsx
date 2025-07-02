@@ -11,7 +11,6 @@
 import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  Building,
   Calculator,
   DollarSign,
   TrendingUp,
@@ -19,7 +18,6 @@ import {
   AlertTriangle,
   CheckCircle,
   BarChart3,
-  PieChart,
   Target,
   Zap,
   Eye
@@ -34,13 +32,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { formatCurrencyBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
 import { useDespesas } from "@/hooks/useDespesas";
 import { orcamentosParametricosApi } from "@/services/orcamentoApi";
 import { cn } from "@/lib/utils";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES

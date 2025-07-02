@@ -14,11 +14,8 @@ import { toast } from "sonner";
 
 import {
   sinapiManutencoes,
-  type SinapiItem,
-  type SinapiManutencao,
   type FiltrosBuscaUnificada,
-  type ValidacaoResult,
-  type RespostaPaginada
+  type ValidacaoResult
 } from "@/services/sinapiManutencoes";
 
 // ====================================

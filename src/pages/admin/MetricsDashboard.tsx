@@ -26,7 +26,6 @@ import {
   LogOut,
   Shield
 } from 'lucide-react'
-import { analytics } from '@/services/analyticsApi'
 import type { 
   LeadMetrics, 
   UserMetrics, 

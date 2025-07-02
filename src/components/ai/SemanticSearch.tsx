@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Search, Loader2, Filter, X, Info, TrendingUp, Clock, Target } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Search, Loader2, Filter, X, Info, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

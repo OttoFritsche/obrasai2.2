@@ -1,8 +1,8 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Filter, Plus, AlertTriangle, Loader2, Settings, TrendingUp, ArrowLeft } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Bell, Filter, AlertTriangle, Loader2, Settings, TrendingUp, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 import DashboardLayout from '@/components/layouts/DashboardLayout';

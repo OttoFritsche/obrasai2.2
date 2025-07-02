@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, FileText, Users, Calculator, Calendar, Save, Eye } from "lucide-react";
+import { ArrowLeft, FileText, Users, Calculator, Calendar, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,7 +9,6 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -171,7 +170,7 @@ const NovoContrato = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Obra *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a obra" />
@@ -196,7 +195,7 @@ const NovoContrato = () => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Template de Contrato *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={
@@ -446,7 +445,7 @@ const NovoContrato = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Forma de Pagamento *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione" />
@@ -737,4 +736,4 @@ const NovoContrato = () => {
   );
 };
 
-export default NovoContrato; 
+export default NovoContrato;

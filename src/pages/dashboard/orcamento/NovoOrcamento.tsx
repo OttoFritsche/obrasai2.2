@@ -11,8 +11,7 @@
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calculator, Sparkles, Building, Bot, Target, Zap, CheckCircle, AlertCircle, Layers, Hammer, Users } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, Calculator, Sparkles, CheckCircle, Layers, Hammer, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

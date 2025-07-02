@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
 import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign, Calculator } from "lucide-react";
@@ -27,7 +26,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { obrasApi } from "@/services/api";
 import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
 
