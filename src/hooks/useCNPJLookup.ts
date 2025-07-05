@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
 import { toast } from 'sonner';
+
 import { supabase } from '@/integrations/supabase/client';
 
 // Interface para os dados do CNPJ

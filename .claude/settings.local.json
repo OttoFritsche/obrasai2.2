@@ -18,7 +18,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git config:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(npm test:*)",
+      "Bash(supabase db diff:*)",
+      "Bash(npx eslint:*)",
+      "Bash(curl:*)",
+      "Bash(cp:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(supabase db pull:*)"
     ],
     "deny": []
   }

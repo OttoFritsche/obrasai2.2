@@ -1,5 +1,6 @@
-import { useCEPOperation } from './useAsyncOperation';
 import { supabase } from '@/integrations/supabase/client';
+
+import { useCEPOperation } from './useAsyncOperation';
 
 interface CEPData {
   cep: string;

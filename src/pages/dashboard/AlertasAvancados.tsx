@@ -1,18 +1,18 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Filter, AlertTriangle, Loader2, Settings, TrendingUp, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft,Bell, Filter, Loader2, Settings, TrendingUp } from 'lucide-react';
+import React from 'react';
+import { useEffect,useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
-import DashboardLayout from '@/components/layouts/DashboardLayout';
 import { DashboardAlertasAvancados } from '@/components/AlertasAvancados';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAdvancedAlerts } from '@/hooks/useAdvancedAlerts';
 import { useObras } from '@/hooks/useObras';
+import { cn } from '@/lib/utils';
 
 const AlertasAvancadosPage: React.FC = () => {
   const [selectedObraId, setSelectedObraId] = useState<string>('all');

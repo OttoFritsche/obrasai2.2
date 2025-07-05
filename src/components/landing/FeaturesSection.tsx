@@ -1,18 +1,18 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
+  BarChart3, 
   Building2, 
   Calculator, 
-  Users, 
-  FileText, 
-  BarChart3, 
-  Shield,
   CheckCircle,
   Clock,
-  DollarSign
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
+  DollarSign,
+  FileText, 
+  Shield,
+  Users} from 'lucide-react';
+import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 const FeaturesSection = () => {
   const features = [

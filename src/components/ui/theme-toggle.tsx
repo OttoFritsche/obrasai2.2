@@ -1,4 +1,6 @@
-import { Moon, Sun, Monitor } from "lucide-react"
+import { AnimatePresence,motion } from "framer-motion"
+import { Monitor,Moon, Sun } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -6,8 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useTheme } from "@/providers/theme-provider"
-import { motion, AnimatePresence } from "framer-motion"
+import { useTheme } from "@/hooks/useTheme"
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -83,4 +84,4 @@ export function ThemeToggle() {
       </DropdownMenuContent>
     </DropdownMenu>
   )
-} 
+}

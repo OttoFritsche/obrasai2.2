@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { AnimatePresence,motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { useTheme } from "@/providers/theme-provider";
+import { useEffect,useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
 import logoLightHorizon from "@/assets/logo/logo_light_horizon.png";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/useTheme";
 
 export const Header = () => {
   const navigate = useNavigate();

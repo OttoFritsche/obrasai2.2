@@ -1,11 +1,12 @@
+import { useQuery } from '@tanstack/react-query';
 import type { ReactNode} from 'react';
 import { createContext, useContext, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+
 import { useTenantValidation } from '@/hooks/useTenantValidation';
-import { obrasApi } from '@/services/api';
-import { queryKeys } from '@/lib/query-keys';
 import type { Database } from '@/integrations/supabase/types';
+import { queryKeys } from '@/lib/query-keys';
+import { obrasApi } from '@/services/api';
 
 type Obra = Database['public']['Tables']['obras']['Row'];
 type Despesa = Database['public']['Tables']['despesas']['Row'];

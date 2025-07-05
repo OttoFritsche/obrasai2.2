@@ -1,6 +1,7 @@
 
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 
 export const CTASection = () => {

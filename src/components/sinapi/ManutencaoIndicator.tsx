@@ -8,16 +8,16 @@
  * @version 1.0.0
  */
 
-import React from "react";
-import { Badge } from "@/components/ui/badge";
 import { 
   CheckCircle, 
-  XCircle, 
+  Clock,
+  Info,
   RefreshCw, 
   Wrench,
-  Clock,
-  Info
-} from "lucide-react";
+  XCircle} from "lucide-react";
+import React from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 // ====================================

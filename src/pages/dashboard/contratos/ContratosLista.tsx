@@ -1,46 +1,25 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
+import { 
+  AlertCircle,
+  Bot,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Crown,
+  Download,
+  Edit, 
+  Eye, 
+  FileText, 
+  Filter,
+  MoreHorizontal,
+  Plus, 
+  Send,
+  Trash2} from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ColumnDef } from "@tanstack/react-table";
-import { 
-  FileText, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Send,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Filter,
-  Download,
-  MoreHorizontal,
-  Trash2,
-  Bot,
-  ChevronDown
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MetricCard } from "@/components/ui/metric-card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,10 +30,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MetricCard } from "@/components/ui/metric-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useContratos } from "@/hooks/useContratos";
 import { useObras } from "@/hooks/useObras";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 
 interface Contrato {
@@ -384,30 +384,12 @@ const ContratosLista = () => {
                 "transition-all duration-300"
               )}
             >
-              <Link to="/dashboard/contratos/novo">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Contrato
+              <Link to="/dashboard/contratos/novo" className="flex items-center">
+                <Bot className="h-4 w-4 mr-2" />
+                Contrato com IA Premium
+                <Crown className="h-4 w-4 ml-2 text-amber-300" />
               </Link>
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Bot className="h-4 w-4" />
-                  Assistente IA
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Criar com IA</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard/contratos/novo-ia">
-                    <Bot className="mr-2 h-4 w-4" />
-                    Novo Contrato com IA
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </motion.div>
         </div>
 

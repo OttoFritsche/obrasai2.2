@@ -1,23 +1,22 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { AnimatePresence,motion } from "framer-motion";
 import { 
-  X, 
-  ZoomIn, 
-  ZoomOut, 
+  AlertTriangle,
   Download, 
   ExternalLink, 
   FileText, 
   Image as ImageIcon,
   Loader2,
-  AlertTriangle,
-  RotateCw
-} from "lucide-react";
+  RotateCw,
+  X, 
+  ZoomIn, 
+  ZoomOut} from "lucide-react";
+import { memo,useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface FileViewerProps {
   isOpen: boolean;
@@ -30,7 +29,7 @@ interface FileViewerProps {
 
 type FileCategory = "pdf" | "image" | "xml" | "unknown";
 
-const FileViewer = ({ 
+const FileViewer = memo(({ 
   isOpen, 
   onClose, 
   fileUrl, 
@@ -63,18 +62,18 @@ const FileViewer = ({
     }
   }, [isOpen]);
 
-  const handleLoad = () => {
+  const handleLoad = useCallback(() => {
     setIsLoading(false);
     setHasError(false);
-  };
+  }, []);
 
-  const handleError = () => {
+  const handleError = useCallback(() => {
     setIsLoading(false);
     setHasError(true);
     toast.error("Erro ao carregar o arquivo");
-  };
+  }, []);
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     try {
       // Criar um link temporário para download
       const link = document.createElement('a');
@@ -86,28 +85,28 @@ const FileViewer = ({
       document.body.removeChild(link);
       
       toast.success("Download iniciado");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erro ao fazer download do arquivo");
     }
-  };
+  }, [fileUrl, fileName]);
 
-  const handleZoomIn = () => {
+  const handleZoomIn = useCallback(() => {
     setZoom(prev => Math.min(prev + 25, 200));
-  };
+  }, []);
 
-  const handleZoomOut = () => {
+  const handleZoomOut = useCallback(() => {
     setZoom(prev => Math.max(prev - 25, 50));
-  };
+  }, []);
 
-  const handleRotate = () => {
+  const handleRotate = useCallback(() => {
     setRotation(prev => (prev + 90) % 360);
-  };
+  }, []);
 
-  const handleOpenExternal = () => {
+  const handleOpenExternal = useCallback(() => {
     window.open(fileUrl, '_blank', 'noopener,noreferrer');
-  };
+  }, [fileUrl]);
 
-  const getFileIcon = () => {
+  const getFileIcon = useCallback(() => {
     switch (fileCategory) {
       case "pdf":
         return <FileText className="h-5 w-5" />;
@@ -118,9 +117,9 @@ const FileViewer = ({
       default:
         return <FileText className="h-5 w-5" />;
     }
-  };
+  }, [fileCategory]);
 
-  const getFileColor = () => {
+  const getFileColor = useCallback(() => {
     switch (fileCategory) {
       case "pdf":
         return "bg-red-500/10 text-red-600 border-red-200 dark:border-red-700";
@@ -131,7 +130,7 @@ const FileViewer = ({
       default:
         return "bg-gray-500/10 text-gray-600 border-gray-200 dark:border-gray-700";
     }
-  };
+  }, [fileCategory]);
 
   const renderFileContent = () => {
     if (hasError) {
@@ -219,6 +218,8 @@ const FileViewer = ({
               className="max-h-full max-w-full object-contain rounded-lg"
               onLoad={handleLoad}
               onError={handleError}
+              loading="lazy"
+              decoding="async"
               style={{ 
                 transform: `scale(${zoom / 100}) rotate(${rotation}deg)`,
                 transformOrigin: 'center center'
@@ -412,6 +413,8 @@ const FileViewer = ({
       )}
     </AnimatePresence>
   );
-};
+});
 
-export default FileViewer; 
+FileViewer.displayName = 'FileViewer';
+
+export default FileViewer;

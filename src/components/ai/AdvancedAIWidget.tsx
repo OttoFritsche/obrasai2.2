@@ -12,33 +12,33 @@
  * @version 2.0.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { motion } from 'framer-motion';
 import {
+  AlertTriangle,
   Bot,
   Brain,
-  TrendingUp,
+  Clock,
+  Download,
   Lightbulb,
   MessageSquare,
-  AlertTriangle,
-  Zap,
-  Target,
-  Clock,
   Minimize2,
-  Send,
   RefreshCw,
-  Download,
+  Send,
+  Target,
+  ThumbsDown,
   ThumbsUp,
-  ThumbsDown
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useAsyncOperation } from '@/hooks/useAsyncOperation';
+  TrendingUp,
+  Zap} from 'lucide-react';
+import React, { useCallback,useEffect, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLoading } from '@/contexts/LoadingContext';
+import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 
 interface AIInsight {
   id: string;
@@ -57,7 +57,7 @@ interface AIInsight {
   };
   timestamp: Date;
   source: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface ChatMessage {
@@ -67,7 +67,7 @@ interface ChatMessage {
   timestamp: Date;
   context?: {
     relatedInsights?: string[];
-    metrics?: Record<string, any>;
+    metrics?: Record<string, unknown>;
     suggestions?: string[];
   };
   feedback?: 'positive' | 'negative';

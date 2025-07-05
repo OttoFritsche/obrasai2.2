@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+
 import { toast } from '@/hooks/use-toast';
 import { secureLogger } from '@/lib/secure-logger';
 
@@ -67,7 +68,7 @@ export const useErrorHandler = () => {
   /**
    * Função específica para erros de API
    */
-  const handleApiError = useCallback((error: any, operation: string) => {
+  const handleApiError = useCallback((error: unknown, operation: string) => {
     const errorInfo: ErrorInfo = {
       message: error?.message || 'Erro na comunicação com o servidor',
       code: error?.code || 'API_ERROR',
@@ -82,7 +83,7 @@ export const useErrorHandler = () => {
   /**
    * Função específica para erros de validação
    */
-  const handleValidationError = useCallback((error: any, field?: string) => {
+  const handleValidationError = useCallback((error: unknown, field?: string) => {
     const errorInfo: ErrorInfo = {
       message: error?.message || 'Dados inválidos',
       code: 'VALIDATION_ERROR',
@@ -121,8 +122,8 @@ export const useErrorHandler = () => {
     return async (...args: T): Promise<R | undefined> => {
       try {
         return await fn(...args);
-      } catch (error) {
-        handleError(error, context);
+      } catch (_error) {
+        handleError(_error, context);
         return undefined;
       }
     };

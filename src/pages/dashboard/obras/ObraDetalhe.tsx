@@ -1,46 +1,63 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Building, 
-  Pencil, 
-  Clock, 
-  Calendar, 
-  DollarSign, 
-  MapPin, 
-  ArrowLeft,
-  Loader2,
-  AlertTriangle,
-  TrendingUp,
-  BarChart3,
-  MessageSquare,
-  Calculator,
-  Plus,
-  Receipt
-} from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
-import { obrasApi } from "@/services/api";
-import { orcamentosParametricosApi, orcamentoUtils } from "@/services/orcamentoApi";
-import { STATUS_ORCAMENTO_LABELS, STATUS_ORCAMENTO_CORES, TIPO_OBRA_LABELS } from "@/lib/validations/orcamento";
+import {
+    AlertTriangle,
+    ArrowLeft,
+    BarChart3,
+    Building,
+    Calculator,
+    Calendar,
+    Check,
+    Clock,
+    DollarSign,
+    Loader2,
+    MapPin,
+    MessageSquare,
+    Pencil,
+    Plus,
+    Receipt,
+    Trash2,
+    TrendingUp
+} from "lucide-react";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import InsightsObra from "@/components/ai/InsightsObra";
 import InterfaceChat from "@/components/ai/InterfaceChat";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import type { Despesa } from "@/hooks/useDespesas";
+import { useDespesas } from "@/hooks/useDespesas";
+import { supabase } from "@/integrations/supabase/client";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { STATUS_ORCAMENTO_CORES, STATUS_ORCAMENTO_LABELS, TIPO_OBRA_LABELS } from "@/lib/validations/orcamento";
+import { obrasApi } from "@/services/api";
+import { orcamentosParametricosApi, orcamentoUtils } from "@/services/orcamentoApi";
 
 const ObraDetalhe = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("detalhes");
+  const { deleteDespesa } = useDespesas();
+  const [despesaToDelete, setDespesaToDelete] = useState<string | null>(null);
 
   const { data: obra, isLoading, isError, refetch } = useQuery({
     queryKey: ["obra", id],
@@ -77,7 +94,10 @@ const ObraDetalhe = () => {
           pago,
           categoria,
           quantidade,
-          valor_unitario
+          valor_unitario,
+          etapa,
+          insumo,
+          data_pagamento
         `)
         .eq("obra_id", id)
         .order("data_despesa", { ascending: false });
@@ -90,6 +110,9 @@ const ObraDetalhe = () => {
       return data || [];
     },
     enabled: !!id,
+    onSuccess: () => {
+      refetch(); // Refetch obra data to update metrics
+    }
   });
 
   // ====================================
@@ -125,7 +148,7 @@ const ObraDetalhe = () => {
       const progresso = Math.max(0, Math.min(100, (tempoDecorrido / duracaoTotal) * 100));
       
       return Math.round(progresso);
-    } catch (error) {
+    } catch (_error) {
       console.error("❌ Erro ao calcular progresso:", error);
       return 0;
     }
@@ -179,7 +202,7 @@ const ObraDetalhe = () => {
       const diasRestantes = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
       return diasRestantes;
-    } catch (error) {
+    } catch (_error) {
       console.error("❌ Erro ao calcular dias restantes:", error);
       return null;
     }
@@ -197,6 +220,7 @@ const ObraDetalhe = () => {
 
   const tabs = [
     { id: "detalhes", label: "Detalhes", icon: Building, color: "text-blue-500" },
+    { id: "despesas", label: "Despesas", icon: Receipt, color: "text-orange-500" },
     { id: "insights", label: "Insights IA", icon: TrendingUp, color: "text-blue-500" },
     { id: "chat", label: "Chat IA", icon: MessageSquare, color: "text-green-500" },
   ];
@@ -241,6 +265,109 @@ const ObraDetalhe = () => {
       </DashboardLayout>
     );
   }
+
+  const despesasColumns: ColumnDef<Despesa>[] = [
+    {
+      accessorKey: "descricao",
+      header: "Descrição",
+      cell: ({ row }) => (
+        <div className="font-medium">{row.original.descricao}</div>
+      ),
+    },
+    {
+      accessorKey: "categoria",
+      header: "Categoria",
+      cell: ({ row }) => (
+        <Badge 
+          variant="outline" 
+          className="text-xs bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300"
+        >
+          {row.original.categoria || "-"}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "custo",
+      header: "Valor",
+      cell: ({ row }) => (
+        <span className="font-mono font-medium text-emerald-600 dark:text-emerald-400">
+          {formatCurrencyBR(row.original.custo)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "data_despesa",
+      header: "Data",
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {formatDateBR(row.original.data_despesa)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "pago",
+      header: "Status",
+      cell: ({ row }) => 
+        row.original.pago ? (
+          <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700 hover:bg-emerald-200 dark:hover:bg-emerald-900/50">
+            <Check className="h-3 w-3 mr-1" />
+            Pago
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300">
+            <AlertTriangle className="h-3 w-3 mr-1" />
+            Pendente
+          </Badge>
+        ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Editar"
+            onClick={() => navigate(`/dashboard/despesas/${row.original.id}/editar?return=/dashboard/obras/${id}`)}
+            className="h-8 w-8 text-sky-600 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/30 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Excluir"
+            onClick={() => setDespesaToDelete(row.original.id)}
+            className="h-8 w-8 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-700 dark:hover:text-rose-300 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  const handleDeleteDespesa = async () => {
+    if (!despesaToDelete) return;
+    await deleteDespesa.mutateAsync(despesaToDelete, {
+      onSuccess: () => {
+        toast({
+          title: "Sucesso!",
+          description: "A despesa foi excluída.",
+          variant: "success",
+        });
+        setDespesaToDelete(null);
+        // O onSuccess da query já vai refetch os dados da obra
+      },
+      onError: (error) => {
+        toast({
+          title: "Erro ao excluir",
+          description: error.message || "Não foi possível remover a despesa.",
+          variant: "destructive",
+        });
+      },
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -332,7 +459,7 @@ const ObraDetalhe = () => {
           transition={{ delay: 0.4 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -631,6 +758,34 @@ const ObraDetalhe = () => {
               )}
             </TabsContent>
 
+            <TabsContent value="despesas" className="pt-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Despesas da Obra</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingDespesas ? (
+                      <div className="flex items-center justify-center h-48">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                      </div>
+                    ) : (
+                      <DataTable
+                        columns={despesasColumns}
+                        data={despesasObra || []}
+                        searchColumn="descricao"
+                        searchPlaceholder="Buscar por descrição..."
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </TabsContent>
+
             <TabsContent value="insights" className="pt-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -653,6 +808,23 @@ const ObraDetalhe = () => {
           </Tabs>
         </motion.div>
       </motion.div>
+
+      <AlertDialog open={!!despesaToDelete} onOpenChange={(open) => !open && setDespesaToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteDespesa} className="bg-destructive hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };

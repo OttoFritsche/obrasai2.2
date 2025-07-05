@@ -1,5 +1,5 @@
 <prompt>
-    <descricao>Instruções para análise de arquivos do projeto Pharma.AI</descricao>
+    <descricao>Instruções para análise de arquivos do projeto Obras.AI</descricao>
     <passos>
         <passo ordem="1">Analise os arquivos dentro da pasta .cursor\rules</passo>
         <passo ordem="2">Analise os arquivos de regras para compreender todas as diretrizes: rules.md e project-rules.mdc.</passo>

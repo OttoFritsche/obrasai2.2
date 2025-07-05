@@ -9,6 +9,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+
 import { secureLogger } from './secure-logger';
 
 /**
@@ -46,7 +47,7 @@ export const clearCorruptedAuthData = async (): Promise<void> => {
     
     logger.info('Dados de autenticação limpos com sucesso', { removedKeysCount: removedCount });
     
-  } catch (error) {
+  } catch (_error) {
     logger.error('Erro ao limpar dados de autenticação', error);
   }
 };
@@ -65,7 +66,7 @@ export const checkAndCleanRefreshToken = async (): Promise<boolean> => {
     }
     
     return !!session;
-  } catch (error) {
+  } catch (_error) {
     logger.error('Erro ao verificar token de refresh - iniciando limpeza', error);
     await clearCorruptedAuthData();
     return false;
@@ -94,7 +95,7 @@ export const debugAuthSession = async (): Promise<void> => {
     
     logger.info('Debug de sessão de autenticação', debugInfo);
     
-  } catch (error) {
+  } catch (_error) {
     logger.error('Erro no debug de autenticação', error);
   }
 };

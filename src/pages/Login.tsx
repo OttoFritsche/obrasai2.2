@@ -1,21 +1,22 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
-import { Input } from "@/components/ui/input";
+
+import loginBg from "@/assets/images/4d142594-a29e-4e94-bd77-48cf91ebcfac.png";
+import logoLightHorizon from "@/assets/logo/logo_light_horizon.png";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/auth";
-import { t } from "@/lib/i18n";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
-import { motion } from "framer-motion";
-import Logo from "@/components/ui/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import loginBg from "@/assets/images/4d142594-a29e-4e94-bd77-48cf91ebcfac.png";
+import { t } from "@/lib/i18n";
 
 
 // Esquema de validação do formulário
@@ -99,7 +100,7 @@ const Login = () => {
         if (currentSession?.user && !hasRedirectedRef.current) {
           performRedirect.current();
         }
-      } catch (error) {
+      } catch (_error) {
         console.error("Erro ao verificar sessão:", error);
       }
     };
@@ -178,7 +179,14 @@ const Login = () => {
               className="flex justify-center mb-4"
             >
               <div className="h-16 w-full flex items-center justify-center">
-                <Logo variant="horizontal" width={240} height={64} alt="Logo Obras.AI" />
+                <img
+                  src={logoLightHorizon}
+                  width={240}
+                  height={64}
+                  alt="Logo Obras.AI"
+                  style={{ maxWidth: 240, maxHeight: 64, height: "auto", width: "auto", display: "block" }}
+                  draggable={false}
+                />
               </div>
             </motion.div>
             <motion.div

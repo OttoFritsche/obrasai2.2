@@ -18,7 +18,7 @@ export default defineConfig(({ command }) => ({
   },
   plugins: [
     react(),
-    command === 'serve' && componentTagger(),
+    // command === 'serve' && componentTagger(), // Temporariamente desabilitado devido a erro de sintaxe
     command === 'build' && visualizer({
       filename: 'dist/stats.html',
       open: true,

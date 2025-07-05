@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Phone, Mail, MapPin, Shield, Clock, Award } from "lucide-react";
+import { Award,Clock, Mail, MapPin, Phone, Shield } from "lucide-react";
+
 import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
 
 export const Footer = () => {

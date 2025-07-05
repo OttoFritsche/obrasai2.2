@@ -1,6 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useTenantValidation } from './useTenantValidation';
+
 import { invalidationHelpers, queryKeys } from '@/lib/query-keys';
+
+import { useTenantValidation } from './useTenantValidation';
 
 /**
  * Hook para invalidação otimizada e seletiva de queries
@@ -165,7 +167,7 @@ export const useOptimizedInvalidation = () => {
       queryClient.setQueryData(queryKey, result);
       
       return result;
-    } catch (error) {
+    } catch (_error) {
       // Se erro, reverter para dados anteriores
       queryClient.setQueryData(queryKey, previousData);
       throw error;

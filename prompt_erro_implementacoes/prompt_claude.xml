@@ -1,0 +1,56 @@
+<prompt>
+  <context>
+    <project>Aplicação React com TypeScript e Vite</project>
+    <library>TanStack Query (@tanstack/react-query) para gerenciamento de estado de servidor (server state)</library>
+    <library>shadcn/ui para componentes de UI</library>
+    <task>Corrigir um bug de atualização de UI após operações de mutação de dados (criar/excluir/duplicar)</task>
+  </context>
+
+  <problem_description>
+    A aplicação possui uma página que lista "orçamentos" (`OrcamentosLista.tsx`). Nesta página, o usuário pode excluir ou duplicar um orçamento. Existe também uma página para criar um novo orçamento (`NovaObraRefactored.tsx`).
+
+    O problema principal é que a UI não reflete as mudanças nos dados sem que o usuário atualize a página manualmente (F5).
+
+    1.  **Ao Criar/Excluir:** Na página `OrcamentosLista.tsx`, quando um usuário exclui ou duplica um item, a API é chamada com sucesso, mas o item excluído continua na lista (ou o item duplicado não aparece) até a página ser recarregada.
+    2.  **Ao Criar:** Na página `NovaObraRefactored.tsx`, após o usuário preencher o formulário e criar um novo orçamento, ele é redirecionado de volta para a lista `OrcamentosLista.tsx`. No entanto, o orçamento recém-criado não está visível na lista, exigindo uma atualização manual.
+
+    Isso indica que o cache do TanStack Query não está sendo invalidado corretamente após as mutações.
+  </problem_description>
+
+  <relevant_files>
+    <file path="src/pages/dashboard/orcamento/OrcamentosLista.tsx">
+      - **Responsabilidade:** Exibe a lista de orçamentos, busca os dados usando `useQuery` e contém as funções para excluir, excluir em massa e duplicar orçamentos.
+      - **Query Key Relevante:** `['orcamentos-parametricos']`
+    </file>
+    <file path="src/pages/dashboard/obras/NovaObraRefactored.tsx">
+      - **Responsabilidade:** Contém o formulário e a lógica para criar uma nova obra e seu orçamento paramétrico associado.
+      - **Ação:** Após a criação bem-sucedida, deve invalidar a query da lista para que a atualização seja visível ao retornar para a página `OrcamentosLista.tsx`.
+    </file>
+  </relevant_files>
+
+  <desired_solution>
+    A solução correta e idiomática para este problema usando TanStack Query é refatorar todas as operações de mutação de dados para usar o hook `useMutation`.
+
+    **Passos para a correção:**
+
+    1.  **Em `OrcamentosLista.tsx`:**
+        - Obtenha o `queryClient` com o hook `useQueryClient()`.
+        - Crie três `useMutation` separados: um para excluir um único orçamento, um para excluir em massa e um para duplicar.
+        - A `mutationFn` de cada `useMutation` deve chamar a respectiva função da API (ex: `orcamentosParametricosApi.delete(id)`).
+        - No callback `onSuccess` de cada `useMutation`, chame `queryClient.invalidateQueries({ queryKey: ['orcamentos-parametricos'] })`. Isso irá forçar o `useQuery` da lista a buscar os dados atualizados.
+        - Nos botões da UI, chame a função `mutate` retornada pelo `useMutation` (ex: `excluirOrcamento.mutate(id)`).
+        - Adicione feedback de loading (ex: desabilitar o botão enquanto a mutação está `isPending`).
+
+    2.  **Em `NovaObraRefactored.tsx`:**
+        - A lógica de criação já deve usar um `useMutation`.
+        - Localize o `useMutation` responsável por criar a obra/orçamento.
+        - No callback `onSuccess`, **além** de navegar o usuário, certifique-se de que a invalidação da query está presente e correta: `queryClient.invalidateQueries({ queryKey: ['orcamentos-parametricos'] })`. Isso garante que, quando o usuário for redirecionado, a lista já estará atualizada.
+
+    O objetivo final é que a interface do usuário seja reativa e sempre reflita o estado atual do banco de dados sem a necessidade de intervenção manual do usuário.
+  </desired_solution>
+
+  <request>
+    Por favor, analise os arquivos `src/pages/dashboard/orcamento/OrcamentosLista.tsx` e `src/pages/dashboard/obras/NovaObraRefactored.tsx`.
+    Refatore o código para implementar a `desired_solution` descrita acima, utilizando o hook `useMutation` para todas as operações de criação, exclusão e duplicação, e garantindo a invalidação correta do cache do `useQuery` com a chave `['orcamentos-parametricos']` no `onSuccess` de cada mutação.
+  </request>
+</prompt>

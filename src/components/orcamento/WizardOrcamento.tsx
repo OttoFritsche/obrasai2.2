@@ -8,37 +8,34 @@
  * @version 1.0.0
  */
 
-import React, { useState, useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
-import { ChevronLeft, ChevronRight, Calculator, Building, MapPin, Ruler, Settings, Sparkles, CheckCircle, Search } from "lucide-react";
+import { Building, Calculator, CheckCircle, ChevronLeft, ChevronRight, MapPin, Ruler, Search,Settings, Sparkles } from "lucide-react";
+import React, { useCallback, useEffect,useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import type { z } from "zod";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-
+import { Textarea } from "@/components/ui/textarea";
+import { useCEP } from "@/hooks/useCEP";
 import type {
   WizardCompleto} from "@/lib/validations/orcamento";
 import {
+  ESTADOS_BRASILEIROS,
+  PADRAO_OBRA_LABELS,
+  TIPO_OBRA_LABELS,
+  WizardCompletoSchema,
   WizardEtapa1Schema,
   WizardEtapa2Schema, 
   WizardEtapa3Schema,
-  WizardEtapa4Schema,
-  WizardCompletoSchema,
-  TIPO_OBRA_LABELS,
-  PADRAO_OBRA_LABELS,
-  ESTADOS_BRASILEIROS
-} from "@/lib/validations/orcamento";
-
-import { orcamentosParametricosApi, calculoOrcamentoApi } from "@/services/orcamentoApi";
-import { useCEP } from "@/hooks/useCEP";
+  WizardEtapa4Schema} from "@/lib/validations/orcamento";
 import { obrasApi } from "@/services/api";
+import { calculoOrcamentoApi,orcamentosParametricosApi } from "@/services/orcamentoApi";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES
@@ -143,8 +140,8 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
       area_total: dadosIniciais?.area_total || "",
       area_construida: dadosIniciais?.area_construida || "",
       area_detalhada: dadosIniciais?.area_detalhada || {},
-      especificacoes: dadosIniciais?.especificacoes || {},
-      parametros_entrada: dadosIniciais?.parametros_entrada || {},
+      especificacoes: dadosIniciais?.especificacoes || "",
+      parametros_entrada: dadosIniciais?.parametros_entrada || ""
       obra_id: obraId || dadosIniciais?.obra_id
     }
   });
@@ -176,7 +173,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
         
         toast.success(`✅ Dados da obra "${obra.nome}" carregados!`);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar dados da obra:', error);
       toast.error('❌ Erro ao carregar dados da obra');
     } finally {
@@ -214,7 +211,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
         
         toast.success(`✅ Endereço encontrado: ${dadosCEP.localidade}/${dadosCEP.uf}`);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar CEP:', error);
       // Não mostrar erro aqui, o hook já gerencia
     }
@@ -289,7 +286,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
       // Callback de sucesso
       onOrcamentoCriado?.(novoOrcamento.id);
 
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao criar orçamento:", error);
       toast.error("❌ Erro ao criar orçamento. Tente novamente.");
     } finally {
@@ -327,7 +324,7 @@ export const WizardOrcamento: React.FC<WizardOrcamentoProps> = ({
         }
       }
 
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro no cálculo da IA:", error);
       toast.warning("⚠️ Orçamento criado, mas cálculo da IA falhou.");
     } finally {

@@ -1,18 +1,19 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Building2, User } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
-import { useConstrutoraMutations } from '@/hooks/useConstrutoraMutations';
-import { useConstrutoraForm } from '@/hooks/useConstrutoraForm';
-import { useConstrutoraCNPJ } from '@/hooks/useConstrutoraCNPJ';
+
+import { ConstrutoraFormPF } from '@/components/construtora/ConstrutoraFormPF';
+import { ConstrutoraFormPJ } from '@/components/construtora/ConstrutoraFormPJ';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ConstrutoraFormPJ } from '@/components/construtora/ConstrutoraFormPJ';
-import { ConstrutoraFormPF } from '@/components/construtora/ConstrutoraFormPF';
-import DashboardLayout from '@/components/layouts/DashboardLayout';
+import { useAuth } from '@/contexts/auth';
+import { useConstrutoraCNPJ } from '@/hooks/useConstrutoraCNPJ';
+import { useConstrutoraForm } from '@/hooks/useConstrutoraForm';
+import { useConstrutoraMutations } from '@/hooks/useConstrutoraMutations';
 
 type ConstrutoraType = 'PJ' | 'PF';
 

@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, X, Loader2 } from 'lucide-react';
+import { AnimatePresence,motion } from 'framer-motion';
+import { Bot, Loader2,Send, User, X } from 'lucide-react';
+import React, { useEffect,useRef, useState } from 'react';
+
+import logoImageLight from "@/assets/logo/logo_image_dark.png";
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import logoImageLight from "@/assets/logo/logo_image_dark.png";
 
 interface Message {
   id: string;
@@ -107,7 +108,7 @@ const LandingChat: React.FC<LandingChatProps> = ({ className = '' }) => {
 
       setMessages(prev => [...prev, botMessage]);
 
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao enviar mensagem:', error);
       
       const errorMessage: Message = {

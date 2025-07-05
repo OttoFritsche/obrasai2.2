@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Building2, User, Edit, Trash2, Plus } from "lucide-react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Building2, Edit, Plus,Trash2, User } from "lucide-react";
+import { useEffect,useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,10 +15,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const ConstrutorasLista = () => {
   const navigate = useNavigate();
@@ -100,7 +101,7 @@ const ConstrutorasLista = () => {
         setConstrutoras((prev) => prev.filter((c) => c.id !== id));
         toast.success("Construtora excluída com sucesso!");
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro inesperado:", error);
       toast.error("Erro inesperado ao excluir construtora");
     }
@@ -145,7 +146,7 @@ const ConstrutorasLista = () => {
         setShowBulkDeleteDialog(false);
         toast.success(`${selectedConstrutoras.length} construtora(s) excluída(s) com sucesso!`);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro inesperado:", error);
       toast.error("Erro inesperado ao excluir construtoras");
     }

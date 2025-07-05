@@ -1,5 +1,5 @@
-import { supabase } from '@/integrations/supabase/client';
 import type { AlertaDesvio, ConfiguracaoAlerta, FiltrosAlertas } from '@/hooks/useAlertasDesvio';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CalcularDesvioParams {
   obra_id: string;
@@ -96,7 +96,7 @@ class AlertasApi {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar alertas:', error);
       throw new Error('Falha ao carregar alertas de desvio');
     }
@@ -123,7 +123,7 @@ class AlertasApi {
 
       if (error) throw error;
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar alerta:', error);
       return null;
     }
@@ -146,7 +146,7 @@ class AlertasApi {
         .eq('id', id);
 
       if (error) throw error;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao atualizar status do alerta:', error);
       throw new Error('Falha ao atualizar status do alerta');
     }
@@ -167,7 +167,7 @@ class AlertasApi {
 
       if (error) throw error;
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao calcular desvios:', error);
       throw new Error('Falha ao calcular desvios orçamentários');
     }
@@ -187,7 +187,7 @@ class AlertasApi {
 
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar configuração de alerta:', error);
       return null;
     }
@@ -211,7 +211,7 @@ class AlertasApi {
 
       if (error) throw error;
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao salvar configuração de alerta:', error);
       throw new Error('Falha ao salvar configuração de alerta');
     }
@@ -231,7 +231,7 @@ class AlertasApi {
         .eq('obra_id', obraId);
 
       if (error) throw error;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao remover configuração de alerta:', error);
       throw new Error('Falha ao remover configuração de alerta');
     }
@@ -316,7 +316,7 @@ class AlertasApi {
           valor: alertaComMaiorDesvio.valor_desvio || 0
         }
       };
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar estatísticas:', error);
       throw new Error('Falha ao carregar estatísticas dos alertas');
     }
@@ -343,7 +343,7 @@ class AlertasApi {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao buscar alertas ativos:', error);
       throw new Error('Falha ao carregar alertas ativos da obra');
     }
@@ -364,7 +364,7 @@ class AlertasApi {
         .eq('status', 'ATIVO');
 
       if (error) throw error;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao marcar alertas como visualizados:', error);
       throw new Error('Falha ao atualizar status dos alertas');
     }
@@ -387,7 +387,7 @@ class AlertasApi {
 
       if (error) throw error;
       return data?.length || 0;
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao limpar alertas antigos:', error);
       throw new Error('Falha ao limpar alertas antigos');
     }

@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useTenantValidation } from './useTenantValidation';
-import { useTenantListQuery } from './useTenantQuery';
+
 import { queryKeys } from '@/lib/query-keys';
+
+import { useTenantListQuery } from './useTenantQuery';
+import { useTenantValidation } from './useTenantValidation';
 
 /**
  * Hook genérico para operações CRUD

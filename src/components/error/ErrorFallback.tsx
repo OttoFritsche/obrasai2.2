@@ -1,9 +1,10 @@
+import { AlertTriangle, Bug,Home, RefreshCw } from 'lucide-react';
 import React from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useNavigate } from 'react-router-dom';
 import { secureLogger } from '@/lib/secure-logger';
 
 export interface ErrorFallbackProps {

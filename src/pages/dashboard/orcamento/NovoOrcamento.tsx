@@ -8,18 +8,18 @@
  * @version 2.0.0 - Orçamento Paramétrico
  */
 
+import { motion } from "framer-motion";
+import { ArrowLeft, Building, Calculator, CheckCircle, Hammer, Layers, Sparkles, Users } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Calculator, Sparkles, CheckCircle, Layers, Hammer, Users } from "lucide-react";
 
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { WizardOrcamentoRefactored as WizardOrcamento } from "@/components/orcamento/WizardOrcamentoRefactored";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-
-import { WizardOrcamentoRefactored as WizardOrcamento } from "@/components/orcamento/WizardOrcamentoRefactored";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { useObras } from "@/hooks/useObras";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES
@@ -34,6 +34,7 @@ interface NovoOrcamentoProps {}
 export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { obras } = useObras();
   
   // Estados da página
   const [orcamentoCriado, setOrcamentoCriado] = useState<string | null>(null);
@@ -41,6 +42,9 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
   // Parâmetros da URL
   const obraId = searchParams.get('obra_id');
   const retornarPara = searchParams.get('return') || '/dashboard/obras';
+  
+  // ✅ Buscar dados da obra para personalizar interface
+  const obraSelecionada = obraId && obras ? obras.find(obra => obra.id === obraId) : null;
 
   // ====================================
   // 🎯 HANDLERS DE EVENTOS
@@ -49,7 +53,8 @@ export const NovoOrcamento: React.FC<NovoOrcamentoProps> = () => {
   /**
    * Callback quando orçamento é criado com sucesso
    */
-  const handleOrcamentoCriado = (orcamentoId: string) => {
+  const handleOrcamentoCriado = (orcamento: any) => {
+    const orcamentoId = orcamento?.id || orcamento;
     setOrcamentoCriado(orcamentoId);
     
     // Aguardar um pouco e redirecionar
@@ -178,10 +183,13 @@ IA está processando seu orçamento paramétrico
               transition={{ delay: 0.2 }}
             >
               <h1 className="text-3xl font-bold bg-gradient-to-r from-[#182b4d] to-blue-600 bg-clip-text text-transparent">
-                Novo Orçamento Paramétrico
+                {obraSelecionada ? `Orçamento - ${obraSelecionada.nome}` : 'Novo Orçamento Paramétrico'}
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
-                Crie estimativas precisas com IA - Orçamento Paramétrico
+                {obraSelecionada 
+                  ? `Estimativa precisa com IA para a obra: ${obraSelecionada.cidade}, ${obraSelecionada.estado}`
+                  : 'Crie estimativas precisas com IA - Orçamento Paramétrico'
+                }
               </p>
             </motion.div>
           </div>
@@ -192,6 +200,15 @@ IA está processando seu orçamento paramétrico
             transition={{ delay: 0.3 }}
             className="flex items-center space-x-2"
           >
+            {obraSelecionada && (
+              <Badge 
+                variant="default"
+                className="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Building className="h-4 w-4" />
+                <span>Vinculado à Obra</span>
+              </Badge>
+            )}
             <Badge 
               variant="secondary" 
               className="flex items-center space-x-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-700"

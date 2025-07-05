@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AlertTriangle, Lightbulb, TrendingUp, Clock, DollarSign, Shield, CheckCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle,Clock, DollarSign, Lightbulb, Shield, TrendingUp } from "lucide-react";
 import { useState } from "react";
 
 interface ProblemCardProps {

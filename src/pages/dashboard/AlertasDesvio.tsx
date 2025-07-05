@@ -1,6 +1,7 @@
 import React from 'react';
-import DashboardLayout from '@/components/layouts/DashboardLayout';
+
 import AlertasDesvioComponent from '@/components/dashboard/AlertasDesvio';
+import DashboardLayout from '@/components/layouts/DashboardLayout';
 
 const AlertasDesvioPage: React.FC = () => {
   return (

@@ -7,12 +7,12 @@
 
 // Componentes principais
 export { default as ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
-export { ErrorFallback, SimpleErrorFallback } from './ErrorFallback';
 export type { ErrorFallbackProps } from './ErrorFallback';
+export { ErrorFallback, SimpleErrorFallback } from './ErrorFallback';
 
 // Hooks (re-exportando do módulo de hooks)
-export { useErrorHandler, useErrorBoundary } from '../../hooks/useErrorHandler';
 export type { ErrorInfo } from '../../hooks/useErrorHandler';
+export { useErrorBoundary,useErrorHandler } from '../../hooks/useErrorHandler';
 
 // Hook deprecated (mantido para compatibilidade)
 export { useErrorHandler as useErrorHandlerDeprecated } from './ErrorBoundary';

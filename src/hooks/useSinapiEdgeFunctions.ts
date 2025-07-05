@@ -8,9 +8,10 @@
  * @version 1.0.0
  */
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import { supabase } from "@/integrations/supabase/client";
 
 // ====================================
@@ -288,6 +289,5 @@ export const useSinapiEdgeFunctions = () => {
 
 export type { 
   CodigoValidacao, 
-  ValidacaoBatchResponse, 
-  ImpactoOrcamento 
-};
+  ImpactoOrcamento, 
+  ValidacaoBatchResponse};

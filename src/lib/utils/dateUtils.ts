@@ -54,7 +54,7 @@ export function formatTimeBR(date: Date | string | null | undefined): string {
 /**
  * Verifica se uma data é válida
  */
-export function isValidDate(date: any): boolean {
+export function isValidDate(date: unknown): boolean {
   if (!date) return false;
   
   const dateObj = typeof date === 'string' ? new Date(date) : date;

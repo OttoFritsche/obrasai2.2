@@ -1,20 +1,20 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Check, 
-  X, 
-  Star, 
-  Crown, 
+  BarChart3,
   Building, 
-  Zap,
-  Users,
+  Check, 
+  Crown, 
   MessageCircle,
   Shield,
-  BarChart3
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
+  Star, 
+  Users,
+  X, 
+  Zap} from 'lucide-react';
+import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const PricingSection = () => {
   const plans = [

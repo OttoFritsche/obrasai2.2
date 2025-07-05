@@ -1,28 +1,27 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Bot, FileText, Lightbulb, Send, Copy, Sparkles } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { ArrowLeft, Bot, Copy, FileText, Lightbulb, Send, Sparkles } from "lucide-react";
+import { useEffect, useRef,useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import * as z from "zod";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { useContratos, useContrato, useTemplatesContratos } from "@/hooks/useContratos";
-import { useObras } from "@/hooks/useObras";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription,CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useContratoAI } from "@/hooks/useContratoAI";
-import { orcamentosParametricosApi } from '@/services/orcamentoApi';
+import { useContrato, useContratos, useTemplatesContratos } from "@/hooks/useContratos";
+import { useObras } from "@/hooks/useObras";
 import { supabase } from "@/integrations/supabase/client";
+import { orcamentosParametricosApi } from '@/services/orcamentoApi';
 
 const contratoSchema = z.object({
   titulo: z.string().min(5, "Título deve ter pelo menos 5 caracteres"),
@@ -254,12 +253,11 @@ const ContratoComIA = () => {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watchedValues.template_id, templates]);
+  }, [watchedValues.template_id, watchedValues.titulo, templates, form]);
 
   // Preencher contratante ao selecionar obra
   useEffect(() => {
-    const obraId = form.watch("obra_id");
+    const obraId = watchedValues.obra_id;
     if (!obraId) return;
     const obraSelecionada = obras?.find((o) => o.id === obraId);
     if (!obraSelecionada || !obraSelecionada.construtora_id) return;
@@ -269,7 +267,7 @@ const ContratoComIA = () => {
       .select("*")
       .eq("id", obraSelecionada.construtora_id)
       .single()
-      .then(({ data, error }) => {
+      .then(({ data, _error }) => {
         if (data) {
           if (data.tipo === "pj") {
             form.setValue("contratante_nome", data.razao_social || "");
@@ -286,8 +284,7 @@ const ContratoComIA = () => {
           }
         }
       });
-    // eslint-disable-next-line
-  }, [form.watch("obra_id")]);
+  }, [watchedValues.obra_id, obras, form]);
 
   return (
     <DashboardLayout>

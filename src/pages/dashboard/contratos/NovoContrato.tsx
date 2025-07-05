@@ -1,22 +1,21 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, FileText, Users, Calculator, Calendar, Save } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { ArrowLeft, Calculator, Calendar, FileText, Save,Users } from "lucide-react";
+import { useEffect,useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import * as z from "zod";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-
 import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription,CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useContratos, useTemplatesContratos } from "@/hooks/useContratos";
 import { useObras } from "@/hooks/useObras";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,7 +122,7 @@ const NovoContrato = () => {
       await createContrato.mutateAsync(data);
       toast.success("Contrato criado com sucesso!");
       navigate("/dashboard/contratos");
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao criar contrato:", error);
       toast.error("Erro ao criar contrato");
     }

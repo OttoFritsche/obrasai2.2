@@ -1,39 +1,38 @@
 // 📊 Dashboard Executivo de Métricas - ObrasAI 2.2
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Progress } from '@/components/ui/progress'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/contexts/auth'
 import { 
-  TrendingUp, 
-  Users, 
-  DollarSign, 
-  Target, 
-  Bot, 
-  FileText, 
-  Building, 
-  RefreshCw,
-  ArrowUp,
-  ArrowDown,
   Activity,
+  ArrowDown,
+  ArrowUp,
+  Bot, 
+  Building, 
   Calendar,
-  Eye,
+  DollarSign, 
   Download,
+  Eye,
+  FileText, 
   LogOut,
-  Shield
-} from 'lucide-react'
-import type { 
-  LeadMetrics, 
-  UserMetrics, 
-  ProductMetrics, 
-  BusinessMetrics 
-} from '@/services/analyticsApi'
+  RefreshCw,
+  Shield,
+  Target, 
+  TrendingUp, 
+  Users} from 'lucide-react'
+import React, { useEffect,useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 import { AIInsightsWidget } from '@/components/admin/AIInsightsWidget'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/contexts/auth'
 import type { MetricsData } from '@/services/aiInsightsApi'
+import type { 
+  BusinessMetrics, 
+  LeadMetrics, 
+  ProductMetrics, 
+  UserMetrics} from '@/services/analyticsApi'
 
 interface AllMetrics {
   leads: LeadMetrics
@@ -117,7 +116,7 @@ export default function MetricsDashboard() {
       // const data = await analytics.getAllMetrics()
       // setMetrics(data)
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading metrics:', error)
       
       // Fallback para dados mock em caso de erro

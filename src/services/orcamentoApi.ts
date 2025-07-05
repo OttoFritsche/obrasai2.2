@@ -1,9 +1,9 @@
 /**
  * 🎯 API Service para Orçamento Paramétrico
- * 
+ *
  * Este arquivo contém todos os serviços de API para interação
  * com o banco de dados relacionados ao orçamento paramétrico.
- * 
+ *
  * @author ObrasAI Team
  * @version 1.0.0
  */
@@ -11,26 +11,26 @@
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeFormData } from "@/lib/input-sanitizer";
 import { secureLogger } from "@/lib/secure-logger";
-import { analytics } from "@/services/analyticsApi";
 import type {
-  OrcamentoParametrico,
-  ItemOrcamento,
-  BaseCustoRegional,
-  CoeficienteTecnico,
-  ComparacaoOrcamentoReal,
-  FiltrosOrcamento,
-  CriarOrcamentoRequest,
   AtualizarOrcamentoRequest,
+  BaseCustoRegional,
   CalcularOrcamentoRequest,
   CalcularOrcamentoResponse,
-  TipoObra,
+  CoeficienteTecnico,
+  ComparacaoOrcamentoReal,
+  CriarOrcamentoRequest,
+  FiltrosOrcamento,
+  ItemOrcamento,
+  OrcamentoParametrico,
   PadraoObra,
-  StatusOrcamento
+  StatusOrcamento,
+  TipoObra,
 } from "@/lib/validations/orcamento";
-import type { 
-  ApiResponse, 
-  ConversaoOrcamentoDespesa, 
-  ConversaoOrcamentoDespesaResult 
+import { analytics } from "@/services/analyticsApi";
+import type {
+  ApiResponse,
+  ConversaoOrcamentoDespesa,
+  ConversaoOrcamentoDespesaResult,
 } from "@/types/api";
 
 // ====================================
@@ -56,7 +56,7 @@ export const orcamentosParametricosApi = {
    * Lista todos os orçamentos do usuário com paginação e filtros
    */
   getAll: async (
-    filtros: FiltrosOrcamento = {}
+    filtros: FiltrosOrcamento = {},
   ): Promise<PaginatedResponse<OrcamentoParametrico>> => {
     try {
       const {
@@ -70,7 +70,7 @@ export const orcamentosParametricosApi = {
         data_inicio,
         data_fim,
         limit = 20,
-        offset = 0
+        offset = 0,
       } = filtros;
 
       // Construir query base
@@ -88,13 +88,19 @@ export const orcamentosParametricosApi = {
       if (cidade) query = query.ilike("cidade", `%${cidade}%`);
       if (custo_min) query = query.gte("custo_estimado", custo_min);
       if (custo_max) query = query.lte("custo_estimado", custo_max);
-      if (data_inicio) query = query.gte("created_at", data_inicio.toISOString());
+      if (data_inicio) {
+        query = query.gte("created_at", data_inicio.toISOString());
+      }
       if (data_fim) query = query.lte("created_at", data_fim.toISOString());
 
       const { data, count, error } = await query;
 
       if (error) {
-        secureLogger.error("Failed to fetch orçamentos paramétricos", error, filtros);
+        secureLogger.error(
+          "Failed to fetch orçamentos paramétricos",
+          error,
+          filtros,
+        );
         throw error;
       }
 
@@ -105,10 +111,14 @@ export const orcamentosParametricosApi = {
         data: data || [],
         total: count || 0,
         page,
-        totalPages
+        totalPages,
       };
-    } catch (error) {
-      secureLogger.error("Error in orcamentosParametricosApi.getAll", error, filtros);
+    } catch (_error) {
+      secureLogger.error(
+        "Error in orcamentosParametricosApi.getAll",
+        error,
+        filtros,
+      );
       throw error;
     }
   },
@@ -125,13 +135,17 @@ export const orcamentosParametricosApi = {
         .single();
 
       if (error) {
-        secureLogger.error("Failed to fetch orçamento by ID", error, { orcamentoId: id });
+        secureLogger.error("Failed to fetch orçamento by ID", error, {
+          orcamentoId: id,
+        });
         throw error;
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in orcamentosParametricosApi.getById", error, { orcamentoId: id });
+    } catch (_error) {
+      secureLogger.error("Error in orcamentosParametricosApi.getById", error, {
+        orcamentoId: id,
+      });
       throw error;
     }
   },
@@ -139,11 +153,13 @@ export const orcamentosParametricosApi = {
   /**
    * Cria um novo orçamento paramétrico
    */
-  create: async (orcamentoData: CriarOrcamentoRequest): Promise<OrcamentoParametrico> => {
+  create: async (
+    orcamentoData: CriarOrcamentoRequest,
+  ): Promise<OrcamentoParametrico> => {
     try {
       // Obter usuário autenticado
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         throw new Error("Usuário não autenticado");
       }
@@ -175,13 +191,12 @@ export const orcamentosParametricosApi = {
         cep: sanitizedData.cep || null,
         area_total: sanitizedData.area_total,
         area_construida: sanitizedData.area_construida || null,
-        area_detalhada: sanitizedData.area_detalhada || null,
         especificacoes: sanitizedData.especificacoes || null,
         parametros_entrada: sanitizedData.parametros_entrada || null,
         obra_id: sanitizedData.obra_id || null,
         custo_estimado: 0.01,
         custo_m2: 0.01,
-        status: "RASCUNHO" as StatusOrcamento
+        status: "RASCUNHO" as StatusOrcamento,
       };
 
       const { data, error } = await supabase
@@ -191,15 +206,15 @@ export const orcamentosParametricosApi = {
         .single();
 
       if (error) {
-        secureLogger.error("Failed to create orçamento paramétrico", error, { 
-          userId: user.id, 
-          tenantId: profile.tenant_id 
+        secureLogger.error("Failed to create orçamento paramétrico", error, {
+          userId: user.id,
+          tenantId: profile.tenant_id,
         });
         throw error;
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in orcamentosParametricosApi.create", error);
       throw error;
     }
@@ -208,26 +223,49 @@ export const orcamentosParametricosApi = {
   /**
    * Atualiza um orçamento existente
    */
-  update: async (id: string, orcamentoData: AtualizarOrcamentoRequest): Promise<OrcamentoParametrico> => {
+  update: async (
+    id: string,
+    orcamentoData: AtualizarOrcamentoRequest,
+  ): Promise<OrcamentoParametrico> => {
     try {
       // Sanitizar dados de entrada
       const sanitizedData = sanitizeFormData(orcamentoData);
 
       // Preparar dados para atualização (apenas campos fornecidos)
       const updateData: Partial<AtualizarOrcamentoRequest> = {};
-      
-      if (sanitizedData.nome_orcamento !== undefined) updateData.nome_orcamento = sanitizedData.nome_orcamento;
-      if (sanitizedData.descricao !== undefined) updateData.descricao = sanitizedData.descricao;
-      if (sanitizedData.tipo_obra !== undefined) updateData.tipo_obra = sanitizedData.tipo_obra;
-      if (sanitizedData.padrao_obra !== undefined) updateData.padrao_obra = sanitizedData.padrao_obra;
-      if (sanitizedData.estado !== undefined) updateData.estado = sanitizedData.estado;
-      if (sanitizedData.cidade !== undefined) updateData.cidade = sanitizedData.cidade;
+
+      if (sanitizedData.nome_orcamento !== undefined) {
+        updateData.nome_orcamento = sanitizedData.nome_orcamento;
+      }
+      if (sanitizedData.descricao !== undefined) {
+        updateData.descricao = sanitizedData.descricao;
+      }
+      if (sanitizedData.tipo_obra !== undefined) {
+        updateData.tipo_obra = sanitizedData.tipo_obra;
+      }
+      if (sanitizedData.padrao_obra !== undefined) {
+        updateData.padrao_obra = sanitizedData.padrao_obra;
+      }
+      if (sanitizedData.estado !== undefined) {
+        updateData.estado = sanitizedData.estado;
+      }
+      if (sanitizedData.cidade !== undefined) {
+        updateData.cidade = sanitizedData.cidade;
+      }
       if (sanitizedData.cep !== undefined) updateData.cep = sanitizedData.cep;
-      if (sanitizedData.area_total !== undefined) updateData.area_total = sanitizedData.area_total;
-      if (sanitizedData.area_construida !== undefined) updateData.area_construida = sanitizedData.area_construida;
-      if (sanitizedData.area_detalhada !== undefined) updateData.area_detalhada = sanitizedData.area_detalhada;
-      if (sanitizedData.especificacoes !== undefined) updateData.especificacoes = sanitizedData.especificacoes;
-      if (sanitizedData.parametros_entrada !== undefined) updateData.parametros_entrada = sanitizedData.parametros_entrada;
+      if (sanitizedData.area_total !== undefined) {
+        updateData.area_total = sanitizedData.area_total;
+      }
+      if (sanitizedData.area_construida !== undefined) {
+        updateData.area_construida = sanitizedData.area_construida;
+      }
+
+      if (sanitizedData.especificacoes !== undefined) {
+        updateData.especificacoes = sanitizedData.especificacoes;
+      }
+      if (sanitizedData.parametros_entrada !== undefined) {
+        updateData.parametros_entrada = sanitizedData.parametros_entrada;
+      }
 
       const { data, error } = await supabase
         .from("orcamentos_parametricos")
@@ -237,13 +275,17 @@ export const orcamentosParametricosApi = {
         .single();
 
       if (error) {
-        secureLogger.error("Failed to update orçamento paramétrico", error, { orcamentoId: id });
+        secureLogger.error("Failed to update orçamento paramétrico", error, {
+          orcamentoId: id,
+        });
         throw error;
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in orcamentosParametricosApi.update", error, { orcamentoId: id });
+    } catch (_error) {
+      secureLogger.error("Error in orcamentosParametricosApi.update", error, {
+        orcamentoId: id,
+      });
       throw error;
     }
   },
@@ -259,13 +301,17 @@ export const orcamentosParametricosApi = {
         .eq("id", id);
 
       if (error) {
-        secureLogger.error("Failed to delete orçamento paramétrico", error, { orcamentoId: id });
+        secureLogger.error("Failed to delete orçamento paramétrico", error, {
+          orcamentoId: id,
+        });
         throw error;
       }
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in orcamentosParametricosApi.delete", error, { orcamentoId: id });
+    } catch (_error) {
+      secureLogger.error("Error in orcamentosParametricosApi.delete", error, {
+        orcamentoId: id,
+      });
       throw error;
     }
   },
@@ -273,7 +319,10 @@ export const orcamentosParametricosApi = {
   /**
    * Duplica um orçamento existente
    */
-  duplicate: async (id: string, novoNome?: string): Promise<OrcamentoParametrico> => {
+  duplicate: async (
+    id: string,
+    novoNome?: string,
+  ): Promise<OrcamentoParametrico> => {
     try {
       // Buscar orçamento original
       const original = await orcamentosParametricosApi.getById(id);
@@ -292,12 +341,16 @@ export const orcamentosParametricosApi = {
         area_detalhada: original.area_detalhada,
         especificacoes: original.especificacoes,
         parametros_entrada: original.parametros_entrada,
-        obra_id: original.obra_id
+        obra_id: original.obra_id,
       };
 
       return await orcamentosParametricosApi.create(copia);
-    } catch (error) {
-      secureLogger.error("Error in orcamentosParametricosApi.duplicate", error, { orcamentoId: id });
+    } catch (_error) {
+      secureLogger.error(
+        "Error in orcamentosParametricosApi.duplicate",
+        error,
+        { orcamentoId: id },
+      );
       throw error;
     }
   },
@@ -314,13 +367,19 @@ export const orcamentosParametricosApi = {
         .order("created_at", { ascending: false });
 
       if (error) {
-        secureLogger.error("Failed to fetch orçamentos by obra", error, { obraId });
+        secureLogger.error("Failed to fetch orçamentos by obra", error, {
+          obraId,
+        });
         throw error;
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in orcamentosParametricosApi.getByObra", error, { obraId });
+    } catch (_error) {
+      secureLogger.error(
+        "Error in orcamentosParametricosApi.getByObra",
+        error,
+        { obraId },
+      );
       throw error;
     }
   },
@@ -332,14 +391,53 @@ export const orcamentosParametricosApi = {
     // Validações básicas
     if (!orcamento) return false;
     if (!orcamento.id) return false;
-    if (orcamento.status === 'RASCUNHO') return false;
-    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
-    
+    if (orcamento.status === "RASCUNHO") return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) {
+      return false;
+    }
+
     // Deve ter pelo menos um item
     // Nota: Esta validação será feita no componente que tem acesso aos itens
-    
+
     return true;
-  }
+  },
+
+  /**
+   * Busca o comparativo de um orçamento com a base SINAPI
+   */
+  getComparativoCustoM2: async (orcamentoId: string) => {
+    const { data, error } = await supabase.rpc("comparar_custo_m2_sinapi", {
+      p_orcamento_id: orcamentoId,
+    });
+
+    if (error) {
+      console.error("Erro ao buscar comparativo de Custo/m²:", error);
+      secureLogger.error("Failed to fetch comparativo Custo/m²", error, {
+        orcamentoId,
+      });
+      throw new Error("Não foi possível carregar o comparativo de Custo/m².");
+    }
+    // A RPC retorna um array, mas esperamos apenas um resultado
+    return data && data.length > 0 ? data[0] : null;
+  },
+
+  /**
+   * Busca o histórico de gastos operacionais de uma obra para o gráfico de projeção
+   */
+  getGastoHistorico: async (obraId: string) => {
+    const { data, error } = await supabase.rpc("get_gasto_historico_obra", {
+      p_obra_id: obraId,
+    });
+
+    if (error) {
+      console.error("Erro ao buscar histórico de gastos:", error);
+      secureLogger.error("Failed to fetch gasto histórico", error, { obraId });
+      throw new Error(
+        "Não foi possível carregar o histórico de gastos para a projeção.",
+      );
+    }
+    return data;
+  },
 };
 
 // ====================================
@@ -353,49 +451,56 @@ export const calculoOrcamentoApi = {
   /**
    * Calcula orçamento usando Edge Function com fallback automático
    */
-  calcular: async (request: CalcularOrcamentoRequest): Promise<CalcularOrcamentoResponse> => {
+  calcular: async (
+    request: CalcularOrcamentoRequest,
+  ): Promise<CalcularOrcamentoResponse> => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
-        throw new Error('Usuário não autenticado');
+        throw new Error("Usuário não autenticado");
       }
 
-      console.log('📡 Tentando Edge Function (orçamento paramétrico)...');
+      console.log("📡 Tentando Edge Function (orçamento paramétrico)...");
 
       // TENTATIVA 1: Usar ai-calculate-budget-v9 (composição detalhada) - PRIORIDADE MÁXIMA
       try {
-        const { data, error } = await supabase.functions.invoke('ai-calculate-budget-v9', {
-          body: {
-            orcamento_id: request.orcamento_id,
-            forcar_recalculo: request.forcar_recalculo || false
+        const { data, error } = await supabase.functions.invoke(
+          "ai-calculate-budget-v9",
+          {
+            body: {
+              orcamento_id: request.orcamento_id,
+              forcar_recalculo: request.forcar_recalculo || false,
+            },
+            headers: {
+              "Authorization": `Bearer ${session.access_token}`,
+            },
           },
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`
-          }
-        });
+        );
 
         if (!error && data && data.success) {
-          console.log('✅ Cálculo paramétrico concluído com sucesso!');
-          console.log(`💰 Custo: R$ ${data.custo_estimado.toLocaleString('pt-BR')}`);
-          
+          console.log("✅ Cálculo paramétrico concluído com sucesso!");
+          console.log(
+            `💰 Custo: R$ ${data.custo_estimado.toLocaleString("pt-BR")}`,
+          );
+
           // 📊 Track orçamento gerado
-          await analytics.trackAIUsage('orcamento', {
+          await analytics.trackAIUsage("orcamento", {
             orcamento_id: request.orcamento_id,
             custo_estimado: data.custo_estimado,
             custo_m2: data.custo_m2,
             itens_inseridos: data.itens_inseridos,
             tempo_calculo_ms: data.estatisticas?.tempo_calculo_ms,
-            versao_funcao: '9.0.0',
-            forcar_recalculo: request.forcar_recalculo
+            versao_funcao: "9.0.0",
+            forcar_recalculo: request.forcar_recalculo,
           });
-          
+
           return {
             success: true,
             orcamento: data.orcamento || {
               id: data.orcamento_id,
               custo_estimado: data.custo_estimado,
-              custo_m2: data.custo_m2
+              custo_m2: data.custo_m2,
             },
             itens: data.itens || [],
             tempo_calculo_ms: data.estatisticas?.tempo_calculo_ms || 0,
@@ -403,46 +508,52 @@ export const calculoOrcamentoApi = {
               ...data.debug,
               fonte_dados: "orcamento_parametrico",
               versao: "9.0.0",
-              total_etapas: data.composicao_detalhada?.resumo_etapas?.length || 0,
-        percentual_mao_obra: data.composicao_detalhada?.percentual_mao_obra || 0,
-        percentual_material: data.composicao_detalhada?.percentual_material || 0,
-        composicao_detalhada: null // Funcionalidade removida
-            }
+              total_etapas: data.composicao_detalhada?.resumo_etapas?.length ||
+                0,
+              percentual_mao_obra:
+                data.composicao_detalhada?.percentual_mao_obra || 0,
+              percentual_material:
+                data.composicao_detalhada?.percentual_material || 0,
+              composicao_detalhada: null, // Funcionalidade removida
+            },
           };
         }
 
-        console.warn('Edge Function falhou, tentando fallback...');
+        console.warn("Edge Function falhou, tentando fallback...");
       } catch (v9Error) {
-        console.warn('Edge Function não disponível, usando fallback:', v9Error);
+        console.warn("Edge Function não disponível, usando fallback:", v9Error);
       }
 
       // FALLBACK: Usar ai-calculate-budget (função estável)
-      console.log('Usando Edge Function fallback (ai-calculate-budget)...');
-      
-      const { data, error } = await supabase.functions.invoke('ai-calculate-budget', {
-        body: {
-          orcamento_id: request.orcamento_id,
-          forcar_recalculo: request.forcar_recalculo || false
+      console.log("Usando Edge Function fallback (ai-calculate-budget)...");
+
+      const { data, error } = await supabase.functions.invoke(
+        "ai-calculate-budget",
+        {
+          body: {
+            orcamento_id: request.orcamento_id,
+            forcar_recalculo: request.forcar_recalculo || false,
+          },
+          headers: {
+            "Authorization": `Bearer ${session.access_token}`,
+          },
         },
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
+      );
 
       if (error) {
-        console.error('❌ Erro Edge Function fallback:', error);
+        console.error("❌ Erro Edge Function fallback:", error);
         throw new Error(`Erro no cálculo: ${error.message}`);
       }
 
       if (!data || !data.success) {
-        throw new Error(data?.error || 'Erro desconhecido no cálculo');
+        throw new Error(data?.error || "Erro desconhecido no cálculo");
       }
 
-      console.log('✅ Cálculo fallback concluído:', {
+      console.log("✅ Cálculo fallback concluído:", {
         custoEstimado: data.custo_estimado,
         itensInseridos: data.itens?.length || 0,
-        versao: data.debug?.versao || 'fallback',
-        tempoMs: data.estatisticas?.tempo_calculo_ms
+        versao: data.debug?.versao || "fallback",
+        tempoMs: data.estatisticas?.tempo_calculo_ms,
       });
 
       return {
@@ -450,18 +561,21 @@ export const calculoOrcamentoApi = {
         orcamento: data.orcamento || {
           id: data.orcamento_id,
           custo_estimado: data.custo_estimado,
-          custo_m2: data.custo_m2
+          custo_m2: data.custo_m2,
         },
         itens: data.itens || [],
         tempo_calculo_ms: data.estatisticas?.tempo_calculo_ms || 0,
         estatisticas: {
           ...data.estatisticas,
           fonte_dados: "fallback_function",
-          versao: data.debug?.versao || "fallback"
-        }
+          versao: data.debug?.versao || "fallback",
+        },
       };
-    } catch (error) {
-      console.error('❌ Erro calculoOrcamentoApi (todas as tentativas falharam):', error);
+    } catch (_error) {
+      console.error(
+        "❌ Erro calculoOrcamentoApi (todas as tentativas falharam):",
+        error,
+      );
       throw error;
     }
   },
@@ -469,14 +583,18 @@ export const calculoOrcamentoApi = {
   /**
    * Recalcula um orçamento existente (usado no frontend)
    */
-  recalcular: async (orcamentoId: string): Promise<CalcularOrcamentoResponse> => {
+  recalcular: async (
+    orcamentoId: string,
+  ): Promise<CalcularOrcamentoResponse> => {
     try {
       return await calculoOrcamentoApi.calcular({
         orcamento_id: orcamentoId,
-        forcar_recalculo: true
+        forcar_recalculo: true,
       });
-    } catch (error) {
-      secureLogger.error("Error in calculoOrcamentoApi.recalcular", error, { orcamentoId });
+    } catch (_error) {
+      secureLogger.error("Error in calculoOrcamentoApi.recalcular", error, {
+        orcamentoId,
+      });
       throw error;
     }
   },
@@ -488,14 +606,16 @@ export const calculoOrcamentoApi = {
     // Validações básicas
     if (!orcamento) return false;
     if (!orcamento.id) return false;
-    if (orcamento.status === 'RASCUNHO') return false;
-    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
-    
+    if (orcamento.status === "RASCUNHO") return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) {
+      return false;
+    }
+
     // Deve ter pelo menos um item
     // Nota: Esta validação será feita no componente que tem acesso aos itens
-    
+
     return true;
-  }
+  },
 };
 
 // ====================================
@@ -518,13 +638,17 @@ export const itensOrcamentoApi = {
         .order("categoria", { ascending: true });
 
       if (error) {
-        secureLogger.error("Failed to fetch itens by orçamento", error, { orcamentoId });
+        secureLogger.error("Failed to fetch itens by orçamento", error, {
+          orcamentoId,
+        });
         throw error;
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in itensOrcamentoApi.getByOrcamento", error, { orcamentoId });
+    } catch (_error) {
+      secureLogger.error("Error in itensOrcamentoApi.getByOrcamento", error, {
+        orcamentoId,
+      });
       throw error;
     }
   },
@@ -532,7 +656,7 @@ export const itensOrcamentoApi = {
   /**
    * Cria um novo item
    */
-  create: async (item: Omit<ItemOrcamento, 'id'>): Promise<ItemOrcamento> => {
+  create: async (item: Omit<ItemOrcamento, "id">): Promise<ItemOrcamento> => {
     try {
       const sanitizedItem = sanitizeFormData(item);
 
@@ -548,7 +672,7 @@ export const itensOrcamentoApi = {
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in itensOrcamentoApi.create", error);
       throw error;
     }
@@ -557,9 +681,11 @@ export const itensOrcamentoApi = {
   /**
    * Cria múltiplos itens de uma vez
    */
-  createMultiple: async (itens: Omit<ItemOrcamento, 'id'>[]): Promise<ItemOrcamento[]> => {
+  createMultiple: async (
+    itens: Omit<ItemOrcamento, "id">[],
+  ): Promise<ItemOrcamento[]> => {
     try {
-      const sanitizedItens = itens.map(item => sanitizeFormData(item));
+      const sanitizedItens = itens.map((item) => sanitizeFormData(item));
 
       const { data, error } = await supabase
         .from("itens_orcamento")
@@ -572,7 +698,7 @@ export const itensOrcamentoApi = {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in itensOrcamentoApi.createMultiple", error);
       throw error;
     }
@@ -581,7 +707,10 @@ export const itensOrcamentoApi = {
   /**
    * Atualiza um item
    */
-  update: async (id: string, item: Partial<ItemOrcamento>): Promise<ItemOrcamento> => {
+  update: async (
+    id: string,
+    item: Partial<ItemOrcamento>,
+  ): Promise<ItemOrcamento> => {
     try {
       const sanitizedItem = sanitizeFormData(item);
 
@@ -593,13 +722,17 @@ export const itensOrcamentoApi = {
         .single();
 
       if (error) {
-        secureLogger.error("Failed to update item orçamento", error, { itemId: id });
+        secureLogger.error("Failed to update item orçamento", error, {
+          itemId: id,
+        });
         throw error;
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in itensOrcamentoApi.update", error, { itemId: id });
+    } catch (_error) {
+      secureLogger.error("Error in itensOrcamentoApi.update", error, {
+        itemId: id,
+      });
       throw error;
     }
   },
@@ -615,13 +748,17 @@ export const itensOrcamentoApi = {
         .eq("id", id);
 
       if (error) {
-        secureLogger.error("Failed to delete item orçamento", error, { itemId: id });
+        secureLogger.error("Failed to delete item orçamento", error, {
+          itemId: id,
+        });
         throw error;
       }
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in itensOrcamentoApi.delete", error, { itemId: id });
+    } catch (_error) {
+      secureLogger.error("Error in itensOrcamentoApi.delete", error, {
+        itemId: id,
+      });
       throw error;
     }
   },
@@ -633,14 +770,16 @@ export const itensOrcamentoApi = {
     // Validações básicas
     if (!orcamento) return false;
     if (!orcamento.id) return false;
-    if (orcamento.status === 'RASCUNHO') return false;
-    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
-    
+    if (orcamento.status === "RASCUNHO") return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) {
+      return false;
+    }
+
     // Deve ter pelo menos um item
     // Nota: Esta validação será feita no componente que tem acesso aos itens
-    
+
     return true;
-  }
+  },
 };
 
 // ====================================
@@ -658,7 +797,7 @@ export const baseCustosRegionaisApi = {
     estado: string,
     cidade: string,
     tipoObra: TipoObra,
-    padraoObra: PadraoObra
+    padraoObra: PadraoObra,
   ): Promise<BaseCustoRegional | null> => {
     try {
       const { data, error } = await supabase
@@ -675,16 +814,26 @@ export const baseCustosRegionaisApi = {
 
       if (error) {
         secureLogger.error("Failed to fetch base custo by criteria", error, {
-          estado, cidade, tipoObra, padraoObra
+          estado,
+          cidade,
+          tipoObra,
+          padraoObra,
         });
         throw error;
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in baseCustosRegionaisApi.getByCriteria", error, {
-        estado, cidade, tipoObra, padraoObra
-      });
+    } catch (_error) {
+      secureLogger.error(
+        "Error in baseCustosRegionaisApi.getByCriteria",
+        error,
+        {
+          estado,
+          cidade,
+          tipoObra,
+          padraoObra,
+        },
+      );
       throw error;
     }
   },
@@ -706,7 +855,7 @@ export const baseCustosRegionaisApi = {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in baseCustosRegionaisApi.getAll", error);
       throw error;
     }
@@ -719,14 +868,16 @@ export const baseCustosRegionaisApi = {
     // Validações básicas
     if (!orcamento) return false;
     if (!orcamento.id) return false;
-    if (orcamento.status === 'RASCUNHO') return false;
-    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
-    
+    if (orcamento.status === "RASCUNHO") return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) {
+      return false;
+    }
+
     // Deve ter pelo menos um item
     // Nota: Esta validação será feita no componente que tem acesso aos itens
-    
+
     return true;
-  }
+  },
 };
 
 // ====================================
@@ -742,7 +893,7 @@ export const coeficientesTecnicosApi = {
    */
   getByTipoEPadrao: async (
     tipoObra: TipoObra,
-    padraoObra: PadraoObra
+    padraoObra: PadraoObra,
   ): Promise<CoeficienteTecnico[]> => {
     try {
       const { data, error } = await supabase
@@ -754,17 +905,27 @@ export const coeficientesTecnicosApi = {
         .order("categoria", { ascending: true });
 
       if (error) {
-        secureLogger.error("Failed to fetch coeficientes by tipo/padrão", error, {
-          tipoObra, padraoObra
-        });
+        secureLogger.error(
+          "Failed to fetch coeficientes by tipo/padrão",
+          error,
+          {
+            tipoObra,
+            padraoObra,
+          },
+        );
         throw error;
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in coeficientesTecnicosApi.getByTipoEPadrao", error, {
-        tipoObra, padraoObra
-      });
+    } catch (_error) {
+      secureLogger.error(
+        "Error in coeficientesTecnicosApi.getByTipoEPadrao",
+        error,
+        {
+          tipoObra,
+          padraoObra,
+        },
+      );
       throw error;
     }
   },
@@ -776,14 +937,16 @@ export const coeficientesTecnicosApi = {
     // Validações básicas
     if (!orcamento) return false;
     if (!orcamento.id) return false;
-    if (orcamento.status === 'RASCUNHO') return false;
-    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
-    
+    if (orcamento.status === "RASCUNHO") return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) {
+      return false;
+    }
+
     // Deve ter pelo menos um item
     // Nota: Esta validação será feita no componente que tem acesso aos itens
-    
+
     return true;
-  }
+  },
 };
 
 // ====================================
@@ -797,7 +960,9 @@ export const comparacoesApi = {
   /**
    * Cria uma nova comparação
    */
-  create: async (comparacao: Omit<ComparacaoOrcamentoReal, 'id'>): Promise<ComparacaoOrcamentoReal> => {
+  create: async (
+    comparacao: Omit<ComparacaoOrcamentoReal, "id">,
+  ): Promise<ComparacaoOrcamentoReal> => {
     try {
       const sanitizedComparacao = sanitizeFormData(comparacao);
 
@@ -813,7 +978,7 @@ export const comparacoesApi = {
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in comparacoesApi.create", error);
       throw error;
     }
@@ -831,13 +996,17 @@ export const comparacoesApi = {
         .order("data_analise", { ascending: false });
 
       if (error) {
-        secureLogger.error("Failed to fetch comparações by obra", error, { obraId });
+        secureLogger.error("Failed to fetch comparações by obra", error, {
+          obraId,
+        });
         throw error;
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in comparacoesApi.getByObra", error, { obraId });
+    } catch (_error) {
+      secureLogger.error("Error in comparacoesApi.getByObra", error, {
+        obraId,
+      });
       throw error;
     }
   },
@@ -849,14 +1018,16 @@ export const comparacoesApi = {
     // Validações básicas
     if (!orcamento) return false;
     if (!orcamento.id) return false;
-    if (orcamento.status === 'RASCUNHO') return false;
-    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) return false;
-    
+    if (orcamento.status === "RASCUNHO") return false;
+    if (!orcamento.custo_estimado || orcamento.custo_estimado <= 0) {
+      return false;
+    }
+
     // Deve ter pelo menos um item
     // Nota: Esta validação será feita no componente que tem acesso aos itens
-    
+
     return true;
-  }
+  },
 };
 
 // ====================================
@@ -871,9 +1042,9 @@ export const orcamentoUtils = {
    * Formata valor monetário para exibição
    */
   formatarValor: (valor: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(valor);
   },
 
@@ -889,13 +1060,13 @@ export const orcamentoUtils = {
    * Converte um orçamento paramétrico em despesas para uma obra
    */
   converterParaDespesas: async (
-    orcamentoId: string, 
-    obraId: string, 
-    configuracao?: Record<string, unknown>
+    orcamentoId: string,
+    obraId: string,
+    configuracao?: Record<string, unknown>,
   ): Promise<ApiResponse<ConversaoOrcamentoDespesaResult>> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         throw new Error("Usuário não autenticado");
       }
@@ -914,7 +1085,9 @@ export const orcamentoUtils = {
       // Verificar se o orçamento existe e pode ser convertido
       const orcamento = await orcamentosParametricosApi.getById(orcamentoId);
       if (!orcamentosParametricosApi.podeConverterEmObra(orcamento)) {
-        throw new Error("Orçamento não pode ser convertido. Verifique se está concluído e tem custo estimado.");
+        throw new Error(
+          "Orçamento não pode ser convertido. Verifique se está concluído e tem custo estimado.",
+        );
       }
 
       // Criar registro de conversão
@@ -927,7 +1100,7 @@ export const orcamentoUtils = {
           tenant_id: profile.tenant_id,
           status: "PROCESSANDO",
           configuracao_mapeamento: configuracao || {},
-          valor_total_orcamento: orcamento.custo_estimado
+          valor_total_orcamento: orcamento.custo_estimado,
         })
         .select()
         .single();
@@ -938,7 +1111,7 @@ export const orcamentoUtils = {
 
       // Buscar itens do orçamento
       const itens = await itensOrcamentoApi.getByOrcamento(orcamentoId);
-      
+
       if (!itens || itens.length === 0) {
         throw new Error("Nenhum item encontrado no orçamento");
       }
@@ -950,7 +1123,9 @@ export const orcamentoUtils = {
       for (const item of itens) {
         try {
           // Mapear categoria do orçamento para categoria de despesa
-          const categoriaMapeada = mapearCategoriaOrcamentoParaDespesa(item.categoria);
+          const categoriaMapeada = mapearCategoriaOrcamentoParaDespesa(
+            item.categoria,
+          );
           const etapaMapeada = mapearEtapaOrcamentoParaDespesa(item.etapa);
           const insumoMapeado = mapearInsumoOrcamentoParaDespesa(item.insumo);
 
@@ -959,7 +1134,7 @@ export const orcamentoUtils = {
             usuario_id: user.id,
             tenant_id: profile.tenant_id,
             descricao: `${item.descricao} (Convertido do orçamento)`,
-            data_despesa: new Date().toISOString().split('T')[0],
+            data_despesa: new Date().toISOString().split("T")[0],
             categoria: categoriaMapeada,
             etapa: etapaMapeada,
             insumo: insumoMapeado,
@@ -968,7 +1143,8 @@ export const orcamentoUtils = {
             valor_unitario: item.valor_unitario_base,
             custo: item.quantidade_estimada * item.valor_unitario_base,
             pago: false,
-            observacoes: `Convertido do orçamento paramétrico. Item original: ${item.id}`
+            observacoes:
+              `Convertido do orçamento paramétrico. Item original: ${item.id}`,
           };
 
           const { data: despesa, error: despesaError } = await supabase
@@ -981,23 +1157,26 @@ export const orcamentoUtils = {
             erros.push({
               item_id: item.id,
               erro: despesaError.message,
-              item_descricao: item.descricao
+              item_descricao: item.descricao,
             });
           } else {
             despesasCriadas.push(despesa);
           }
-        } catch (error) {
+        } catch (_error) {
           erros.push({
             item_id: item.id,
-            erro: error instanceof Error ? error.message : 'Erro desconhecido',
-            item_descricao: item.descricao
+            erro: error instanceof Error ? error.message : "Erro desconhecido",
+            item_descricao: item.descricao,
           });
         }
       }
 
       // Atualizar registro de conversão
-      const valorTotalDespesas = despesasCriadas.reduce((total, despesa) => total + despesa.custo, 0);
-      
+      const valorTotalDespesas = despesasCriadas.reduce(
+        (total, despesa) => total + despesa.custo,
+        0,
+      );
+
       const { error: updateError } = await supabase
         .from("conversoes_orcamento_despesa")
         .update({
@@ -1005,7 +1184,7 @@ export const orcamentoUtils = {
           total_itens_orcamento: itens.length,
           total_despesas_criadas: despesasCriadas.length,
           valor_total_despesas: valorTotalDespesas,
-          erros_processamento: erros
+          erros_processamento: erros,
         })
         .eq("id", conversao.id);
 
@@ -1019,7 +1198,7 @@ export const orcamentoUtils = {
         obra_id: obraId,
         itens_processados: itens.length,
         despesas_criadas: despesasCriadas.length,
-        erros: erros.length
+        erros: erros.length,
       });
 
       return {
@@ -1029,16 +1208,18 @@ export const orcamentoUtils = {
           despesas_criadas: despesasCriadas.length,
           total_itens: itens.length,
           valor_total: valorTotalDespesas,
-          erros: erros
+          erros: erros,
         },
-        message: `Conversão concluída: ${despesasCriadas.length}/${itens.length} itens convertidos`
+        message:
+          `Conversão concluída: ${despesasCriadas.length}/${itens.length} itens convertidos`,
       };
-
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Erro na conversão de orçamento para despesas", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Erro desconhecido na conversão"
+        error: error instanceof Error
+          ? error.message
+          : "Erro desconhecido na conversão",
       };
     }
   },
@@ -1046,7 +1227,9 @@ export const orcamentoUtils = {
   /**
    * Lista conversões de orçamento para despesas
    */
-  listarConversoes: async (filtros: { obra_id?: string; status?: string } = {}): Promise<ApiResponse<ConversaoOrcamentoDespesa[]>> => {
+  listarConversoes: async (
+    filtros: { obra_id?: string; status?: string } = {},
+  ): Promise<ApiResponse<ConversaoOrcamentoDespesa[]>> => {
     try {
       let query = supabase
         .from("conversoes_orcamento_despesa")
@@ -1073,17 +1256,18 @@ export const orcamentoUtils = {
 
       return {
         success: true,
-        data: data || []
+        data: data || [],
       };
-
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Erro ao listar conversões", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Erro ao listar conversões"
+        error: error instanceof Error
+          ? error.message
+          : "Erro ao listar conversões",
       };
     }
-  }
+  },
 };
 
 // ====================================
@@ -1097,20 +1281,22 @@ export const orcamentoUtils = {
 /**
  * Mapeia categoria do orçamento para categoria de despesa
  */
-function mapearCategoriaOrcamentoParaDespesa(categoriaOrcamento: string): string {
+function mapearCategoriaOrcamentoParaDespesa(
+  categoriaOrcamento: string,
+): string {
   const mapeamento: Record<string, string> = {
-    'MATERIAL_CONSTRUCAO': 'material',
-    'MAO_DE_OBRA': 'mao_de_obra',
-    'ALUGUEL_EQUIPAMENTOS': 'equipamento',
-    'TRANSPORTE_FRETE': 'servico',
-    'TAXAS_LICENCAS': 'servico',
-    'SERVICOS_TERCEIRIZADOS': 'servico',
-    'ADMINISTRATIVO': 'outros',
-    'IMPREVISTOS': 'outros',
-    'OUTROS': 'outros'
+    "MATERIAL_CONSTRUCAO": "material",
+    "MAO_DE_OBRA": "mao_de_obra",
+    "ALUGUEL_EQUIPAMENTOS": "equipamento",
+    "TRANSPORTE_FRETE": "servico",
+    "TAXAS_LICENCAS": "servico",
+    "SERVICOS_TERCEIRIZADOS": "servico",
+    "ADMINISTRATIVO": "outros",
+    "IMPREVISTOS": "outros",
+    "OUTROS": "outros",
   };
-  
-  return mapeamento[categoriaOrcamento] || 'outros';
+
+  return mapeamento[categoriaOrcamento] || "outros";
 }
 
 /**
@@ -1118,27 +1304,27 @@ function mapearCategoriaOrcamentoParaDespesa(categoriaOrcamento: string): string
  */
 function mapearEtapaOrcamentoParaDespesa(etapaOrcamento: string): string {
   const mapeamento: Record<string, string> = {
-    'PLANEJAMENTO': 'outros',
-    'DEMOLICAO': 'outros',
-    'TERRAPLANAGEM': 'fundacao',
-    'FUNDACAO': 'fundacao',
-    'ESTRUTURA': 'estrutura',
-    'ALVENARIA': 'alvenaria',
-    'COBERTURA': 'cobertura',
-    'INSTALACOES_ELETRICAS': 'instalacoes',
-    'INSTALACOES_HIDRAULICAS': 'instalacoes',
-    'REVESTIMENTOS_INTERNOS': 'acabamento',
-    'REVESTIMENTOS_EXTERNOS': 'acabamento',
-    'PINTURA': 'acabamento',
-    'ACABAMENTOS': 'acabamento',
-    'PAISAGISMO': 'outros',
-    'LIMPEZA_POS_OBRA': 'outros',
-    'ENTREGA_VISTORIA': 'outros',
-    'DOCUMENTACAO': 'outros',
-    'OUTROS': 'outros'
+    "PLANEJAMENTO": "outros",
+    "DEMOLICAO": "outros",
+    "TERRAPLANAGEM": "fundacao",
+    "FUNDACAO": "fundacao",
+    "ESTRUTURA": "estrutura",
+    "ALVENARIA": "alvenaria",
+    "COBERTURA": "cobertura",
+    "INSTALACOES_ELETRICAS": "instalacoes",
+    "INSTALACOES_HIDRAULICAS": "instalacoes",
+    "REVESTIMENTOS_INTERNOS": "acabamento",
+    "REVESTIMENTOS_EXTERNOS": "acabamento",
+    "PINTURA": "acabamento",
+    "ACABAMENTOS": "acabamento",
+    "PAISAGISMO": "outros",
+    "LIMPEZA_POS_OBRA": "outros",
+    "ENTREGA_VISTORIA": "outros",
+    "DOCUMENTACAO": "outros",
+    "OUTROS": "outros",
   };
-  
-  return mapeamento[etapaOrcamento] || 'outros';
+
+  return mapeamento[etapaOrcamento] || "outros";
 }
 
 /**
@@ -1148,18 +1334,28 @@ function mapearInsumoOrcamentoParaDespesa(insumoOrcamento: string): string {
   // Como o campo insumo no orçamento é string livre e na despesa é enum,
   // vamos fazer um mapeamento básico por palavras-chave
   const insumoLower = insumoOrcamento.toLowerCase();
-  
-  if (insumoLower.includes('cimento')) return 'cimento';
-  if (insumoLower.includes('areia')) return 'areia';
-  if (insumoLower.includes('brita')) return 'brita';
-  if (insumoLower.includes('ferro') || insumoLower.includes('aço')) return 'ferro';
-  if (insumoLower.includes('madeira')) return 'madeira';
-  if (insumoLower.includes('ceramica') || insumoLower.includes('azulejo')) return 'ceramica';
-  if (insumoLower.includes('tinta')) return 'tinta';
-  if (insumoLower.includes('eletric') || insumoLower.includes('fio') || insumoLower.includes('cabo')) return 'eletrico';
-  if (insumoLower.includes('hidraulic') || insumoLower.includes('cano') || insumoLower.includes('tubo')) return 'hidraulico';
-  
-  return 'outros';
+
+  if (insumoLower.includes("cimento")) return "cimento";
+  if (insumoLower.includes("areia")) return "areia";
+  if (insumoLower.includes("brita")) return "brita";
+  if (insumoLower.includes("ferro") || insumoLower.includes("aço")) {
+    return "ferro";
+  }
+  if (insumoLower.includes("madeira")) return "madeira";
+  if (insumoLower.includes("ceramica") || insumoLower.includes("azulejo")) {
+    return "ceramica";
+  }
+  if (insumoLower.includes("tinta")) return "tinta";
+  if (
+    insumoLower.includes("eletric") || insumoLower.includes("fio") ||
+    insumoLower.includes("cabo")
+  ) return "eletrico";
+  if (
+    insumoLower.includes("hidraulic") || insumoLower.includes("cano") ||
+    insumoLower.includes("tubo")
+  ) return "hidraulico";
+
+  return "outros";
 }
 
 // ====================================
@@ -1173,5 +1369,5 @@ export default {
   baseCustosRegionaisApi,
   coeficientesTecnicosApi,
   comparacoesApi,
-  orcamentoUtils
+  orcamentoUtils,
 };

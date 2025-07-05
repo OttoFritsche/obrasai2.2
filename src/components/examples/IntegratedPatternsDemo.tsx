@@ -13,28 +13,28 @@
  * @version 1.0.0
  */
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { motion } from 'framer-motion';
 import {
-  Sparkles,
-  Zap,
+  ArrowRight,
   BarChart3,
   Bot,
+  CheckCircle,
+  Code,
   FormInput,
   Layers,
-  CheckCircle,
-  ArrowRight,
-  Code,
-  Lightbulb
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useAsyncOperation } from '@/hooks/useAsyncOperation';
-import { useLoading } from '@/contexts/LoadingContext';
+  Lightbulb,
+  Sparkles,
+  Zap} from 'lucide-react';
+import React, { useState } from 'react';
+
 import LoadingMetricsDashboard from '@/components/dashboard/LoadingMetricsDashboard';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useLoading } from '@/contexts/LoadingContext';
+import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 
 interface PatternExample {
   id: string;

@@ -8,7 +8,26 @@
  * @version 1.0.0
  */
 
-import React, { useState, useMemo } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { 
+  Activity,
+  AlertCircle,
+  Calendar, 
+  CheckCircle2,
+  Clock,
+  FileText, 
+  Filter,
+  History, 
+  Info,
+  RefreshCw,
+  TrendingUp,
+  XCircle} from "lucide-react";
+import React, { useMemo,useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -17,32 +36,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  History, 
-  Calendar, 
-  FileText, 
-  Activity,
-  Filter,
-  TrendingUp,
-  Clock,
-  Info,
-  AlertCircle,
-  CheckCircle2,
-  XCircle,
-  RefreshCw
-} from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
 import { useSinapiHistorico } from "@/hooks/useSinapiManutencoes";
-import { ManutencaoIndicator } from "./ManutencaoIndicator";
 import { cn } from "@/lib/utils";
+
+import { ManutencaoIndicator } from "./ManutencaoIndicator";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES

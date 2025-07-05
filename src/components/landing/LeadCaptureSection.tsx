@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Rocket,
-  Users,
-  Calculator,
-  Clock,
-  CheckCircle,
-  X,
   ArrowRight,
+  Calculator,
+  CheckCircle,
+  Clock,
+  Rocket,
   Star,
-  TrendingUp
-} from 'lucide-react';
+  TrendingUp,
+  Users,
+  X} from 'lucide-react';
+import React, { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import LeadCaptureForm from './LeadCaptureForm';
 
 const LeadCaptureSection = () => {

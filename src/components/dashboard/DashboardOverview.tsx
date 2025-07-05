@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrencyBR } from "@/lib/i18n";
-import { useObras } from "@/hooks/useObras";
 import { useDespesas } from "@/hooks/useDespesas";
 import { useNotasFiscais } from "@/hooks/useNotasFiscais";
+import { useObras } from "@/hooks/useObras";
+import { formatCurrencyBR } from "@/lib/i18n";
 
 export const DashboardOverview = () => {
   const { obras } = useObras();

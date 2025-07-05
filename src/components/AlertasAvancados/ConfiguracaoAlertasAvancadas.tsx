@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  AlertTriangle,
+  Bell, 
+  CheckCircle,
+  Info,
+  Mail, 
+  Save, 
+  Settings, 
+  TestTube, 
+  Webhook, 
+  X} from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import type { ConfiguracaoAlertaAvancada } from '@/hooks/useAdvancedAlerts';
 import { useAdvancedAlerts } from '@/hooks/useAdvancedAlerts';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Settings, 
-  Mail, 
-  Bell, 
-  Webhook, 
-  TestTube, 
-  Save, 
-  X,
-  AlertTriangle,
-  Info,
-  CheckCircle
-} from 'lucide-react';
 
 interface ConfiguracaoAlertasAvancadasProps {
   obraId?: string;

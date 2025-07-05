@@ -1,28 +1,26 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
-  FileText, 
-  Users, 
+  AlertCircle,
   Calculator, 
   Calendar,
-  Download,
-  Send,
-  Eye,
-  Clock,
   CheckCircle,
-  AlertCircle,
-  Edit
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+  Clock,
+  Download,
+  Edit,
+  Eye,
+  FileText, 
+  Send,
+  Users} from "lucide-react";
+import { useState } from "react";
+import { useNavigate,useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { useContrato, useGerarPDF, useEnviarAssinatura } from "@/hooks/useContratos";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useContrato, useEnviarAssinatura,useGerarPDF } from "@/hooks/useContratos";
 import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 
 const ContratoDetalhe = () => {
@@ -67,7 +65,7 @@ const ContratoDetalhe = () => {
       
       // Recarregar dados do contrato para mostrar o novo documento
       refetch();
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao gerar PDF:", error);
       toast.error("Erro ao gerar documento");
     }
@@ -85,7 +83,7 @@ const ContratoDetalhe = () => {
         telefone: contrato?.contratado_telefone 
       });
       toast.success("Contrato enviado para assinatura!");
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao enviar para assinatura:", error);
       toast.error("Erro ao enviar contrato");
     }

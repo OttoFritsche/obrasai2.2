@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-07-02T16:33:07.285Z",
+  "summary": {
+    "totalTests": 4,
+    "passedTests": 0,
+    "failedTests": 4,
+    "criticalViolations": 0,
+    "seriousViolations": 0,
+    "moderateViolations": 0,
+    "minorViolations": 0,
+    "coveragePercentage": 0
+  },
+  "results": [
+    {
+      "testFile": "Header.accessibility.test.tsx",
+      "status": "failed",
+      "violations": [],
+      "duration": 2902
+    },
+    {
+      "testFile": "Forms.accessibility.test.tsx",
+      "status": "failed",
+      "violations": [],
+      "duration": 3488
+    },
+    {
+      "testFile": "Images.accessibility.test.tsx",
+      "status": "failed",
+      "violations": [],
+      "duration": 5495
+    },
+    {
+      "testFile": "LandingPage.accessibility.test.tsx",
+      "status": "failed",
+      "violations": [],
+      "duration": 3506
+    }
+  ],
+  "recommendations": [
+    "Aumentar cobertura de testes de acessibilidade para pelo menos 80%",
+    "Implementar testes manuais de navegação por teclado",
+    "Testar com screen readers (NVDA, JAWS, VoiceOver)",
+    "Validar contraste de cores com ferramentas como Lighthouse",
+    "Adicionar skip links para navegação rápida",
+    "Implementar live regions para anúncios dinâmicos",
+    "Treinar equipe em práticas de acessibilidade",
+    "Integrar testes de acessibilidade no pipeline CI/CD"
+  ]
+}

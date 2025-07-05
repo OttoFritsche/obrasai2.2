@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useCallback,useEffect, useState } from 'react';
+
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface AlertaDesvio {
   id: string;
@@ -130,7 +131,7 @@ export const useAlertasDesvio = () => {
       setAlertas(alertasList);
       setResumo(calcularResumo(alertasList));
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao carregar alertas:', error);
       toast({
         title: "Erro",
@@ -155,7 +156,7 @@ export const useAlertasDesvio = () => {
       if (error) throw error;
       
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.error(`Erro ao calcular desvio para obra ${obraId}:`, error);
       throw error;
     }
@@ -207,7 +208,7 @@ export const useAlertasDesvio = () => {
               erros++;
               return { obra: obra.nome, sucesso: false, erro: resultado?.error || 'Erro desconhecido' };
             }
-          } catch (error) {
+          } catch (_error) {
             erros++;
             return { obra: obra.nome, sucesso: false, erro: error instanceof Error ? error.message : 'Erro desconhecido' };
           }
@@ -236,7 +237,7 @@ export const useAlertasDesvio = () => {
       await carregarAlertas();
       
       return { sucessos, erros, resultados };
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao calcular desvios:', error);
       toast({
         title: "Erro",
@@ -284,7 +285,7 @@ export const useAlertasDesvio = () => {
         description: `Alerta marcado como ${statusLabels[novoStatus]}.`,
       });
       
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao atualizar status:', error);
       toast({
         title: "Erro",

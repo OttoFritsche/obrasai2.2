@@ -188,7 +188,7 @@ export const aiInsights = {
 
       return data.response || 'Não consegui gerar uma resposta adequada.'
 
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro no chat:', error)
       return this.generateSmartFallbackResponse(userMessage, metrics)
     }

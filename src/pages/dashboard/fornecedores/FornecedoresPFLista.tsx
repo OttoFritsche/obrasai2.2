@@ -1,25 +1,19 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
 import { 
-  Pencil, 
-  Trash2, 
-  User, 
-  Plus, 
-  Users,
+  AlertTriangle,
   Building2,
   Loader2,
-  AlertTriangle
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+  Pencil, 
+  Plus, 
+  Trash2, 
+  User, 
+  Users} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,11 +24,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTable } from "@/components/ui/data-table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fornecedoresPFApi } from "@/services/api";
 import { formatDateBR } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { fornecedoresPFApi } from "@/services/api";
 
 interface FornecedorPF {
   id: string;
@@ -98,7 +97,7 @@ const FornecedoresPFLista = () => {
       queryClient.invalidateQueries(["fornecedores_pf", validTenantId]);
       setSelectedFornecedores([]);
       setShowBulkDeleteDialog(false);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting fornecedores:", error);
     }
   };

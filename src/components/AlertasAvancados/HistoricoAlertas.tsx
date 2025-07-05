@@ -1,23 +1,23 @@
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { 
+  AlertTriangle, 
+  Clock, 
+  FileDown,
+  Filter, 
+  RefreshCw,
+  Search} from 'lucide-react';
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { HistoricoAlerta } from '@/hooks/useAdvancedAlerts';
 import { formatCurrency } from '@/lib/formatters';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { 
-  Clock, 
-  Filter, 
-  Search, 
-  AlertTriangle, 
-  RefreshCw,
-  FileDown
-} from 'lucide-react';
 
 interface HistoricoAlertasProps {
   historico: HistoricoAlerta[];

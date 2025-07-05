@@ -1,7 +1,8 @@
-import { AlertCircle, AlertTriangle, TrendingUp, CheckCircle2, Info, Lightbulb, BarChart3 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { AlertCircle, AlertTriangle, BarChart3,CheckCircle2, Info, Lightbulb, TrendingUp } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateBR } from "@/lib/i18n";
 
 interface InsightData {

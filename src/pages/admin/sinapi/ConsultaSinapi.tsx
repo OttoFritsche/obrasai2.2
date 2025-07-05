@@ -8,24 +8,24 @@
  * @version 1.0.0
  */
 
-import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
+  Activity,
+  AlertCircle,
+  BarChart3,
+  Clock, 
   Database, 
+  FileText,
+  Info,
   Search, 
   TrendingUp, 
-  Clock, 
-  AlertCircle,
-  Info,
-  FileText,
-  Activity,
-  BarChart3,
   Wrench
 } from "lucide-react";
+import React from "react";
 
 import ConsultaAvancada from "@/components/sinapi/ConsultaAvancada";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useSinapiEstatisticas } from "@/hooks/useSinapiManutencoes";
 
 // ====================================

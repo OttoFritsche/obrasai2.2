@@ -10,6 +10,7 @@
 
 import { useCallback } from "react";
 import { toast } from "sonner";
+
 import { useSinapiValidacao } from "./useSinapiManutencoes";
 
 // ====================================
@@ -60,7 +61,7 @@ export const useOrcamentoValidation = () => {
         status: 'ativo' as const, // Será substituído por dados reais
         validacao: validacoes[index]
       }));
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro na validação de códigos:', error);
       toast.error('Erro ao validar códigos SINAPI');
       return [];
@@ -126,7 +127,7 @@ export const useOrcamentoValidation = () => {
       }
 
       return { codigosValidados, relatorio };
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro na validação completa:', error);
       toast.error('Falha na validação dos códigos');
       

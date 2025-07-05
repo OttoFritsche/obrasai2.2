@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Bell, 
-  AlertTriangle, 
-  TrendingUp, 
-  TrendingDown, 
-  RefreshCw, 
-  Eye, 
-  Check, 
-  X,
   Activity,
-  BarChart3
-} from 'lucide-react';
+  AlertTriangle, 
+  BarChart3,
+  Bell, 
+  Check, 
+  Eye, 
+  RefreshCw, 
+  TrendingDown, 
+  TrendingUp, 
+  X} from 'lucide-react';
+import React, { memo,useCallback, useEffect, useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/formatters';
@@ -60,7 +60,7 @@ interface ResumoAlertas {
   critica: number;
 }
 
-const AlertasDesvio: React.FC = () => {
+const AlertasDesvio: React.FC = memo(() => {
   const [alertas, setAlertas] = useState<AlertaDesvio[]>([]);
   const [resumo, setResumo] = useState<ResumoAlertas>({
     total: 0,
@@ -74,7 +74,7 @@ const AlertasDesvio: React.FC = () => {
   const [calculandoDesvios, setCalculandoDesvios] = useState(false);
   const { toast } = useToast();
 
-  const carregarAlertas = async () => {
+  const carregarAlertas = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -114,7 +114,7 @@ const AlertasDesvio: React.FC = () => {
       });
 
       setResumo(novoResumo);
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao carregar alertas:', error);
       toast({
         title: "Erro",
@@ -124,9 +124,9 @@ const AlertasDesvio: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const calcularDesviosTodasObras = async () => {
+  const calcularDesviosTodasObras = useCallback(async () => {
     try {
       setCalculandoDesvios(true);
       
@@ -143,7 +143,7 @@ const AlertasDesvio: React.FC = () => {
 
       // Recarregar alertas após o cálculo
       await carregarAlertas();
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao calcular desvios:', error);
       toast({
         title: "Erro",
@@ -153,9 +153,9 @@ const AlertasDesvio: React.FC = () => {
     } finally {
       setCalculandoDesvios(false);
     }
-  };
+  }, [toast, carregarAlertas]);
 
-  const atualizarStatusAlerta = async (alertaId: string, novoStatus: AlertaDesvio['status']) => {
+  const atualizarStatusAlerta = useCallback(async (alertaId: string, novoStatus: AlertaDesvio['status']) => {
     try {
       const { error } = await supabase
         .from('alertas_desvio')
@@ -174,17 +174,17 @@ const AlertasDesvio: React.FC = () => {
 
       // Recarregar alertas
       await carregarAlertas();
-    } catch (error) {
-      console.error('Erro ao atualizar status:', error);
+    } catch (_error) {
+      console.error('Erro ao atualizar status:', _error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o status do alerta.",
         variant: "destructive",
       });
     }
-  };
+  }, [toast, carregarAlertas]);
 
-  const getBadgeVariant = (severidade: string) => {
+  const getBadgeVariant = useCallback((severidade: string) => {
     switch (severidade) {
       case 'critica': return 'destructive';
       case 'alta': return 'destructive';
@@ -192,17 +192,17 @@ const AlertasDesvio: React.FC = () => {
       case 'baixa': return 'secondary';
       default: return 'default';
     }
-  };
+  }, []);
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = useCallback((status: string) => {
     switch (status) {
       case 'ativo': return <AlertTriangle className="h-4 w-4" />;
       case 'visto': return <Eye className="h-4 w-4" />;
       case 'resolvido': return <Check className="h-4 w-4" />;
-      case 'ignorado': return <X className="h-4 w-4" />;
-      default: return <AlertTriangle className="h-4 w-4" />;
-    }
-  };
+       case 'ignorado': return <X className="h-4 w-4" />;
+       default: return <AlertTriangle className="h-4 w-4" />;
+     }
+   }, []);
 
   useEffect(() => {
     carregarAlertas();
@@ -586,6 +586,8 @@ const AlertasDesvio: React.FC = () => {
       </Tabs>
     </div>
   );
-};
+});
+
+AlertasDesvio.displayName = 'AlertasDesvio';
 
 export default AlertasDesvio;

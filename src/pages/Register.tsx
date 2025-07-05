@@ -1,11 +1,12 @@
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { t } from "@/lib/i18n";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { motion } from "framer-motion";
-import Logo from "@/components/ui/Logo";
+import { Link } from "react-router-dom";
+
 import registerBg from "@/assets/images/4d142594-a29e-4e94-bd77-48cf91ebcfac.png";
+import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import Logo from "@/components/ui/Logo";
+import { t } from "@/lib/i18n";
 
 const Register = () => {
   return (

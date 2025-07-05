@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
-import { Search, Loader2, Filter, X, Info, Target } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Filter, Info, Loader2, Search, Target,X } from 'lucide-react';
+import React, { useCallback,useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
@@ -118,7 +119,7 @@ export function SemanticSearch({
     try {
       const explanation = await explainSinapiResult(result);
       setSelectedResult({ ...result, explanation });
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao explicar resultado:', error);
     } finally {
       setExplainLoading(false);

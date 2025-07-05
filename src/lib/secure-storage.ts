@@ -45,7 +45,7 @@ const encrypt = (data: string): string => {
   try {
     const key = getEncryptionKey();
     return CryptoJS.AES.encrypt(data, key).toString();
-  } catch (error) {
+  } catch (_error) {
     console.error('Encryption failed');
     throw new Error('Failed to encrypt data');
   }
@@ -65,7 +65,7 @@ const decrypt = (encryptedData: string): string => {
     }
     
     return decrypted;
-  } catch (error) {
+  } catch (_error) {
     // Log mais silencioso para evitar spam no console
     if (import.meta.env.DEV) {
       console.warn('Decryption failed - data may be corrupted or from different key');
@@ -99,7 +99,7 @@ export const createSecureStorage = () => ({
       
       // Dados legados não criptografados (migração)
       return encryptedData;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to retrieve secure data');
       return null;
     }
@@ -109,7 +109,7 @@ export const createSecureStorage = () => ({
     try {
       const encryptedData = 'encrypted:' + encrypt(value);
       localStorage.setItem(key, encryptedData);
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to store secure data');
       // Fallback para armazenamento não criptografado em desenvolvimento
       if (import.meta.env.DEV) {

@@ -1,13 +1,11 @@
-import React from 'react';
 import { Settings, Sparkles } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
+import React from 'react';
+import type { UseFormReturn } from 'react-hook-form';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-
+import { Textarea } from '@/components/ui/textarea';
 import { PADRAO_OBRA_LABELS, type WizardCompleto } from '@/lib/validations/orcamento';
 
 interface WizardEtapa4Props {
@@ -54,98 +52,46 @@ export const WizardEtapa4: React.FC<WizardEtapa4Props> = ({ form }) => {
           )}
         />
 
-        {/* Opções Adicionais */}
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 dark:text-gray-100">
-            Incluir no Orçamento:
-          </h4>
-
-          <FormField
-            control={form.control}
-            name="incluir_terreno"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Custo do Terreno
-                  </FormLabel>
-                  <FormDescription>
-                    Incluir estimativa do valor do terreno baseado na região
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="incluir_projeto"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Projeto Arquitetônico
-                  </FormLabel>
-                  <FormDescription>
-                    Incluir custos de projeto arquitetônico e complementares
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="incluir_fundacao"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    Fundação Completa
-                  </FormLabel>
-                  <FormDescription>
-                    Incluir todos os serviços de fundação e estrutura
-                  </FormDescription>
-                </div>
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Observações */}
+        {/* Especificações */}
         <FormField
           control={form.control}
-          name="observacoes"
+          name="especificacoes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Observações Adicionais</FormLabel>
+              <FormLabel>Especificações Técnicas</FormLabel>
               <FormControl>
                 <Textarea 
-                  placeholder="Adicione qualquer informação específica que possa influenciar o orçamento..."
+                  placeholder="Exemplo: Piso em porcelanato 60x60cm, paredes em textura acrílica, forro em gesso com sanca, esquadrias em alumínio branco, portões automáticos, piscina 6x3m com deck"
                   className="min-h-[100px]"
-                  {...field} 
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormDescription>
-                Informações adicionais para personalizar o cálculo do orçamento
+                Descreva materiais, acabamentos e detalhes técnicos específicos da obra
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Parâmetros de Entrada */}
+        <FormField
+          control={form.control}
+          name="parametros_entrada"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Informações Extras</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Exemplo: Obra em condomínio fechado, terreno com declive 15%, necessário muro de arrimo, instalação de ar condicionado split em todos os quartos, sistema de energia solar"
+                  className="min-h-[100px]"
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormDescription>
+                Detalhes sobre localização, condições do terreno e instalações especiais
               </FormDescription>
               <FormMessage />
             </FormItem>

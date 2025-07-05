@@ -1,17 +1,19 @@
-import React, { useEffect } from 'react';
-import { MessageCircle, X, Minimize2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bot, Minimize2, X } from 'lucide-react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+
 import { Button } from '@/components/ui/button';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { AIChatSidebar } from './AIChatSidebar';
 import { getWidgetConfig, shouldShowWidget } from '@/config/aiWidgetConfig';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAIWidget } from '@/contexts/AIWidgetContext';
+
+import { AIChatSidebar } from './AIChatSidebar';
 
 export function AIHelpWidget() {
   const { state, toggleWidget, closeWidget, toggleMinimize, updateConfig } = useAIWidget();
@@ -41,6 +43,7 @@ export function AIHelpWidget() {
       toggleWidget();
     }
   };
+
   return (
     <>
       <motion.div
@@ -55,31 +58,47 @@ export function AIHelpWidget() {
               <Button
                 onClick={handleToggle}
                 className={`
-                  w-14 h-14 rounded-full shadow-lg transition-all duration-300
+                  w-16 h-16 rounded-full shadow-2xl transition-all duration-300
                   ${state.isOpen 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'bg-white hover:bg-gray-50 text-blue-600 border border-blue-200'
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700' 
+                    : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
                   }
-                  hover:scale-105 active:scale-95
+                  hover:scale-110 active:scale-95
                   ${state.unreadCount > 0 ? 'animate-pulse' : ''}
+                  relative overflow-hidden group
                 `}
               >
-                {state.isOpen ? (
-                  state.isMinimized ? <Minimize2 className="h-6 w-6" /> : <X className="h-6 w-6" />
-                ) : (
-                  <>
-                    <MessageCircle className="h-6 w-6" />
-                    {state.unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {state.unreadCount > 9 ? '9+' : state.unreadCount}
-                      </span>
-                    )}
-                  </>
+                {/* Efeito de brilho */}
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                
+                {/* Ícone principal */}
+                <div className="relative flex items-center justify-center">
+                  {state.isOpen ? (
+                    state.isMinimized ? (
+                      <Minimize2 className="h-8 w-8 text-white" />
+                    ) : (
+                      <X className="h-8 w-8 text-white" />
+                    )
+                  ) : (
+                    <>
+                      <Bot className="h-8 w-8 text-white" />
+                      {state.unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-bounce">
+                          {state.unreadCount > 9 ? '9+' : state.unreadCount}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Animação de pulso quando fechado */}
+                {!state.isOpen && (
+                  <div className="absolute inset-0 rounded-full animate-ping bg-blue-400 opacity-20" />
                 )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>{state.isOpen ? 'Fechar ajuda' : 'Ajuda AI'}</p>
+            <TooltipContent side="left" className="font-medium">
+              <p>{state.isOpen ? 'Fechar assistente' : '🤖 Assistente IA ObrasAI'}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -89,6 +108,7 @@ export function AIHelpWidget() {
       <AnimatePresence>
         {state.isOpen && !state.isMinimized && (
           <AIChatSidebar
+            isOpen={state.isOpen}
             config={state.config}
             onClose={closeWidget}
             onToggleMinimize={toggleMinimize}
@@ -98,4 +118,4 @@ export function AIHelpWidget() {
       </AnimatePresence>
     </>
   );
-};
+}

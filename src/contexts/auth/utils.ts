@@ -1,5 +1,7 @@
-import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
+
+import { supabase } from "@/integrations/supabase/client";
+
 import type { Subscription } from "./types";
 
 // Cache simples para dados de perfil - usando unknown ao invés de any
@@ -124,7 +126,7 @@ export const fetchUserSubscription = async (userId: string): Promise<Subscriptio
     };
     
     return subscription;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

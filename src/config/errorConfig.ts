@@ -349,7 +349,7 @@ export function isSensitiveField(fieldName: string): boolean {
 /**
  * Remove campos sensíveis de um objeto
  */
-export function sanitizeData(data: Record<string, any>): Record<string, any> {
+export function sanitizeData(data: Record<string, unknown>): Record<string, unknown> {
   const sanitized = { ...data };
   
   Object.keys(sanitized).forEach(key => {
@@ -385,11 +385,11 @@ export function getCurrentLoggingConfig() {
 // ============================================================================
 
 export {
-  OBRASAI_ERROR_CONFIG,
   ERROR_MESSAGES,
-  RETRY_CONFIG,
   LOGGING_CONFIG,
   NOTIFICATION_CONFIG,
+  OBRASAI_ERROR_CONFIG,
+  RETRY_CONFIG,
 };
 
 export default errorConfig;

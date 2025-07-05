@@ -280,3 +280,22 @@ export interface ConversaoOrcamentoDespesaResult {
     item_descricao: string;
   }>;
 }
+
+// Tipos para templates de contrato
+export interface Template {
+  id: string;
+  nome: string;
+  descricao?: string;
+  escopo: 'contrato' | 'documento';
+  tags?: string[];
+}
+
+// Tipos para orçamentos
+export interface Orcamento {
+  id: string;
+  nome: string;
+  obra_id: string;
+  valor_total: number;
+  status: 'em_elaboracao' | 'aprovado' | 'reprovado';
+  data_criacao: string;
+}

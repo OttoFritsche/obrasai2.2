@@ -1,20 +1,21 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef,useState } from 'react';
+
 import { useAsyncOperation } from './useAsyncOperation';
 
-export interface FormField<T = any> {
+export interface FormField<T = unknown> {
   value: T;
   error?: string;
   touched: boolean;
 }
 
-export interface FormState<T extends Record<string, any>> {
+export interface FormState<T extends Record<string, unknown>> {
   fields: { [K in keyof T]: FormField<T[K]> };
   isValid: boolean;
   isDirty: boolean;
   isSubmitting: boolean;
 }
 
-export interface FormValidationRule<T = any> {
+export interface FormValidationRule<T = unknown> {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
@@ -22,10 +23,10 @@ export interface FormValidationRule<T = any> {
   custom?: (value: T) => string | undefined;
 }
 
-export interface FormConfig<T extends Record<string, any>> {
+export interface FormConfig<T extends Record<string, unknown>> {
   initialValues: T;
   validationRules?: { [K in keyof T]?: FormValidationRule<T[K]> };
-  onSubmit: (values: T) => Promise<any>;
+  onSubmit: (values: T) => Promise<unknown>;
   resetOnSuccess?: boolean;
 }
 
@@ -33,7 +34,7 @@ export interface FormConfig<T extends Record<string, any>> {
  * Hook unificado para gerenciar estado de formulários
  * Elimina duplicação de lógica de validação e submissão
  */
-export function useFormState<T extends Record<string, any>>(config: FormConfig<T>) {
+export function useFormState<T extends Record<string, unknown>>(config: FormConfig<T>) {
   const { initialValues, validationRules = {}, onSubmit, resetOnSuccess = false } = config;
   const asyncOperation = useAsyncOperation({
     showSuccessToast: true,
@@ -147,7 +148,7 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
       if (resetOnSuccess) {
         reset();
       }
-    } catch (error) {
+    } catch {
       // Error já tratado pelo asyncOperation
     }
   }, [validateAllFields, getValues, asyncOperation, onSubmit, resetOnSuccess, reset]);
@@ -175,9 +176,9 @@ export function useFormState<T extends Record<string, any>>(config: FormConfig<T
 }
 
 // Hook especializado para formulários simples
-export function useSimpleForm<T extends Record<string, any>>(
+export function useSimpleForm<T extends Record<string, unknown>>(
   initialValues: T,
-  onSubmit: (values: T) => Promise<any>
+  onSubmit: (values: T) => Promise<unknown>
 ) {
   return useFormState({
     initialValues,
@@ -187,10 +188,10 @@ export function useSimpleForm<T extends Record<string, any>>(
 }
 
 // Hook especializado para formulários com validação
-export function useValidatedForm<T extends Record<string, any>>(
+export function useValidatedForm<T extends Record<string, unknown>>(
   initialValues: T,
   validationRules: { [K in keyof T]?: FormValidationRule<T[K]> },
-  onSubmit: (values: T) => Promise<any>
+  onSubmit: (values: T) => Promise<unknown>
 ) {
   return useFormState({
     initialValues,

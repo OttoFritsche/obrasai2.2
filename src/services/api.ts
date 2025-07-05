@@ -1,14 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ObraFormValues } from "@/lib/validations/obra";
+import { sanitizeFormData } from "@/lib/input-sanitizer";
+import { secureLogger } from "@/lib/secure-logger";
+import { unformat } from "@/lib/utils/formatters";
+import type { DespesaFormValues } from "@/lib/validations/despesa";
 import type {
   FornecedorPFFormValues,
   FornecedorPJFormValues,
 } from "@/lib/validations/fornecedor";
-import type { DespesaFormValues } from "@/lib/validations/despesa";
 import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
-import { sanitizeFormData } from "@/lib/input-sanitizer";
-import { secureLogger } from "@/lib/secure-logger";
-import { unformat } from "@/lib/utils/formatters";
+import type { ObraFormValues } from "@/lib/validations/obra";
 
 // Obras API
 export const obrasApi = {
@@ -25,7 +25,7 @@ export const obrasApi = {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in obrasApi.getAll", error, { tenantId });
       throw error;
     }
@@ -48,7 +48,7 @@ export const obrasApi = {
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in obrasApi.getById", error, {
         obraId: id,
         tenantId,
@@ -105,7 +105,7 @@ export const obrasApi = {
             }
           }
           return null;
-        } catch (error) {
+        } catch (_error) {
           console.warn("❌ Erro ao formatar data (create):", error);
           return null;
         }
@@ -118,9 +118,9 @@ export const obrasApi = {
         cidade: sanitizedObra.cidade,
         estado: sanitizedObra.estado,
         cep: sanitizedObra.cep,
-        orcamento: sanitizedObra.orcamento,
+        orcamento_total: sanitizedObra.orcamento,
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
-        data_prevista_termino: formatDateForDB(
+        data_fim: formatDateForDB(
           sanitizedObra.data_prevista_termino,
         ),
         usuario_id: user.id,
@@ -149,9 +149,9 @@ export const obrasApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in obrasApi.create", error);
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in obrasApi.create", _error);
+      throw _error;
     }
   },
 
@@ -190,16 +190,23 @@ export const obrasApi = {
           }
 
           return null;
-        } catch (error) {
+        } catch (_error) {
           console.warn("❌ Erro ao formatar data (update):", error);
           return null;
         }
       };
 
+      // Mapear campos do formulário para os campos do banco de dados
       const formattedObra = {
-        ...sanitizedObra,
+        nome: sanitizedObra.nome,
+        endereco: sanitizedObra.endereco,
+        cidade: sanitizedObra.cidade,
+        estado: sanitizedObra.estado,
+        cep: sanitizedObra.cep,
+        orcamento_total: sanitizedObra.orcamento,
+        construtora_id: sanitizedObra.construtora_id,
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
-        data_prevista_termino: formatDateForDB(
+        data_fim: formatDateForDB(
           sanitizedObra.data_prevista_termino,
         ),
       };
@@ -220,9 +227,9 @@ export const obrasApi = {
       secureLogger.info("Obra updated successfully", { obraId: data.id });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in obrasApi.update", error, { obraId: id });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in obrasApi.update", _error, { obraId: id });
+      throw _error;
     }
   },
 
@@ -242,9 +249,9 @@ export const obrasApi = {
       secureLogger.info("Obra deleted successfully", { obraId: id });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in obrasApi.delete", error, { obraId: id });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in obrasApi.delete", _error, { obraId: id });
+      throw _error;
     }
   },
 };
@@ -267,11 +274,11 @@ export const fornecedoresPJApi = {
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.getAll", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.getAll", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -293,12 +300,12 @@ export const fornecedoresPJApi = {
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.getById", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.getById", _error, {
         fornecedorId: id,
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -357,11 +364,11 @@ export const fornecedoresPJApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.create", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.create", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -407,11 +414,11 @@ export const fornecedoresPJApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.update", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.update", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -435,11 +442,11 @@ export const fornecedoresPJApi = {
       });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.delete", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.delete", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 };
@@ -462,11 +469,11 @@ export const fornecedoresPFApi = {
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.getAll", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.getAll", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -488,12 +495,12 @@ export const fornecedoresPFApi = {
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.getById", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.getById", _error, {
         fornecedorId: id,
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -533,8 +540,8 @@ export const fornecedoresPFApi = {
           }
 
           return null;
-        } catch (error) {
-          console.warn("❌ Erro ao formatar data:", date, error);
+        } catch (_error) {
+          console.warn("❌ Erro ao formatar data:", date, _error);
           return null;
         }
       };
@@ -581,11 +588,11 @@ export const fornecedoresPFApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.create", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.create", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -613,8 +620,8 @@ export const fornecedoresPFApi = {
           }
 
           return null;
-        } catch (error) {
-          console.warn("❌ Erro ao formatar data:", date, error);
+        } catch (_error) {
+          console.warn("❌ Erro ao formatar data:", date, _error);
           return null;
         }
       };
@@ -657,11 +664,11 @@ export const fornecedoresPFApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.update", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.update", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -685,11 +692,11 @@ export const fornecedoresPFApi = {
       });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.delete", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.delete", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 };
@@ -720,9 +727,9 @@ export const despesasApi = {
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.getAll", error, { tenantId });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.getAll", _error, { tenantId });
+      throw _error;
     }
   },
 
@@ -758,12 +765,12 @@ export const despesasApi = {
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.getById", error, {
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.getById", _error, {
         despesaId: id,
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -823,14 +830,25 @@ export const despesasApi = {
       const custoTotal = sanitizedDespesa.quantidade *
         sanitizedDespesa.valor_unitario;
 
-      // ✅ Formatar as datas para o formato do banco de dados
+      // ✅ Função auxiliar para converter data para string ISO ou null
+      const formatDateToISO = (date: Date | string | null): string | null => {
+        if (!date) return null;
+        if (date instanceof Date) {
+          return date.toISOString().split("T")[0];
+        }
+        // Se for string, tentar converter para Date primeiro
+        const dateObj = new Date(date);
+        return isNaN(dateObj.getTime())
+          ? null
+          : dateObj.toISOString().split("T")[0];
+      };
+
+      // ✅ Formatar as datas para o formato do banco de dados com tratamento seguro
       const formattedDespesa = {
         ...sanitizedDespesa,
         custo: custoTotal, // Adicionar o campo custo calculado
-        data_despesa: sanitizedDespesa.data_despesa.toISOString().split("T")[0],
-        data_pagamento: sanitizedDespesa.data_pagamento
-          ? sanitizedDespesa.data_pagamento.toISOString().split("T")[0]
-          : null,
+        data_despesa: formatDateToISO(sanitizedDespesa.data_despesa),
+        data_pagamento: formatDateToISO(sanitizedDespesa.data_pagamento),
         usuario_id: user.id,
         tenant_id: tenantId.trim(),
       };
@@ -856,9 +874,9 @@ export const despesasApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.create", error, { tenantId });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.create", _error, { tenantId });
+      throw _error;
     }
   },
 
@@ -869,8 +887,49 @@ export const despesasApi = {
         throw new Error("ID da despesa inválido ou ausente");
       }
 
+      // 🔒 Forçar datas para Date após sanitização
+      if (despesa.data_despesa && !(despesa.data_despesa instanceof Date)) {
+        despesa.data_despesa = new Date(despesa.data_despesa as string);
+      }
+      if (
+        despesa.data_pagamento && !(despesa.data_pagamento instanceof Date)
+      ) {
+        despesa.data_pagamento = new Date(despesa.data_pagamento as string);
+      }
+      console.log(
+        "Tipo de data_despesa antes do sanitize:",
+        typeof despesa.data_despesa,
+        despesa.data_despesa,
+      );
+      console.log("É Date?", despesa.data_despesa instanceof Date);
+
       // ✅ Sanitizar dados de entrada
       const sanitizedDespesa = sanitizeFormData(despesa);
+
+      // 🔧 DEBUG: Log dos dados recebidos
+      console.log("🔧 API - Dados recebidos:", sanitizedDespesa);
+      console.log(
+        "🔧 API - Tipo data_despesa antes sanitização:",
+        typeof sanitizedDespesa.data_despesa,
+        sanitizedDespesa.data_despesa,
+      );
+      console.log(
+        "🔧 API - É Date antes sanitização?:",
+        sanitizedDespesa.data_despesa instanceof Date,
+      );
+
+      // ✅ Função auxiliar para converter data para string ISO ou null
+      const formatDateToISO = (date: Date | string | null): string | null => {
+        if (!date) return null;
+        if (date instanceof Date) {
+          return date.toISOString().split("T")[0];
+        }
+        // Se for string, tentar converter para Date primeiro
+        const dateObj = new Date(date);
+        return isNaN(dateObj.getTime())
+          ? null
+          : dateObj.toISOString().split("T")[0];
+      };
 
       // Calculate the total cost if we have both quantidade and valor_unitario
       const updates: Record<string, unknown> = { ...sanitizedDespesa };
@@ -883,15 +942,21 @@ export const despesasApi = {
           sanitizedDespesa.valor_unitario;
       }
 
-      // Format the dates
+      // ✅ Formatação segura das datas
       if (sanitizedDespesa.data_despesa) {
-        updates.data_despesa =
-          sanitizedDespesa.data_despesa.toISOString().split("T")[0];
+        let dataDespesa = sanitizedDespesa.data_despesa;
+        if (!(dataDespesa instanceof Date)) {
+          dataDespesa = new Date(dataDespesa);
+        }
+        updates.data_despesa = formatDateToISO(dataDespesa);
       }
 
       if (sanitizedDespesa.data_pagamento) {
-        updates.data_pagamento =
-          sanitizedDespesa.data_pagamento.toISOString().split("T")[0];
+        let dataPagamento = sanitizedDespesa.data_pagamento;
+        if (!(dataPagamento instanceof Date)) {
+          dataPagamento = new Date(dataPagamento);
+        }
+        updates.data_pagamento = formatDateToISO(dataPagamento);
       } else if (sanitizedDespesa.data_pagamento === null) {
         updates.data_pagamento = null;
       }
@@ -918,11 +983,11 @@ export const despesasApi = {
       secureLogger.info("Despesa updated successfully", { despesaId: data.id });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.update", error, {
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.update", _error, {
         despesaId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -949,11 +1014,11 @@ export const despesasApi = {
       secureLogger.info("Despesa deleted successfully", { despesaId: id });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.delete", error, {
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.delete", _error, {
         despesaId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 };

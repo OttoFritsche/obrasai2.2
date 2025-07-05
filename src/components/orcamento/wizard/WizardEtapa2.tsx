@@ -1,15 +1,14 @@
-import React from 'react';
 import { MapPin, Search } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
+import React from 'react';
+import type { UseFormReturn } from 'react-hook-form';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-
+import type { useCEP } from '@/hooks/useCEP';
 import { ESTADOS_BRASILEIROS, type WizardCompleto } from '@/lib/validations/orcamento';
-import { useCEP } from '@/hooks/useCEP';
 
 interface WizardEtapa2Props {
   form: UseFormReturn<WizardCompleto>;
@@ -17,15 +16,26 @@ interface WizardEtapa2Props {
 }
 
 export const WizardEtapa2: React.FC<WizardEtapa2Props> = ({ form, cepData }) => {
-  const handleBuscarCEP = async () => {
-    const cep = form.getValues('cep');
-    if (cep && cep.length >= 8) {
-      const resultado = await cepData.buscarCEP(cep);
-      if (resultado) {
-        form.setValue('cidade', resultado.cidade);
-        form.setValue('estado', resultado.estado);
-        form.setValue('endereco', resultado.endereco);
+  const handleBuscarCEP = async (cepValue?: string) => {
+    const cep = cepValue || form.getValues('cep');
+    if (cep && cep.replace(/\D/g, '').length === 8) {
+      try {
+        const resultado = await cepData.buscarCEP(cep);
+        if (resultado) {
+          form.setValue('cidade', resultado.localidade);
+          form.setValue('estado', resultado.uf);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
       }
+    }
+  };
+
+  const handleCepChange = (value: string) => {
+    form.setValue('cep', value);
+    // Busca automática quando CEP tem 8 dígitos
+    if (value.replace(/\D/g, '').length === 8) {
+      handleBuscarCEP(value);
     }
   };
 
@@ -51,21 +61,32 @@ export const WizardEtapa2: React.FC<WizardEtapa2Props> = ({ form, cepData }) => 
                   <Input 
                     placeholder="00000-000" 
                     maxLength={9}
-                    {...field} 
+                    value={field.value || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value);
+                      handleCepChange(value);
+                    }}
+                    disabled={cepData.isLoading}
                   />
                 </FormControl>
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={handleBuscarCEP}
+                  onClick={() => handleBuscarCEP()}
                   disabled={cepData.isLoading}
                   size="icon"
+                  title="Buscar CEP"
                 >
-                  <Search className="h-4 w-4" />
+                  {cepData.isLoading ? (
+                    <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
               <FormDescription>
-                O CEP influencia nos custos de materiais e mão de obra
+                {cepData.isLoading ? 'Buscando CEP...' : 'O CEP influencia nos custos de materiais e mão de obra'}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -87,8 +108,8 @@ export const WizardEtapa2: React.FC<WizardEtapa2Props> = ({ form, cepData }) => 
                 </FormControl>
                 <SelectContent>
                   {ESTADOS_BRASILEIROS.map((estado) => (
-                    <SelectItem key={estado} value={estado}>
-                      {estado}
+                    <SelectItem key={estado.sigla} value={estado.sigla}>
+                      {estado.nome} ({estado.sigla})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -122,26 +143,7 @@ export const WizardEtapa2: React.FC<WizardEtapa2Props> = ({ form, cepData }) => 
           )}
         />
 
-        {/* Endereço */}
-        <FormField
-          control={form.control}
-          name="endereco"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Endereço Completo</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder="Rua, número, bairro..." 
-                  {...field} 
-                />
-              </FormControl>
-              <FormDescription>
-                Endereço detalhado da obra (opcional)
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
       </CardContent>
     </Card>

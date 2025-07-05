@@ -1,46 +1,28 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  User, 
-  ArrowLeft, 
-  Save, 
-  Building2, 
-  Mail, 
-  Phone,
-  MapPin,
-  FileText,
-  Loader2,
-  Search,
-  CheckCircle,
-  AlertCircle,
-  Globe
-} from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { FormProvider, useFormContext } from "@/contexts/FormContext";
-import { useAsyncOperation } from "@/hooks/useAsyncOperation";
-import { useLoading } from "@/contexts/LoadingContext";
-
-import type {
-  FornecedorPJFormValues,
-  FornecedorPFFormValues,
-  FornecedorType
-} from "@/lib/validations/fornecedor";
 import { 
-  fornecedorPJSchema, 
-  fornecedorPFSchema
-} from "@/lib/validations/fornecedor";
-import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
-import { useAuth } from "@/contexts/auth";
-import { useCNPJLookup } from "@/hooks/useCNPJLookup";
-import { formatCNPJ, formatCPF, formatPhone, formatCEP, isComplete } from "@/lib/utils/formatters";
-import { brazilianStates } from "@/lib/i18n";
-import { DatePicker } from "@/components/ui/date-picker";
+  AlertCircle,
+  ArrowLeft, 
+  Building2, 
+  CheckCircle,
+  FileText,
+  Globe,
+  Loader2,
+  Mail, 
+  MapPin,
+  Phone,
+  Save, 
+  Search,
+  User} from "lucide-react";
+import { memo,useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -50,6 +32,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -57,14 +40,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/auth";
+import { useAsyncOperation } from "@/hooks/useAsyncOperation";
+import { useCNPJLookup } from "@/hooks/useCNPJLookup";
+import { brazilianStates } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { formatCEP, formatCNPJ, formatCPF, formatPhone, isComplete } from "@/lib/utils/formatters";
+import type {
+  FornecedorPFFormValues,
+  FornecedorPJFormValues,
+  FornecedorType
+} from "@/lib/validations/fornecedor";
+import { 
+  fornecedorPFSchema,
+  fornecedorPJSchema} from "@/lib/validations/fornecedor";
+import { fornecedoresPFApi,fornecedoresPJApi } from "@/services/api";
 
-// Componente interno que usa o FormContext
-const NovoFornecedorForm: React.FC = () => {
+// Componente principal do formulário
+const NovoFornecedor = memo(() => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { setLoading, isLoading } = useLoading();
   const [fornecedorType, setFornecedorType] = useState<FornecedorType>("pj");
   const { lookupCNPJ, isLoading: isLoadingCNPJ, data: cnpjData, reset: resetCNPJ } = useCNPJLookup();
   
@@ -75,9 +72,9 @@ const NovoFornecedorForm: React.FC = () => {
   const tenantId = user?.profile?.tenant_id;
   const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
   
-  // Form para PJ usando FormContext
-  const pjFormContext = useFormContext<FornecedorPJFormValues>({
-    schema: fornecedorPJSchema,
+  // Form para PJ usando React Hook Form diretamente
+  const pjForm = useForm<FornecedorPJFormValues>({
+    resolver: zodResolver(fornecedorPJSchema),
     defaultValues: {
       cnpj: "",
       razao_social: "",
@@ -94,9 +91,9 @@ const NovoFornecedorForm: React.FC = () => {
     },
   });
 
-  // Form para PF usando FormContext
-  const pfFormContext = useFormContext<FornecedorPFFormValues>({
-    schema: fornecedorPFSchema,
+  // Form para PF usando React Hook Form diretamente
+  const pfForm = useForm<FornecedorPFFormValues>({
+    resolver: zodResolver(fornecedorPFSchema),
     defaultValues: {
       cpf: "",
       nome: "",
@@ -105,9 +102,6 @@ const NovoFornecedorForm: React.FC = () => {
       data_nascimento: null,
     },
   });
-
-  const { form: pjForm } = pjFormContext;
-  const { form: pfForm } = pfFormContext;
 
   // Watch do campo CNPJ para busca automática
   const cnpjValue = pjForm.watch("cnpj");
@@ -198,12 +192,6 @@ const NovoFornecedorForm: React.FC = () => {
 
   // Operações assíncronas usando useAsyncOperation
   const { execute: createPJFornecedor, isLoading: isCreatingPJ } = useAsyncOperation({
-    operation: async (values: FornecedorPJFormValues) => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado');
-      }
-      return fornecedoresPJApi.create(values, validTenantId);
-    },
     onSuccess: () => {
       toast.success("Fornecedor PJ criado com sucesso!");
       navigate("/dashboard/fornecedores/pj");
@@ -215,12 +203,6 @@ const NovoFornecedorForm: React.FC = () => {
   });
 
   const { execute: createPFFornecedor, isLoading: isCreatingPF } = useAsyncOperation({
-    operation: async (values: FornecedorPFFormValues) => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado');
-      }
-      return fornecedoresPFApi.create(values, validTenantId);
-    },
     onSuccess: () => {
       toast.success("Fornecedor PF criado com sucesso!");
       navigate("/dashboard/fornecedores/pf");
@@ -231,16 +213,26 @@ const NovoFornecedorForm: React.FC = () => {
     },
   });
 
-  const onSubmitPJ = async (values: FornecedorPJFormValues) => {
-    await createPJFornecedor(values);
-  };
+  const onSubmitPJ = useCallback(async (values: FornecedorPJFormValues) => {
+    await createPJFornecedor(async () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPJApi.create(values, validTenantId);
+    });
+  }, [createPJFornecedor, validTenantId]);
 
-  const onSubmitPF = async (values: FornecedorPFFormValues) => {
-    await createPFFornecedor(values);
-  };
+  const onSubmitPF = useCallback(async (values: FornecedorPFFormValues) => {
+    await createPFFornecedor(async () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPFApi.create(values, validTenantId);
+    });
+  }, [createPFFornecedor, validTenantId]);
 
   // Função para buscar CNPJ manualmente
-  const handleManualCNPJLookup = async () => {
+  const handleManualCNPJLookup = useCallback(async () => {
     const cnpjValue = pjForm.getValues("cnpj");
     if (cnpjValue) {
       const data = await lookupCNPJ(cnpjValue);
@@ -288,7 +280,7 @@ const NovoFornecedorForm: React.FC = () => {
         }
       }
     }
-  };
+  }, [pjForm, lookupCNPJ]);
 
   return (
     <DashboardLayout>
@@ -1062,15 +1054,8 @@ const NovoFornecedorForm: React.FC = () => {
       </motion.div>
     </DashboardLayout>
   );
-};
+});
 
-// Componente principal com providers
-const NovoFornecedor: React.FC = () => {
-  return (
-    <FormProvider>
-      <NovoFornecedorForm />
-    </FormProvider>
-  );
-};
+NovoFornecedor.displayName = 'NovoFornecedor';
 
 export default NovoFornecedor;

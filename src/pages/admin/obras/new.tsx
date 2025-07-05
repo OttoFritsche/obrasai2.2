@@ -1,10 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate } from 'react-router-dom';
+
+import { useObras } from '@/hooks/useObras';
 import type { ObraFormValues} from '@/lib/validations/obra';
 import { obraSchema } from '@/lib/validations/obra';
-import { useObras } from '@/hooks/useObras';
-import { useNavigate } from 'react-router-dom';
 
 /**
  * Página de cadastro de nova obra multi-tenant.
@@ -27,7 +28,7 @@ const NovaObraPage: React.FC = () => {
     try {
       await createObra.mutateAsync(values);
       navigate('/admin/obras');
-    } catch (error) {
+    } catch (_error) {
       alert('Erro ao cadastrar obra.');
     }
   };

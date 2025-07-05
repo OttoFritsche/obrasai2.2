@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 import React, { Component } from 'react';
+
+import { secureLogger } from '@/lib/secure-logger';
+
 import type { ErrorFallbackProps } from './ErrorFallback';
 import { ErrorFallback } from './ErrorFallback';
-import { secureLogger } from '@/lib/secure-logger';
 
 interface ErrorBoundaryState {
   hasError: boolean;

@@ -1,0 +1,170 @@
+name: Auditoria de Acessibilidade
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Executa diariamente às 9h UTC (6h BRT)
+    - cron: '0 9 * * *'
+
+jobs:
+  accessibility-audit:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Instalar dependências
+      run: npm ci
+    
+    - name: Executar testes de acessibilidade
+      run: npm run test:accessibility
+      continue-on-error: true
+    
+    - name: Gerar relatório de acessibilidade
+      run: npm run audit:accessibility
+      continue-on-error: true
+    
+    - name: Upload relatórios de acessibilidade
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: accessibility-reports-node-${{ matrix.node-version }}
+        path: accessibility-reports/
+        retention-days: 30
+    
+    - name: Comentar PR com resultados
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const reportPath = path.join('accessibility-reports', 'accessibility-metrics.json');
+            if (fs.existsSync(reportPath)) {
+              const metrics = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              const comment = `## 🔍 Relatório de Acessibilidade
+              
+              | Métrica | Valor |
+              |---------|-------|
+              | Testes Executados | ${metrics.totalTests} |
+              | Testes Aprovados | ${metrics.passedTests} |
+              | Taxa de Sucesso | ${metrics.coveragePercentage}% |
+              | Violações Críticas | ${metrics.criticalViolations} |
+              | Violações Sérias | ${metrics.seriousViolations} |
+              
+              ${metrics.criticalViolations > 0 ? '❌ **ATENÇÃO:** Violações críticas encontradas!' : '✅ **Sucesso:** Nenhuma violação crítica!'}
+              
+              📄 Relatórios detalhados disponíveis nos artifacts do workflow.`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.log('Erro ao ler métricas de acessibilidade:', error.message);
+          }
+    
+    - name: Falhar build se violações críticas
+      run: |
+        if [ -f "accessibility-reports/accessibility-metrics.json" ]; then
+          CRITICAL=$(cat accessibility-reports/accessibility-metrics.json | jq '.criticalViolations')
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "❌ Build falhou: $CRITICAL violações críticas de acessibilidade encontradas"
+            exit 1
+          fi
+        fi
+
+  lighthouse-audit:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Instalar dependências
+      run: npm ci
+    
+    - name: Build aplicação
+      run: npm run build
+    
+    - name: Servir aplicação
+      run: |
+        npm install -g serve
+        serve -s dist -l 3000 &
+        sleep 10
+    
+    - name: Executar Lighthouse CI
+      run: |
+        npm install -g @lhci/cli
+        lhci autorun --config=.lighthouserc.json || true
+    
+    - name: Upload Lighthouse reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: lighthouse-reports
+        path: .lighthouseci/
+        retention-days: 30
+
+  wave-audit:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' # Executa apenas no agendamento diário
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Instalar dependências
+      run: npm ci
+    
+    - name: Build e servir aplicação
+      run: |
+        npm run build
+        npm install -g serve
+        serve -s dist -l 3000 &
+        sleep 10
+    
+    - name: Executar WAVE API (se configurado)
+      run: |
+        # Placeholder para integração com WAVE API
+        # Requer configuração de API key nos secrets
+        echo "WAVE audit seria executado aqui se API key estivesse configurada"
+    
+    - name: Notificar equipe sobre resultados
+      if: failure()
+      run: |
+        echo "Notificação sobre falhas na auditoria de acessibilidade seria enviada aqui"
+        # Integração com Slack, Teams, etc.

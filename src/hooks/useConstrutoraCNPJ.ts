@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
+
 import { useCNPJLookup } from '@/hooks/useCNPJLookup';
 import { formatCEP, isComplete } from '@/lib/utils/formatters';
 import type { ConstrutoraPJFormValues } from '@/lib/validations/construtora';

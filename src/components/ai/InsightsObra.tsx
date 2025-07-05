@@ -1,10 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lightbulb } from "lucide-react";
-import WidgetAnaliseAI from "./WidgetAnaliseAI";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+import WidgetAnaliseAI from "./WidgetAnaliseAI";
 
 interface InsightObraProps {
   obraId: string;

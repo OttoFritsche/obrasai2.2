@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useCallback,useState } from 'react';
+
 import { useToast } from './use-toast';
 
 export interface AsyncOperationState<T = any> {
@@ -20,7 +21,7 @@ export interface AsyncOperationOptions {
  * Hook unificado para gerenciar operações assíncronas
  * Elimina duplicação de estados de loading, error e success
  */
-export function useAsyncOperation<T = any>(options: AsyncOperationOptions = {}) {
+export function useAsyncOperation<T = unknown>(options: AsyncOperationOptions = {}) {
   const { toast } = useToast();
   const {
     showSuccessToast = false,

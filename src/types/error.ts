@@ -79,7 +79,7 @@ export interface ErrorInfo {
   httpStatus?: HttpStatus;
   
   /** Dados adicionais seguros */
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
   
   /** Se o erro é recuperável */
   recoverable?: boolean;
@@ -105,7 +105,7 @@ export interface ErrorHandlerOptions {
   logLevel?: LogLevel;
   
   /** Dados adicionais para logging */
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
   
   /** Se o erro é recuperável */
   recoverable?: boolean;
@@ -131,7 +131,7 @@ export interface ApiErrorHandlerOptions {
   showToast?: boolean;
   
   /** Dados adicionais para logging */
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 /**
@@ -168,7 +168,7 @@ export interface CriticalErrorOptions {
   context: string;
   
   /** Dados adicionais importantes */
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
   
   /** Se deve notificar administradores */
   notifyAdmins?: boolean;
@@ -263,7 +263,7 @@ export interface UseErrorHandlerReturn {
   handleAuthError: (error: unknown, context: string) => void;
   
   /** Wrapper para funções assíncronas */
-  wrapAsync: <T extends (...args: any[]) => Promise<any>>(
+  wrapAsync: <T extends (...args: unknown[]) => Promise<unknown>>(
     fn: T,
     options: AsyncWrapperOptions
   ) => T;
@@ -293,13 +293,13 @@ export interface UseErrorBoundaryReturn {
 export class ApiError extends Error {
   public readonly status: HttpStatus;
   public readonly code?: string;
-  public readonly details?: Record<string, any>;
+  public readonly details?: Record<string, unknown>;
   
   constructor(
     message: string,
     status: HttpStatus,
     code?: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'ApiError';
@@ -314,13 +314,13 @@ export class ApiError extends Error {
  */
 export class ValidationError extends Error {
   public readonly field?: string;
-  public readonly value?: any;
+  public readonly value?: unknown;
   public readonly rule?: string;
   
   constructor(
     message: string,
     field?: string,
-    value?: any,
+    value?: unknown,
     rule?: string
   ) {
     super(message);
@@ -503,40 +503,35 @@ export const DEFAULT_ERROR_CONFIG: ErrorSystemConfig = {
 // ============================================================================
 
 export type {
-  // Interfaces principais
-  ErrorInfo,
-  ErrorHandlerOptions,
   ApiErrorHandlerOptions,
   AsyncWrapperOptions,
   CriticalErrorOptions,
-  
   // Interfaces de componentes
   ErrorBoundaryProps,
   ErrorFallbackProps,
-  SimpleErrorFallbackProps,
-  
-  // Interfaces de hooks
-  UseErrorHandlerReturn,
-  UseErrorBoundaryReturn,
-  
+  ErrorHandlerOptions,
+  // Interfaces principais
+  ErrorInfo,
   // Configurações
   ErrorSystemConfig,
+  SimpleErrorFallbackProps,
+  UseErrorBoundaryReturn,
+  // Interfaces de hooks
+  UseErrorHandlerReturn,
 };
 
 export {
   // Classes de erro
   ApiError,
-  ValidationError,
   AuthError,
-  NetworkError,
-  
-  // Type guards
-  isApiError,
-  isValidationError,
-  isAuthError,
-  isNetworkError,
-  isError,
-  
   // Configuração padrão
   DEFAULT_ERROR_CONFIG,
+  // Type guards
+  isApiError,
+  isAuthError,
+  isError,
+  isNetworkError,
+  isValidationError,
+  NetworkError,
+  ValidationError,
 };

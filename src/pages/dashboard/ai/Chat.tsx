@@ -1,9 +1,10 @@
-import { motion } from "framer-motion";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import InterfaceChat from "@/components/ai/InterfaceChat";
-import ChatContextSidebar from "@/components/ai/ChatContextSidebar";
-import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { useMemo,useState } from "react";
+
+import ChatContextSidebar from "@/components/ai/ChatContextSidebar";
+import InterfaceChat from "@/components/ai/InterfaceChat";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { obrasApi } from "@/services/api";
 
 const ChatAIPage = () => {

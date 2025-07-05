@@ -1,10 +1,11 @@
 
+import { Menu } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 export const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

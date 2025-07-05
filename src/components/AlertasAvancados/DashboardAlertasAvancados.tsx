@@ -1,31 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { 
+  Activity,
+  AlertTriangle, 
+  Bell, 
+  CheckCircle, 
+  Clock,
+  Eye,
+  Mail,
+  RefreshCw,
+  Settings, 
+  TrendingUp, 
+  Webhook,
+  XCircle} from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAdvancedAlerts } from '@/hooks/useAdvancedAlerts';
+import { formatCurrency } from '@/lib/formatters';
+
 import { ConfiguracaoAlertasAvancadas } from './ConfiguracaoAlertasAvancadas';
 import { HistoricoAlertas } from './HistoricoAlertas';
 import { NotificacoesAlertas } from './NotificacoesAlertas';
-import { 
-  Bell, 
-  Settings, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle,
-  Clock,
-  Mail,
-  Webhook,
-  Eye,
-  RefreshCw,
-  Activity
-} from 'lucide-react';
-import { formatCurrency } from '@/lib/formatters';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface DashboardAlertasAvancadosProps {
   obraId?: string;

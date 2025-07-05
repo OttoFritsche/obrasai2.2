@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface DocumentationContext {
@@ -40,7 +41,7 @@ export const useAIChatContextual = () => {
       }
 
       return data.response || 'Desculpe, não consegui processar sua pergunta.';
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro no chat IA:', error);
       throw error;
     } finally {

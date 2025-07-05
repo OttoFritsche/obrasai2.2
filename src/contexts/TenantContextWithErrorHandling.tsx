@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
-import { supabase } from '@/integrations/supabase/client';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { createContext, useContext, useEffect,useState } from 'react';
+
 import { ErrorBoundary } from '@/components/error';
+import { useAuth } from '@/contexts/auth';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 
 type Tenant = Database['public']['Tables']['construtoras']['Row'];

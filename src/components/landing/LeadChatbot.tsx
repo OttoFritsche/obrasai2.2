@@ -1,12 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, User, Loader2, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/use-toast';
+import { CheckCircle,Loader2, Send, User } from 'lucide-react';
+import React, { useEffect,useRef, useState } from 'react';
+
 import logoImageDark from '@/assets/logo/logo_image_dark.png';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription,DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
 import { useAnalytics } from '@/services/analyticsApi';
 
 interface Message {
@@ -195,7 +196,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
         console.error('❌ Erro ao enviar lead:', response.status);
         return false;
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('❌ Erro ao enviar lead para webhook:', error);
       return false;
     }
@@ -227,7 +228,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
 
       const data = await response.json();
       return data.response || 'Desculpe, não consegui processar sua pergunta.';
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro na IA:', error);
       return 'Desculpe, estou com dificuldades técnicas no momento. Mas posso te dizer que o ObrasAI oferece gestão completa de obras, orçamento inteligente com IA, sistema SINAPI integrado e muito mais!';
     }
@@ -387,7 +388,7 @@ const LeadChatbot: React.FC<LeadChatbotProps> = ({ isOpen, onClose }) => {
         
         setMessages(prev => [...prev, botMessage]);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('💥 ERRO em handleSendMessage:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),

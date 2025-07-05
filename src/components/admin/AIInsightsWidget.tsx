@@ -1,30 +1,30 @@
 // 🤖 Widget Flutuante de IA - Insights de Métricas + Chat Interativo
-import React, { useState, useEffect, useRef } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { AnimatePresence,motion } from 'framer-motion'
+import { 
+  AlertTriangle, 
+  BarChart3,
+  Bot, 
+  Brain, 
+  CheckCircle, 
+  Info, 
+  Maximize2,
+  MessageCircle,
+  Minimize2, 
+  RefreshCw,
+  Send,
+  Sparkles,
+  X} from 'lucide-react'
+import React, { useEffect, useRef,useState } from 'react'
+
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Bot, 
-  Brain, 
-  AlertTriangle, 
-  CheckCircle, 
-  Info, 
-  X, 
-  Minimize2, 
-  Maximize2,
-  RefreshCw,
-  Sparkles,
-  MessageCircle,
-  Send,
-  BarChart3
-} from 'lucide-react'
-import { aiInsights, type AIInsight, type MetricsData } from '@/services/aiInsightsApi'
-import { useAsyncOperation } from '@/hooks/useAsyncOperation'
 import { useLoading } from '@/contexts/LoadingContext'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { type AIInsight, aiInsights, type MetricsData } from '@/services/aiInsightsApi'
 
 interface ChatMessage {
   id: string

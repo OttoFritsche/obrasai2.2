@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Bot, User } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bot, Loader2, Send, User } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAIChatContextual } from '@/hooks/useAIChatContextual';
 import { type WidgetConfig } from '@/config/aiWidgetConfig';
+import { useSystemChatbot } from '@/hooks/useSystemChatbot';
 
 interface Message {
   id: string;
@@ -18,44 +19,39 @@ interface AIChatSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   config: WidgetConfig;
+  onToggleMinimize?: () => void;
+  isMinimized?: boolean;
 }
 
 export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({ 
   isOpen, 
   onClose, 
-  config 
+  config,
+  onToggleMinimize,
+  isMinimized = false
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { sendMessage } = useAIChatContextual();
+  const { sendMessage, isLoading, fetchSystemContext } = useSystemChatbot();
 
-  // Mensagem de boas-vindas baseada no contexto
-  const getWelcomeMessage = (context: string): string => {
-    const messages = {
-      contratos: 'Olá! Sou seu assistente IA para o módulo de Contratos. Posso te ajudar com dúvidas sobre criação, edição, assinatura e gerenciamento de contratos. O que você gostaria de saber?',
-      obras: 'Olá! Sou seu assistente IA para o módulo de Obras. Posso te ajudar com dúvidas sobre cadastro, acompanhamento, status e gerenciamento de obras. Como posso ajudar?',
-      despesas: 'Olá! Sou seu assistente IA para o módulo de Despesas. Posso te ajudar com dúvidas sobre lançamento, categorização e controle de despesas. O que você precisa saber?',
-      orcamentos: 'Olá! Sou seu assistente IA para o módulo de Orçamentos. Posso te ajudar com dúvidas sobre criação paramétrica, análise de custos e composições. Como posso auxiliar?'
-    };
-    return messages[context as keyof typeof messages] || 'Olá! Como posso ajudar você hoje?';
-  };
-
-  // Inicializar com mensagem de boas-vindas
+  // Mensagem de boas-vindas
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && config.showWelcomeMessage) {
       const welcomeMessage: Message = {
         id: 'welcome',
-        content: config.welcomeMessage,
+        content: `🤖 ${config.welcomeMessage}\n\nPosso ajudar você com:\n• 📊 Informações sobre obras e projetos\n• 💰 Controle de despesas\n• 📋 Orçamentos com IA\n• 🏢 Fornecedores e construtoras\n• 📄 Contratos\n• 🔧 Tabela SINAPI\n\nO que você gostaria de saber?`,
         isUser: false,
         timestamp: new Date()
       };
       setMessages([welcomeMessage]);
+      
+      // Buscar contexto inicial do sistema
+      fetchSystemContext();
     }
-  }, [isOpen, config.welcomeMessage]);
+  }, [isOpen, config.showWelcomeMessage, config.welcomeMessage]);
 
-  // Auto-scroll para última mensagem
+  // Auto scroll para última mensagem
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -72,10 +68,9 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
 
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
-    setIsLoading(true);
 
     try {
-      const response = await sendMessage(inputValue, config.pageContext);
+      const response = await sendMessage(inputValue);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -88,13 +83,11 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Desculpe, ocorreu um erro. Tente novamente em alguns instantes.',
+        content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.',
         isUser: false,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -104,6 +97,15 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
       handleSendMessage();
     }
   };
+
+  // Sugestões de perguntas rápidas
+  const quickQuestions = [
+    "Quantas obras estão em andamento?",
+    "Qual o total de despesas este mês?",
+    "Como criar um orçamento com IA?",
+    "Mostrar fornecedores cadastrados",
+    "Status dos contratos ativos"
+  ];
 
   return (
     <AnimatePresence>
@@ -120,7 +122,7 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
           
           {/* Sidebar */}
           <motion.div
-            className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50 flex flex-col"
+            className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -129,13 +131,24 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
             {/* Header */}
             <div className="p-4 border-b bg-gradient-to-r from-blue-500 to-blue-600 text-white">
               <div className="flex items-center gap-3">
-                <Bot className="h-6 w-6" />
-                <div>
-                  <h3 className="font-semibold">Assistente IA</h3>
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <Bot className="h-6 w-6" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold">Assistente IA ObrasAI</h3>
                   <p className="text-sm opacity-90">
-                    {config.title}
+                    Seu assistente inteligente
                   </p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="text-white hover:bg-white/20"
+                >
+                  <span className="sr-only">Fechar</span>
+                  ✕
+                </Button>
               </div>
             </div>
 
@@ -145,61 +158,76 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
                 {messages.map((message) => (
                   <motion.div
                     key={message.id}
-                    className={`flex gap-3 ${message.isUser ? 'justify-end' : 'justify-start'}`}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    className={`flex gap-3 ${message.isUser ? 'flex-row-reverse' : ''}`}
                   >
-                    {!message.isUser && (
-                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                        <Bot className="h-4 w-4 text-white" />
-                      </div>
-                    )}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.isUser ? 'bg-blue-500' : 'bg-gray-200 dark:bg-gray-700'
+                    }`}>
+                      {message.isUser ? (
+                        <User className="h-4 w-4 text-white" />
+                      ) : (
+                        <Bot className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                      )}
+                    </div>
                     
-                    <div
-                      className={`
-                        max-w-[80%] p-3 rounded-lg text-sm
-                        ${message.isUser 
-                          ? 'bg-blue-500 text-white rounded-br-none' 
-                          : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                        }
-                      `}
-                    >
-                      <p className="whitespace-pre-wrap">{message.content}</p>
-                      <p className={`text-xs mt-1 opacity-70`}>
+                    <div className={`flex-1 ${message.isUser ? 'text-right' : ''}`}>
+                      <div className={`inline-block p-3 rounded-lg max-w-[85%] ${
+                        message.isUser 
+                          ? 'bg-blue-500 text-white' 
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                      }`}>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {message.timestamp.toLocaleTimeString('pt-BR', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
                         })}
                       </p>
                     </div>
-                    
-                    {message.isUser && (
-                      <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center flex-shrink-0">
-                        <User className="h-4 w-4 text-white" />
-                      </div>
-                    )}
                   </motion.div>
                 ))}
                 
                 {isLoading && (
-                  <motion.div
-                    className="flex gap-3 justify-start"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-4 w-4 text-white" />
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <Bot className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                     </div>
-                    <div className="bg-gray-100 p-3 rounded-lg rounded-bl-none">
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm">Pensando...</span>
+                      </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
                 
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
+
+            {/* Quick Questions */}
+            {messages.length === 1 && (
+              <div className="px-4 pb-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Perguntas rápidas:</p>
+                <div className="flex flex-wrap gap-2">
+                  {quickQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInputValue(question);
+                        handleSendMessage();
+                      }}
+                      className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full px-3 py-1 transition-colors"
+                    >
+                      {question}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Input */}
             <div className="p-4 border-t">
@@ -208,7 +236,7 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Digite sua pergunta..."
+                  placeholder={config.placeholder}
                   disabled={isLoading}
                   className="flex-1"
                 />
@@ -217,12 +245,13 @@ export const AIChatSidebar: React.FC<AIChatSidebarProps> = ({
                   disabled={!inputValue.trim() || isLoading}
                   size="icon"
                 >
-                  <Send className="h-4 w-4" />
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Pressione Enter para enviar
-              </p>
             </div>
           </motion.div>
         </>

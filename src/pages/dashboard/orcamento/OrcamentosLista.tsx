@@ -8,80 +8,79 @@
  * @version 2.0.0 - Orçamento Paramétrico
  */
 
-import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { 
-  Calculator, 
-  Plus, 
-  Eye,
-  Copy,
-  Trash2,
-  Filter,
-  Search,
-  Building,
-  MapPin,
-  TrendingUp,
-  Clock,
-  Sparkles,
-  Layers,
-  AlertCircle,
-  CheckCircle
+import {
+    AlertCircle,
+    Building,
+    Calculator,
+    CheckCircle,
+    Clock,
+    Copy,
+    Eye,
+    Filter,
+    Layers,
+    MapPin,
+    Plus,
+    Search,
+    Sparkles,
+    Trash2,
+    TrendingUp
 } from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { orcamentosParametricosApi, orcamentoUtils, itensOrcamentoApi } from "@/services/orcamentoApi";
-import type { 
-  OrcamentoParametrico, 
-  StatusOrcamento,
-  TipoObra,
-  PadraoObra} from "@/lib/validations/orcamento";
 import {
-  TIPO_OBRA_LABELS,
-  PADRAO_OBRA_LABELS,
-  STATUS_ORCAMENTO_LABELS,
-  STATUS_ORCAMENTO_CORES
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import type {
+    OrcamentoParametrico,
+    PadraoObra, StatusOrcamento,
+    TipoObra
 } from "@/lib/validations/orcamento";
+import {
+    PADRAO_OBRA_LABELS,
+    STATUS_ORCAMENTO_CORES,
+    STATUS_ORCAMENTO_LABELS,
+    TIPO_OBRA_LABELS
+} from "@/lib/validations/orcamento";
+import { itensOrcamentoApi, orcamentosParametricosApi, orcamentoUtils } from "@/services/orcamentoApi";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES
@@ -100,6 +99,7 @@ interface FiltrosState {
 
 const OrcamentosLista: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   // Estados locais
   const [filtros, setFiltros] = useState<FiltrosState>({
@@ -114,21 +114,21 @@ const OrcamentosLista: React.FC = () => {
     data: response, 
     isLoading, 
     error,
-    refetch 
   } = useQuery({
-    queryKey: ['orcamentos-parametricos', filtros],
+    queryKey: ['orcamentos-parametricos'],
     queryFn: () => orcamentosParametricosApi.getAll({
       ...filtros,
       limit: 20,
       offset: 0
-    })
+    }),
+    staleTime: 1000 * 60 * 5 // 5 minutos
   });
 
   const orcamentos = response?.data || [];
 
   // Query para verificar itens dos orçamentos (orçamento paramétrico)
   const { data: orcamentosComItens } = useQuery({
-    queryKey: ['orcamentos-com-itens'],
+    queryKey: ['orcamentos-com-itens', orcamentos.map(o => o.id)],
     queryFn: async () => {
       const promises = orcamentos.map(async (orc) => {
         try {
@@ -152,58 +152,62 @@ const OrcamentosLista: React.FC = () => {
   }));
 
   // ====================================
+  // 🚀 MUTATIONS
+  // ====================================
+
+  const { mutate: duplicarOrcamento } = useMutation({
+    mutationFn: (orcamento: OrcamentoParametrico) =>
+      orcamentosParametricosApi.duplicate(
+        orcamento.id,
+        `${orcamento.nome_orcamento} (Cópia)`
+      ),
+    onSuccess: () => {
+      toast.success("🎉 Orçamento duplicado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ['orcamentos-parametricos'] });
+      queryClient.invalidateQueries({ queryKey: ['orcamentos-com-itens'] });
+    },
+    onError: (err) => {
+      console.error("Erro ao duplicar orçamento:", err);
+      toast.error("❌ Erro ao duplicar orçamento");
+    },
+  });
+
+  const { mutate: excluirOrcamento, isPending: isExcluindo } = useMutation({
+    mutationFn: (id: string) => orcamentosParametricosApi.delete(id),
+    onSuccess: () => {
+      toast.success("🗑️ Orçamento excluído com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ['orcamentos-parametricos'] });
+      queryClient.invalidateQueries({ queryKey: ['orcamentos-com-itens'] });
+      setOrcamentoParaExcluir(null);
+    },
+    onError: (err) => {
+      console.error("Erro ao excluir orçamento:", err);
+      toast.error("❌ Erro ao excluir orçamento");
+    },
+  });
+
+  const { mutate: excluirOrcamentosEmMassa, isPending: isExcluindoEmMassa } = useMutation({
+      mutationFn: (ids: string[]) => Promise.all(ids.map(id => orcamentosParametricosApi.delete(id))),
+      onSuccess: (_data, variables) => {
+        toast.success(`🗑️ ${variables.length} orçamento(s) excluído(s) com sucesso!`);
+        queryClient.invalidateQueries({ queryKey: ['orcamentos-parametricos'] });
+        queryClient.invalidateQueries({ queryKey: ['orcamentos-com-itens'] });
+        setSelectedOrcamentos([]);
+        setShowBulkDeleteDialog(false);
+      },
+      onError: (err) => {
+        console.error("Erro na exclusão em massa:", err);
+        toast.error("❌ Erro ao excluir orçamentos");
+      }
+  });
+
+  // ====================================
   // 🎯 HANDLERS DE EVENTOS
   // ====================================
 
-  /**
-   * Duplicar orçamento
-   */
-  const handleDuplicar = async (orcamento: OrcamentoParametrico) => {
-    try {
-      const duplicado = await orcamentosParametricosApi.duplicate(
-        orcamento.id, 
-        `${orcamento.nome_orcamento} (Cópia)`
-      );
-      toast.success("🎉 Orçamento duplicado com sucesso!");
-      refetch();
-    } catch (error) {
-      console.error("Erro ao duplicar orçamento:", error);
-      toast.error("❌ Erro ao duplicar orçamento");
-    }
-  };
-
-  /**
-   * Excluir orçamento
-   */
-  const handleExcluir = async (id: string) => {
-    try {
-      await orcamentosParametricosApi.delete(id);
-      toast.success("🗑️ Orçamento excluído com sucesso!");
-      setOrcamentoParaExcluir(null);
-      refetch();
-    } catch (error) {
-      console.error("Erro ao excluir orçamento:", error);
-      toast.error("❌ Erro ao excluir orçamento");
-    }
-  };
-
-  /**
-   * Exclusão em massa de orçamentos
-   */
-  const handleBulkDelete = async () => {
-    if (selectedOrcamentos.length === 0) return;
-    
-    try {
-      for (const id of selectedOrcamentos) {
-        await orcamentosParametricosApi.delete(id);
-      }
-      toast.success(`🗑️ ${selectedOrcamentos.length} orçamento(s) excluído(s) com sucesso!`);
-      setSelectedOrcamentos([]);
-      setShowBulkDeleteDialog(false);
-      refetch();
-    } catch (error) {
-      console.error("Erro ao excluir orçamentos:", error);
-      toast.error("❌ Erro ao excluir orçamentos");
+  const handleBulkDelete = () => {
+    if (selectedOrcamentos.length > 0) {
+      excluirOrcamentosEmMassa(selectedOrcamentos);
     }
   };
 
@@ -221,13 +225,13 @@ const OrcamentosLista: React.FC = () => {
   /**
    * Selecionar/deselecionar orçamento individual
    */
-  const handleSelectOrcamento = (id: string, checked: boolean) => {
+  const handleSelectOrcamento = useCallback((id: string, checked: boolean) => {
     if (checked) {
       setSelectedOrcamentos(prev => [...prev, id]);
     } else {
       setSelectedOrcamentos(prev => prev.filter(oId => oId !== id));
     }
-  };
+  }, []);
 
   // ====================================
   // 🎨 COMPONENTES AUXILIARES
@@ -245,7 +249,7 @@ const OrcamentosLista: React.FC = () => {
   /**
    * Indicador de versão da IA
    */
-  const IndicadorVersaoIA: React.FC<{ orcamento: { versao_ia?: boolean; id: string } }> = ({ orcamento }) => {
+  const IndicadorVersaoIA: React.FC<{ orcamento: { versao_ia?: boolean; id: string } }> = ({ orcamento: _orcamento }) => {
     return (
       <Badge variant="outline" className="bg-[#daa916]/20 text-[#daa916] border-[#daa916]/30 text-xs px-2 py-0.5">
         <Sparkles className="h-3 w-3 mr-1" />
@@ -304,7 +308,7 @@ const OrcamentosLista: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => refetch()} className="w-full">
+              <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['orcamentos-parametricos'] })} className="w-full">
                 Tentar Novamente
               </Button>
             </CardContent>
@@ -727,7 +731,7 @@ const OrcamentosLista: React.FC = () => {
                                 Visualizar
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleDuplicar(orcamento)}
+                                onClick={() => duplicarOrcamento(orcamento)}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
                                 Duplicar
@@ -772,9 +776,10 @@ const OrcamentosLista: React.FC = () => {
                 </Button>
                 <Button 
                   variant="destructive" 
-                  onClick={() => handleExcluir(orcamentoParaExcluir)}
+                  onClick={() => excluirOrcamento(orcamentoParaExcluir)}
+                  disabled={isExcluindo}
                 >
-                  Excluir
+                  {isExcluindo ? "Excluindo..." : "Excluir"}
                 </Button>
               </div>
             </CardContent>
@@ -798,9 +803,10 @@ const OrcamentosLista: React.FC = () => {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleBulkDelete}
+              disabled={isExcluindoEmMassa}
               className="bg-red-600 hover:bg-red-700"
             >
-              Excluir {selectedOrcamentos.length} Orçamento(s)
+              {isExcluindoEmMassa ? `Excluindo ${selectedOrcamentos.length}...` : `Excluir ${selectedOrcamentos.length} Orçamento(s)`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

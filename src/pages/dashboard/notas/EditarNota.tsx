@@ -1,40 +1,33 @@
-import type { DragEvent} from "react";
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { AnimatePresence,motion } from "framer-motion";
 import { 
-  FileText, 
+  AlertTriangle,
   ArrowLeft, 
-  UploadCloud, 
-  Save,
   Building2,
-  Receipt,
+  CheckCircle,
   DollarSign,
+  ExternalLink,
+  Eye,
+  FileText, 
   Hash,
   Key,
-  MessageSquare,
-  Trash2,
-  CheckCircle,
   Loader2,
-  AlertTriangle,
-  ExternalLink,
-  Eye
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+  MessageSquare,
+  Receipt,
+  Save,
+  Trash2,
+  UploadCloud} from "lucide-react";
+import type { DragEvent} from "react";
+import { useCallback, useEffect,useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
-import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
-import { notaFiscalSchema } from "@/lib/validations/nota-fiscal";
-import { notasFiscaisApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
-import { useNotasFiscais } from "@/hooks/useNotasFiscais";
-import { useDespesas } from "@/hooks/useDespesas";
-import { DatePicker } from "@/components/ui/date-picker";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import FileViewer from "@/components/ui/file-viewer";
 import {
   Form,
@@ -45,6 +38,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -52,9 +46,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth";
+import { useDespesas } from "@/hooks/useDespesas";
+import { useNotasFiscais } from "@/hooks/useNotasFiscais";
+import { cn } from "@/lib/utils";
+import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
+import { notaFiscalSchema } from "@/lib/validations/nota-fiscal";
+import { fornecedoresPFApi,fornecedoresPJApi, notasFiscaisApi, obrasApi } from "@/services/api";
 
 const EditarNota = () => {
   const navigate = useNavigate();

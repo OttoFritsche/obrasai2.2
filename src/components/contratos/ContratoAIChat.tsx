@@ -1,14 +1,12 @@
-import React, { useRef, useEffect } from 'react';
-import { Bot, Send, Copy, Sparkles, Lightbulb } from 'lucide-react';
+import { Bot, Copy, Lightbulb,Send, Sparkles } from 'lucide-react';
+import React, { useEffect,useRef } from 'react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-
-import { useContratoAI } from '@/hooks/useContratoAI';
 
 interface ContratoAIChatProps {
   contratoContext: string;

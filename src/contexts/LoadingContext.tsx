@@ -1,5 +1,5 @@
 import type { ReactNode} from 'react';
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { createContext, useCallback, useContext, useEffect,useRef, useState } from 'react';
 
 // Tipos para estados de loading mais específicos
 interface LoadingEntry {
@@ -435,6 +435,6 @@ export const usePriorityLoading = () => {
 
 // Exportar enum e tipos para uso externo
 export { LoadingPriority };
-export type { LoadingOptions, LoadingMetrics, LoadingEntry };
+export type { LoadingEntry,LoadingMetrics, LoadingOptions };
 
 export default LoadingContext;

@@ -1,12 +1,13 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+
 import { useAuth } from '@/contexts/auth';
 import { useTenantValidation } from '@/hooks/useTenantValidation';
+import { supabase } from '@/integrations/supabase/client';
 import type {
-  ConstrutoraPJFormValues,
   ConstrutoraPFFormValues,
+  ConstrutoraPJFormValues,
 } from '@/lib/validations/construtora';
 
 /**

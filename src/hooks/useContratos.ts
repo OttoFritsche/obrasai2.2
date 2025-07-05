@@ -1,7 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import { useAuth } from "@/contexts/auth";
+import { supabase } from "@/integrations/supabase/client";
+
 import { useCrudOperations } from './useCrudOperations';
 
 interface Contrato {
@@ -179,6 +181,12 @@ export function useContratos() {
 export function useContrato(id: string) {
   const { user } = useAuth();
 
+  // Validar se é um UUID válido
+  const isValidUUID = (str: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  };
+
   const query = useQuery({
     queryKey: ["contrato", id],
     queryFn: async () => {
@@ -205,7 +213,7 @@ export function useContrato(id: string) {
         status: string;
       }[] };
     },
-    enabled: !!user && !!id,
+    enabled: !!user && !!id && isValidUUID(id), // Só executa se o ID for um UUID válido
   });
 
   return {
