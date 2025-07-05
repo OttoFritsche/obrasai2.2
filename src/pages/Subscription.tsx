@@ -1,13 +1,14 @@
+import { motion } from "framer-motion";
+import { CheckIcon, CreditCard, Crown, Sparkles,Zap } from "lucide-react";
+import { useState } from "react";
+
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckIcon, CreditCard, Crown, Zap, Sparkles } from "lucide-react";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useAuth } from "@/contexts/auth";
 import { toast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/formatters";
+import { cn } from "@/lib/utils";
 
 // Planos de assinatura
 const subscriptionPlans = [
@@ -95,7 +96,7 @@ const Subscription = () => {
         });
         setIsLoading(false);
       }, 1500);
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao iniciar checkout:", error);
       toast({
         title: "Erro ao iniciar checkout",
@@ -120,7 +121,7 @@ const Subscription = () => {
         });
         setIsLoading(false);
       }, 1500);
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao abrir portal:", error);
       toast({
         title: "Erro",

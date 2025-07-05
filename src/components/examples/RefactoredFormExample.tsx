@@ -5,20 +5,19 @@
  * em um formulário típico do projeto ObrasAI
  */
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Building, MapPin } from 'lucide-react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Building, MapPin } from 'lucide-react';
 
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormSection,FormWrapper } from '@/components/ui/FormWrapper';
+import { Input } from '@/components/ui/input';
 // Novos imports refatorados
 import { PageHeader } from '@/components/ui/PageHeader';
-import { FormWrapper, FormSection } from '@/components/ui/FormWrapper';
 import { useFormMutation } from '@/hooks/useFormMutation';
-import { formatDateBR } from '@/lib/utils/dateUtils';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { obrasApi } from '@/lib/api/obras';
 
 // Schema de validação
@@ -185,159 +184,3 @@ export function NovaObraRefatorada() {
   );
 }
 
-// ============================================================================
-// VERSÃO ANTIGA (ANTES DA REFATORAÇÃO)
-// ============================================================================
-
-/*
-export function NovaObraAntiga() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  
-  // ❌ Validação de tenant duplicada
-  const tenantId = user?.profile?.tenant_id;
-  const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
-
-  const form = useForm<ObraFormValues>({
-    resolver: zodResolver(obraSchema),
-    defaultValues: {
-      nome: '',
-      endereco: '',
-      cidade: '',
-      estado: '',
-      cep: '',
-      orcamento: 0,
-    },
-  });
-
-  // ❌ Mutation duplicada
-  const { mutate, isPending } = useMutation({
-    mutationFn: (values: ObraFormValues) => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado');
-      }
-      return obrasApi.create(values, validTenantId);
-    },
-    onSuccess: () => {
-      toast.success('Obra criada com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['obras'] });
-      navigate('/dashboard/obras');
-    },
-    onError: (error) => {
-      console.error('Error creating obra:', error);
-      toast.error('Erro ao criar obra');
-    },
-  });
-
-  return (
-    <DashboardLayout>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="space-y-6"
-      >
-        {/* ❌ Header duplicado */}
-        <div className="flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex items-center gap-3"
-          >
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-400/10 flex items-center justify-center">
-              <Building className="h-6 w-6 text-blue-500 dark:text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Nova Obra</h1>
-              <p className="text-sm text-muted-foreground">
-                Cadastre uma nova obra no sistema
-              </p>
-            </div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/dashboard/obras")}
-              className="group"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
-              Voltar
-            </Button>
-          </motion.div>
-        </div>
-
-        {/* ❌ Card com gradiente duplicado */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="border-border/50 bg-card/95 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle>Informações da Obra</CardTitle>
-              <CardDescription>
-                Preencha os dados básicos da obra que será cadastrada
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(mutate)} className="space-y-6">
-                  {/* ❌ Seção duplicada */}
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Localização
-                    </h3>
-                    
-                    {/* Campos do formulário... */}
-                    
-                    {/* ❌ Botão duplicado */}
-                    <div className="flex justify-end pt-4">
-                      <Button type="submit" disabled={isPending}>
-                        {isPending ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Criando...
-                          </>
-                        ) : (
-                          'Criar Obra'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-    </DashboardLayout>
-  );
-}
-*/
-
-// ============================================================================
-// COMPARAÇÃO DE LINHAS DE CÓDIGO
-// ============================================================================
-
-/*
-VERSÃO ANTIGA:
-- 150+ linhas de código
-- Lógica duplicada em múltiplos arquivos
-- Difícil manutenção
-- Inconsistências de estilo
-
-VERSÃO REFATORADA:
-- 80 linhas de código (-47%)
-- Lógica reutilizável
-- Fácil manutenção
-- Estilo consistente
-- Melhor legibilidade
-*/

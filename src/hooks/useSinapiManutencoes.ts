@@ -8,13 +8,13 @@
  * @version 1.0.0
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback, useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo,useState } from "react";
 import { toast } from "sonner";
 
 import {
-  sinapiManutencoes,
   type FiltrosBuscaUnificada,
+  sinapiManutencoes,
   type ValidacaoResult
 } from "@/services/sinapiManutencoes";
 
@@ -316,7 +316,7 @@ export const useSinapiBuscaInteligente = () => {
       
       try {
         await validarCodigo(codigo);
-      } catch (error) {
+      } catch (_error) {
         console.error("Erro na validação:", error);
       }
     } else {

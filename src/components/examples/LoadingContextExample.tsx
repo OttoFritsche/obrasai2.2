@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
-  useLoading,
-  useLoadingOperation,
+  type LoadingMetrics,
+  LoadingPriority,
   useAppLoadingStates,
   useCrudLoadingStates,
   useDebouncedLoading,
+  useLoading,
   useLoadingMetrics,
-  usePriorityLoading,
-  LoadingPriority,
-  type LoadingMetrics
-} from '@/contexts/LoadingContext';
+  useLoadingOperation,
+  usePriorityLoading} from '@/contexts/LoadingContext';
 
 // Componente para demonstrar operações básicas
 const BasicLoadingExample = () => {
@@ -48,7 +48,7 @@ const BasicLoadingExample = () => {
         }
       );
       console.log(result);
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro na operação:', error);
     }
   };

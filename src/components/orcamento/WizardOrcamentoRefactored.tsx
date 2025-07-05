@@ -12,19 +12,22 @@
  */
 
 import React from "react";
-import { Form } from "@/components/ui/form";
 
+import type { Orcamento } from "@/types/api";
+
+import { Form } from "@/components/ui/form";
 import { useWizardOrcamento } from "@/hooks/useWizardOrcamento";
-import { WizardHeader } from "./wizard/WizardHeader";
+
 import { WizardEtapa1 } from "./wizard/WizardEtapa1";
 import { WizardEtapa2 } from "./wizard/WizardEtapa2";
 import { WizardEtapa3 } from "./wizard/WizardEtapa3";
 import { WizardEtapa4 } from "./wizard/WizardEtapa4";
+import { WizardHeader } from "./wizard/WizardHeader";
 import { WizardNavigation } from "./wizard/WizardNavigation";
 
 // ✅ Interface simplificada - apenas props essenciais
 interface WizardOrcamentoRefactoredProps {
-  onOrcamentoCriado?: (orcamento: any) => void;
+  onOrcamentoCriado?: (orcamento: Orcamento) => void;
   obraId?: string;
 }
 

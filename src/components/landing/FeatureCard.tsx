@@ -1,5 +1,6 @@
 
 import type { LucideIcon } from "lucide-react";
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface FeatureCardProps {

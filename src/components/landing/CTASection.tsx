@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Calculator, Clock, Shield, CheckCircle } from "lucide-react";
+import { ArrowRight, Calculator, CheckCircle,Clock, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
 
 export const CTASection = () => {
   const navigate = useNavigate();

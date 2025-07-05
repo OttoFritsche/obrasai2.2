@@ -1,37 +1,25 @@
-import { useState, useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  Building2,
-  User,
-  ArrowLeft,
-  Save,
-  Trash2,
-  Loader2,
-  Search,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-
-import type {
-  ConstrutoraPJFormValues,
-  ConstrutoraPFFormValues,
-  ConstrutoraType} from "@/lib/validations/construtora";
 import {
-  construtoraPJSchema,
-  construtoraPFSchema
-} from "@/lib/validations/construtora";
-import { useCNPJLookup } from "@/hooks/useCNPJLookup";
-import { formatCNPJ, formatCPF, formatPhone, formatCEP, isComplete } from "@/lib/utils/formatters";
-import { brazilianStates } from "@/lib/i18n";
+  AlertCircle,
+  ArrowLeft,
+  Building2,
+  CheckCircle,
+  Loader2,
+  Save,
+  Search,
+  Trash2,
+  User,
+} from "lucide-react";
+import { useEffect, useRef,useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -41,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -48,11 +37,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/auth";
+import { useCNPJLookup } from "@/hooks/useCNPJLookup";
 import { useTenantValidation } from "@/hooks/useTenantValidation";
 import { supabase } from "@/integrations/supabase/client";
+import { brazilianStates } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import { formatCEP, formatCNPJ, formatCPF, formatPhone, isComplete } from "@/lib/utils/formatters";
+import type {
+  ConstrutoraPFFormValues,
+  ConstrutoraPJFormValues,
+  ConstrutoraType} from "@/lib/validations/construtora";
+import {
+  construtoraPFSchema,
+  construtoraPJSchema} from "@/lib/validations/construtora";
 
 const EditarConstrutora = () => {
   const navigate = useNavigate();

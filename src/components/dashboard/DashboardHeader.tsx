@@ -1,14 +1,15 @@
+import { motion } from "framer-motion";
+import { Bell, LogOut, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Bell, Search } from "lucide-react";
-import { t } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { motion } from "framer-motion";
-import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth";
+import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 

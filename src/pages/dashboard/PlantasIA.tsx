@@ -1,16 +1,17 @@
+import { motion } from 'framer-motion'
+import { AlertTriangle, Building2, CheckCircle, Clock, FileText, History, Loader2, Trash2,Upload, Zap } from 'lucide-react'
 import React from 'react'
-import { Building2, History, Clock, FileText, Upload, Zap, CheckCircle, AlertTriangle, Loader2, Trash2 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
+import DashboardLayout from '@/components/layouts/DashboardLayout'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { MetricCard } from '@/components/ui/metric-card'
-import DashboardLayout from '@/components/layouts/DashboardLayout'
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { usePlantaAnalyzer } from '@/hooks/usePlantaAnalyzer'
+import { cn } from '@/lib/utils'
 
 export function PlantasIA() {
   const {

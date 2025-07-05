@@ -1,57 +1,68 @@
-import { useForm } from "react-hook-form";
+// Bibliotecas externas
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
-import { 
-  Building, 
-  MapPin, 
-  DollarSign,
-  Search,
-  Loader2
-} from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { Building, DollarSign, Info, Loader2, MapPin, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
+// Componentes de layout
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+
+// Componentes UI
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DatePicker } from "@/components/ui/date-picker";
+import {
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { FormWrapper } from "@/components/ui/FormWrapper";
+import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/ui/PageHeader";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+// Contextos
+import { useAuth } from "@/contexts/auth";
+
+// Hooks
+import { useCEP } from "@/hooks/useCEP";
+
+// Integrações
+import { supabase } from "@/integrations/supabase/client";
+
+// Utilitários e validações
+import { brazilianStates } from "@/lib/i18n";
 import type { ObraFormValues } from "@/lib/validations/obra";
 import { obraSchema } from "@/lib/validations/obra";
-import { obrasApi } from "@/services/api";
-import { brazilianStates } from "@/lib/i18n";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
-import { useCEP } from "@/hooks/useCEP";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth";
-import { Info } from "lucide-react";
 
-// Importando os novos componentes refatorados
-import { PageHeader } from "@/components/ui/PageHeader";
-import { FormWrapper } from "@/components/ui/FormWrapper";
-import { useFormMutation } from "@/hooks/useFormMutation";
+// Serviços
+import { obrasApi } from "@/services/api";
 
 const NovaObraRefactored = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   const { user } = useAuth();
   const tenantId = user?.profile?.tenant_id;
-  const [construtoras, setConstrutoras] = useState<{ id: string; nome: string; cnpj?: string; email?: string; telefone?: string; endereco?: string }[]>([]);
+  const [construtoras, setConstrutoras] = useState<Array<{
+    id: string;
+    tipo: string;
+    nome_razao_social: string;
+    nome_fantasia?: string | null;
+    documento: string;
+  }>>([]);
   const [loadingConstrutoras, setLoadingConstrutoras] = useState(true);
   
   const form = useForm<ObraFormValues>({
@@ -63,17 +74,28 @@ const NovaObraRefactored = () => {
       estado: "",
       cep: "",
       orcamento: 0,
+      construtora_id: "",
       data_inicio: null,
       data_prevista_termino: null,
     },
   });
 
-  // Usando o hook genérico de mutação
-  const { mutate, isPending } = useFormMutation({
+  // Usando mutação direta
+  const { mutate, isPending } = useMutation({
     mutationFn: obrasApi.create,
-    successMessage: "Obra criada com sucesso!",
-    errorMessage: "Erro ao criar obra. Tente novamente.",
-    onSuccess: () => navigate("/dashboard/obras"),
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: ["obras"] });
+      await queryClient.invalidateQueries({ queryKey: ["orcamentos-parametricos"] });
+      await queryClient.invalidateQueries({ queryKey: ["orcamentos-com-itens"] });
+      toast.success("Obra criada com sucesso!", {
+        description: `A obra "${form.getValues('nome')}" foi registrada.`,
+      });
+      navigate("/dashboard/obras");
+    },
+    onError: (error) => {
+      console.error("Error creating obra:", error);
+      toast.error("Erro ao criar obra. Tente novamente.");
+    },
   });
 
   const onSubmit = (values: ObraFormValues) => {
@@ -128,10 +150,10 @@ const NovaObraRefactored = () => {
       >
         {/* Header usando o componente refatorado */}
         <PageHeader
-          icon={Building}
+          icon={<Building className="h-6 w-6 text-blue-500 dark:text-blue-400" />}
           title="Nova Obra"
           description="Cadastre uma nova obra no sistema"
-          backUrl="/dashboard/obras"
+          backTo="/dashboard/obras"
           backLabel="Voltar"
         />
 
@@ -152,15 +174,13 @@ const NovaObraRefactored = () => {
 
         {/* Formulário usando o componente refatorado */}
         <FormWrapper
+          form={form}
+          onSubmit={onSubmit}
           title="Informações da Obra"
           description="Preencha os dados básicos da obra que será cadastrada"
-          onSubmit={form.handleSubmit(onSubmit)}
-          onCancel={() => navigate("/dashboard/obras")}
           isLoading={isPending}
           submitLabel="Salvar Obra"
-          cancelLabel="Cancelar"
         >
-          <Form {...form}>
             {/* Seção: Localização (CEP primeiro) */}
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -411,7 +431,6 @@ const NovaObraRefactored = () => {
                 />
               </div>
             </div>
-          </Form>
         </FormWrapper>
       </motion.div>
     </DashboardLayout>

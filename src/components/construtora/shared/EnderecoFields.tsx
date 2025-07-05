@@ -1,8 +1,8 @@
-import type { Control } from 'react-hook-form';
 import { MapPin } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatCEP } from '@/lib/utils/formatters';
-import { brazilianStates } from '@/lib/i18n';
+import type { Control, FieldValues } from 'react-hook-form';
+
+import type { CNPJApiResponse } from '@/types/api';
+
 import {
   FormControl,
   FormField,
@@ -18,14 +18,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { brazilianStates } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
+import { formatCEP } from '@/lib/utils/formatters';
 
-interface EnderecoFieldsProps {
-  // Control genérico para funcionar com PJ e PF
-  control: Control<any>;
-  // Estados opcionais para feedback visual
+// Constraint para garantir que o formulário tenha os campos de endereço
+interface AddressFormValues extends FieldValues {
+  cep?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+}
+
+interface EnderecoFieldsProps<T extends AddressFormValues> {
+  control: Control<T>;
   isLoading?: boolean;
-  cnpjData?: any;
-  // Prefixo para os nomes dos campos (para flexibilidade futura)
+  cnpjData?: CNPJApiResponse | null;
   fieldPrefix?: string;
 }
 
@@ -44,12 +55,12 @@ interface EnderecoFieldsProps {
  * - Facilita manutenção dos campos de endereço
  * - Permite reutilização em outros formulários
  */
-export const EnderecoFields = ({ 
-  control, 
-  isLoading = false, 
-  cnpjData, 
-  fieldPrefix = '' 
-}: EnderecoFieldsProps) => {
+export const EnderecoFields = <T extends AddressFormValues>({
+  control,
+  isLoading = false,
+  cnpjData,
+  fieldPrefix = ''
+}: EnderecoFieldsProps<T>) => {
   const getFieldName = (field: string) => fieldPrefix ? `${fieldPrefix}.${field}` : field;
   
   const getFieldClassName = (hasData = false) => {

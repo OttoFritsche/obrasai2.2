@@ -5,18 +5,18 @@
  * do sistema de tratamento de erros em um cenário real.
  */
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 // Importações do sistema de tratamento de erros
 import {
+  createError,
   ErrorBoundary,
   ErrorFallback,
-  useErrorHandler,
-  createError,
   formatErrorMessage,
   isRecoverableError,
+  useErrorHandler,
 } from '@/lib/errorSystem';
 
 // Tipos para o exemplo
@@ -160,7 +160,7 @@ function UserList() {
     
     try {
       await deleteUserMutation.mutateAsync(userId);
-    } catch (error) {
+    } catch (_error) {
       // Erro já tratado no onError da mutation
       console.log('Erro capturado e tratado:', formatErrorMessage(error));
     }
@@ -170,7 +170,7 @@ function UserList() {
   const triggerError = () => {
     try {
       throw createError.api('Erro simulado para demonstração', 500);
-    } catch (error) {
+    } catch (_error) {
       handleError(error, {
         context: 'demo-error',
         type: 'critical',
@@ -327,7 +327,7 @@ function UserForm() {
     
     try {
       await createUserMutation.mutateAsync(formData);
-    } catch (error) {
+    } catch (_error) {
       // Erro já tratado no onError da mutation
     }
   };

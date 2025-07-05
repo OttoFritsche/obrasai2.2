@@ -1,11 +1,11 @@
-import React from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/hooks/useTheme";
+import React, { memo, useCallback } from "react";
 
+import logoDark from "@/assets/logo/logo_dark.png";
+import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
 // Importação das logos
 import logoLight from "@/assets/logo/logo_light.png";
-import logoDark from "@/assets/logo/logo_dark.png";
 import logoLightHorizon from "@/assets/logo/logo_light_horizon.png";
-import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
 
 interface LogoProps {
   /**
@@ -33,14 +33,20 @@ interface LogoProps {
 /**
  * Componente de Logo que troca automaticamente entre light/dark e horizontal/vertical
  */
-export const Logo: React.FC<LogoProps> = ({
-  variant = "vertical",
-  width,
-  height,
-  alt = "Logo Obras.AI",
-  className = "",
-}) => {
-  const { resolvedTheme } = useTheme();
+export const Logo = memo<LogoProps>((props: LogoProps) => {
+  const {
+    variant = "vertical",
+    width,
+    height,
+    alt = "Logo Obras.AI",
+    className = "",
+  } = props;
+  const { theme } = useTheme();
+  
+  // Resolver tema do sistema se necessário
+  const resolvedTheme = theme === "system" 
+    ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : theme;
 
   // Seleciona a logo correta
   const logoSrc = React.useMemo(() => {
@@ -50,6 +56,10 @@ export const Logo: React.FC<LogoProps> = ({
     return resolvedTheme === "dark" ? logoDark : logoLight;
   }, [variant, resolvedTheme]);
 
+  const handleError = useCallback(() => {
+    console.warn('Erro ao carregar logo');
+  }, []);
+
   return (
     <img
       src={logoSrc}
@@ -57,6 +67,9 @@ export const Logo: React.FC<LogoProps> = ({
       width={width}
       height={height}
       className={className}
+      loading="lazy"
+      decoding="async"
+      onError={handleError}
       style={{
         maxWidth: width || (variant === "horizontal" ? 240 : 48),
         maxHeight: height || (variant === "horizontal" ? 64 : 48),
@@ -67,6 +80,8 @@ export const Logo: React.FC<LogoProps> = ({
       draggable={false}
     />
   );
-};
+});
 
-export default Logo; 
+Logo.displayName = 'Logo';
+
+export default Logo;

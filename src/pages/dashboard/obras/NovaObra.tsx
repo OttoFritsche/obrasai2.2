@@ -1,29 +1,26 @@
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
-  Building, 
   ArrowLeft, 
-  MapPin, 
+  Building, 
   DollarSign,
-  Save,
   Info,
   Loader2,
+  MapPin, 
+  Save,
   Search
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-import type { ObraFormValues } from "@/lib/validations/obra";
-import { obraSchema } from "@/lib/validations/obra";
-import { obrasApi } from "@/services/api";
-import { brazilianStates } from "@/lib/i18n";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -33,6 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -40,19 +38,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
-import { useCEP } from "@/hooks/useCEP";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/auth";
+import { useCEP } from "@/hooks/useCEP";
+import { supabase } from "@/integrations/supabase/client";
+import { brazilianStates } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import type { ObraFormValues } from "@/lib/validations/obra";
+import { obraSchema } from "@/lib/validations/obra";
+import { obrasApi } from "@/services/api";
 
 const NovaObra = () => {
   const navigate = useNavigate();
   const { buscarCEP, formatarCEP, isLoading: isLoadingCEP, error: cepError } = useCEP();
   const { user } = useAuth();
   const tenantId = user?.profile?.tenant_id;
-  const [construtoras, setConstrutoras] = useState<{ id: string; nome: string; cnpj?: string; email?: string; telefone?: string; endereco?: string }[]>([]);
+  const [construtoras, setConstrutoras] = useState<Array<{
+    id: string;
+    tipo: string;
+    nome_razao_social: string;
+    nome_fantasia?: string | null;
+    documento: string;
+  }>>([]);
   const [loadingConstrutoras, setLoadingConstrutoras] = useState(true);
   
   const form = useForm<ObraFormValues>({
@@ -64,6 +70,7 @@ const NovaObra = () => {
       estado: "",
       cep: "",
       orcamento: 0,
+      construtora_id: "",
       data_inicio: null,
       data_prevista_termino: null,
     },

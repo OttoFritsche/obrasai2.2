@@ -1,6 +1,7 @@
+import { MessageCircle } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { getWidgetConfig } from '@/config/aiWidgetConfig';
 import { useAIChat } from '@/hooks/useAIChat';

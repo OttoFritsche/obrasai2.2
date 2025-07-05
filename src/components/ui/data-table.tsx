@@ -1,25 +1,16 @@
-import { useState } from "react";
 import type {
   ColumnDef,
-  SortingState,
-  ColumnFiltersState} from "@tanstack/react-table";
+  ColumnFiltersState,  SortingState} from "@tanstack/react-table";
 import {
   flexRender,
   getCoreRowModel,
-  useReactTable,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
+import { memo, useCallback,useState } from "react";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -29,6 +20,14 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { t } from "@/lib/i18n";
 
 interface DataTableProps<TData, TValue> {
@@ -38,7 +37,7 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string;
 }
 
-export function DataTable<TData, TValue>({
+export const DataTable = memo(function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
@@ -47,14 +46,26 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const handleSortingChange = useCallback((updater: any) => {
+    setSorting(updater);
+  }, []);
+
+  const handleColumnFiltersChange = useCallback((updater: any) => {
+    setColumnFilters(updater);
+  }, []);
+
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>, table: unknown, searchKey: string) => {
+    table.getColumn(searchKey)?.setFilterValue(event.target.value);
+  }, []);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: handleColumnFiltersChange,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
@@ -69,9 +80,7 @@ export function DataTable<TData, TValue>({
           <Input
             placeholder={searchPlaceholder || t("actions.search")}
             value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
+            onChange={(event) => handleSearchChange(event, table, searchKey)}
             className="max-w-sm bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-[#daa916] focus:ring-[#daa916]"
           />
         </div>
@@ -169,4 +178,4 @@ export function DataTable<TData, TValue>({
       </div>
     </div>
   );
-}
+}) as <TData, TValue>(props: DataTableProps<TData, TValue>) => JSX.Element;

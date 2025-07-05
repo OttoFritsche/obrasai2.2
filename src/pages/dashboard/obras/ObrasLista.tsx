@@ -1,15 +1,11 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
+import { Building, Calculator,Calendar, DollarSign, Eye, MapPin, Pencil, PieChart, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign, Calculator } from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import SelecionarObraModal from "@/components/orcamento/SelecionarObraModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,28 +16,42 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
+import { formatCurrencyBR, formatDateBR,t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 
 interface Obra {
   id: string;
   nome: string;
   endereco: string;
+  bairro?: string;
   cidade: string;
   estado: string;
   cep: string;
-  orcamento: number;
+  orcamento_total: number;
+  construtora_id?: string;
   data_inicio: string | null;
-  data_prevista_termino: string | null;
+  data_fim: string | null;
+  descricao?: string;
+  status?: string;
+  tenant_id: string;
   created_at: string;
+  updated_at?: string;
+  // Campos para compatibilidade com código existente
+  orcamento?: number;
+  data_prevista_termino?: string | null;
 }
 
 const ObrasLista = () => {
@@ -49,6 +59,7 @@ const ObrasLista = () => {
   const [obraToDelete, setObraToDelete] = useState<string | null>(null);
   const [selectedObras, setSelectedObras] = useState<string[]>([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [showSelecionarObraModal, setShowSelecionarObraModal] = useState(false);
 
   const { obras, isLoading, error: isError, refetch, deleteObra } = useObras();
 
@@ -58,7 +69,7 @@ const ObrasLista = () => {
     try {
       await deleteObra.mutateAsync(obraToDelete);
       setObraToDelete(null);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting obra:", error);
     }
   };
@@ -72,7 +83,7 @@ const ObrasLista = () => {
       }
       setSelectedObras([]);
       setShowBulkDeleteDialog(false);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting obras:", error);
     }
   };
@@ -97,7 +108,8 @@ const ObrasLista = () => {
   const getObraStatus = (obra: Obra) => {
     const hoje = new Date();
     const dataInicio = obra.data_inicio ? new Date(obra.data_inicio) : null;
-    const dataFim = obra.data_prevista_termino ? new Date(obra.data_prevista_termino) : null;
+    const dataFim = obra.data_fim ? new Date(obra.data_fim) : 
+                   (obra.data_prevista_termino ? new Date(obra.data_prevista_termino) : null);
 
     if (!dataInicio) return { label: "Não iniciada", color: "default" };
     if (dataInicio > hoje) return { label: "Planejada", color: "warning" };
@@ -150,7 +162,7 @@ const ObrasLista = () => {
       ),
     },
     {
-      accessorKey: "orcamento",
+      accessorKey: "orcamento_total",
       header: () => (
         <div className="flex items-center gap-1">
           <DollarSign className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
@@ -159,7 +171,7 @@ const ObrasLista = () => {
       ),
       cell: ({ row }) => (
         <div className="font-medium text-emerald-600 dark:text-emerald-400">
-          {formatCurrencyBR(row.original.orcamento)}
+          {formatCurrencyBR(row.original.orcamento_total || row.original.orcamento || 0)}
         </div>
       ),
     },
@@ -174,7 +186,7 @@ const ObrasLista = () => {
       cell: ({ row }) => (
         <div className="text-sm">
           <div className="text-slate-700 dark:text-slate-300">Início: {formatDateBR(row.original.data_inicio)}</div>
-          <div className="text-slate-500 dark:text-slate-400">Fim: {formatDateBR(row.original.data_prevista_termino)}</div>
+          <div className="text-slate-500 dark:text-slate-400">Fim: {formatDateBR(row.original.data_fim || row.original.data_prevista_termino)}</div>
         </div>
       ),
     },
@@ -343,7 +355,16 @@ const ObrasLista = () => {
 
             
             <Button 
-              onClick={() => navigate('/dashboard/orcamentos/novo')}
+              onClick={() => navigate('/dashboard/controle-orcamentario')}
+              variant="outline"
+              className="border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+            >
+              <PieChart className="h-4 w-4 mr-2" />
+              Controle Orçamentário
+            </Button>
+            
+            <Button 
+              onClick={() => setShowSelecionarObraModal(true)}
               variant="outline"
               className="border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
             >
@@ -520,7 +541,15 @@ const ObrasLista = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
+
+      {/* Modal de Seleção de Obra para Orçamento */}
+      <SelecionarObraModal
+        open={showSelecionarObraModal}
+        onOpenChange={setShowSelecionarObraModal}
+        returnPath="/dashboard/obras"
+        title="Selecionar Obra para Orçamento"
+        description="Escolha a obra para criar o orçamento paramétrico com IA"
+      />
 
     </DashboardLayout>
   );

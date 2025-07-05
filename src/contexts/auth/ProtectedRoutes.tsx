@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "./hooks";
 
 // Protected route wrapper with error boundary
@@ -17,7 +18,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     user = authContext.user;
     loading = authContext.loading;
     session = authContext.session;
-  } catch (error) {
+  } catch (_error) {
     console.error('⚠️ Auth context not available:', error);
     hasAuthError = true;
   }
@@ -88,7 +89,7 @@ export const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }
     const authContext = useAuth();
     user = authContext.user;
     loading = authContext.loading;
-  } catch (error) {
+  } catch (_error) {
     console.error('⚠️ Auth context not available in AdminRoute:', error);
     hasAuthError = true;
   }

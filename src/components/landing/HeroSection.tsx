@@ -1,22 +1,25 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowRight,
-  Building2, 
-  Shield,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  Users,
-  BarChart3
+import {
+    ArrowRight,
+    BarChart3,
+    Bot,
+    Building2,
+    CheckCircle,
+    Clock,
+    Shield,
+    TrendingUp,
+    Users
 } from "lucide-react";
-import { useAuth } from "@/contexts/auth";
-import { VideoModal } from "./VideoModal";
-import LeadChatbot from "./LeadChatbot";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
 import background3 from "@/assets/images/background3.jpg";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth/hooks";
+
+import LeadChatbot from "./LeadChatbot";
+import { VideoModal } from "./VideoModal";
 
 export const HeroSection = () => {
   const { user } = useAuth();
@@ -33,6 +36,10 @@ export const HeroSection = () => {
       setLeadChatbotOpen(true);
     }
     setIsLoading(false);
+  };
+
+  const handleOpenChatbot = () => {
+    setLeadChatbotOpen(true);
   };
 
   return (
@@ -161,7 +168,26 @@ export const HeroSection = () => {
             transition={{ delay: 0.8 }}
             className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
           >
-            <Button 
+            <Link
+              to="/register"
+              className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-8 font-medium text-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+            >
+              Começar Grátis <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+
+            {!user && (
+              <Button
+                variant="outline"
+                onClick={handleOpenChatbot}
+                className="group"
+              >
+                <Bot className="mr-2 h-5 w-5 text-blue-500 transition-transform group-hover:scale-110" />
+                Converse com nossa IA
+              </Button>
+            )}
+
+            <Button
+              variant="ghost"
               size="lg"
               onClick={handleGetStarted}
               disabled={isLoading}
@@ -174,7 +200,6 @@ export const HeroSection = () => {
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               )}
             </Button>
-            
           </motion.div>
 
           {/* Descrição do chatbot */}

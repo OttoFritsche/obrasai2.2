@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTenantValidation } from './useTenantValidation';
+import { useEffect } from 'react';
+
 import { useAuth } from '@/contexts/auth';
-import { queryKeys, prefetchHelpers } from '@/lib/query-keys';
-import { obrasApi, despesasApi, metricasApi } from '@/services/api';
+import { prefetchHelpers,queryKeys } from '@/lib/query-keys';
+import { despesasApi, metricasApi,obrasApi } from '@/services/api';
+
+import { useTenantValidation } from './useTenantValidation';
 
 /**
  * Hook para prefetch estratégico de dados baseado no contexto da aplicação

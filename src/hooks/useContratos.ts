@@ -1,7 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
 import { useAuth } from "@/contexts/auth";
+import { supabase } from "@/integrations/supabase/client";
+
 import { useCrudOperations } from './useCrudOperations';
 
 interface Contrato {

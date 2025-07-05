@@ -310,26 +310,67 @@ const webhookUrl = "https://ottodevsystem.app.n8n.cloud/webhook-test/obrasai";
 - ✅ Design responsivo de email
 - ✅ Registro de IP, expiração de token, auditoria
 
-## 🔒 SEGURANÇA E PERFORMANCE
+## 🔒 SEGURANÇA, QUALIDADE E PERFORMANCE
 
-### Medidas de Segurança
+### Medidas de Segurança (Checklist)
 
-- ✅ **RLS**: Row Level Security nativo PostgreSQL
-- ✅ **Validação**: Frontend (Zod) + Backend
-- ✅ **Sanitização**: DOMPurify para inputs
-- ✅ **Rate Limiting**: IA e APIs protegidas
-- ✅ **CORS**: Headers de segurança configurados
-- ✅ **Hash SHA-256**: Integridade de documentos
-- ✅ **Auditoria**: Logging completo de ações
+- ✅ **Proteção de Chaves:** Nenhum segredo no código; uso exclusivo de
+  variáveis de ambiente.
+- ✅ **Backend-driven:** Lógica sensível e chaves de API restritas às Edge
+  Functions.
+- ✅ **Validação Dupla:** Validação rigorosa com Zod no frontend e no backend.
+- ✅ **RLS Mandatório:** Row Level Security implementado em todas as tabelas
+  para isolamento total dos dados (multi-tenant).
+- ✅ **Prevenção de Ataques:** Uso do ORM do Supabase contra SQL Injection;
+  sanitização de inputs contra XSS.
+- ✅ **Logging Seguro:** Logs de eventos críticos sem dados pessoais, senhas ou
+  tokens.
+- ✅ **Senhas Fortes:** Validação Zod para senhas e hashing seguro do Supabase
+  Auth.
+- ✅ **Backups:** Rotinas de backup automáticas e seguras gerenciadas pelo
+  Supabase.
+- ✅ **Análise de Dependências:** `npm audit` executado periodicamente para
+  identificar e corrigir vulnerabilidades.
+- ✅ **HTTPS Forçado:** Todo o tráfego é criptografado com HTTPS.
+
+### Qualidade de Código e Boas Práticas (Checklist)
+
+- ✅ **DRY (Don't Repeat Yourself):** Reutilização de componentes, hooks e
+  utilitários para evitar duplicação.
+- ✅ **Código Limpo:** Remoção ativa de código não utilizado (dead code).
+- ✅ **TypeScript Robusto:** Tipagem forte, sem uso de `any`, e seguindo as
+  convenções do projeto.
+- ✅ **Componentes Focados:** Componentes pequenos, com responsabilidade única
+  (máx. 250 linhas).
+- ✅ **Estado Eficiente:** `TanStack Query` para estado de servidor e
+  `Context API` modular.
+- ✅ **Hooks Otimizados:** Lógica de negócio encapsulada em custom hooks com
+  dependências bem gerenciadas.
+- ✅ **Separação de Responsabilidades:** Clara distinção entre lógica de negócio
+  e componentes de UI.
+- ✅ **Acessibilidade (a11y):** Conformidade com as diretrizes WCAG para
+  garantir usabilidade para todos.
 
 ### Performance
 
-- ✅ **Bundle Splitting**: Vite otimizado
-- ✅ **Lazy Loading**: Componentes sob demanda
-- ✅ **Cache**: TanStack Query
-- ✅ **CDN**: Supabase Storage
-- ✅ **Edge Functions**: Latência reduzida
-- ✅ **Analytics**: Métricas de uso e performance
+- ✅ **Bundle Splitting**: Vite otimizado.
+- ✅ **Lazy Loading**: Componentes e rotas carregados sob demanda.
+- ✅ **Cache**: `TanStack Query` para cache de dados de API.
+- ✅ **CDN**: Supabase Storage para assets globais.
+- ✅ **Edge Functions**: Lógica de backend com baixa latência.
+- ✅ **Memoization**: Uso consciente de `React.memo`, `useCallback` e `useMemo`.
+
+## 🧪 ESTRATÉGIA DE TESTES
+
+- ✅ **Foco em Integração:** Testes que validam o comportamento de ponta a ponta
+  dos componentes, simulando a interação do usuário com a
+  `React Testing Library`.
+- ✅ **Mocking de API com MSW:** Uso padronizado do **Mock Service Worker** para
+  interceptar chamadas de API, garantindo testes realistas e independentes.
+- ✅ **Testes Unitários para Lógica Pura:** Cobertura total da lógica de negócio
+  isolada (validadores Zod, funções utilitárias) com `Vitest`.
+- ✅ **Cobertura de Fluxos Críticos:** Testes de integração obrigatórios para os
+  fluxos mais importantes (registro, login, criação de obras, etc.).
 
 ## 📱 INTERFACE RESPONSIVA
 

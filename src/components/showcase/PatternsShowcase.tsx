@@ -19,38 +19,37 @@
  * @version 1.0.0
  */
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { motion } from 'framer-motion';
 import {
-  Sparkles,
-  Zap,
-  Brain,
+  Award,
   BarChart3,
-  FormInput,
-  Settings,
+  Brain,
   CheckCircle,
+  Clock,
+  Code,
+  FormInput,
+  Monitor,
+  Rocket,
+  Settings,
+  Shield,
+  Smartphone,
+  Sparkles,
+  Target,
   TrendingUp,
   Users,
-  Clock,
-  Shield,
-  Rocket,
-  Target,
-  Award,
-  Code,
-  Monitor,
-  Smartphone
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+  Zap} from 'lucide-react';
+import React, { useState } from 'react';
 
+import AdvancedAIWidget from '@/components/ai/AdvancedAIWidget';
+import ContinuousMonitoringDashboard from '@/components/dashboard/ContinuousMonitoringDashboard';
 // Importar componentes dos padrões
 import LoadingMetricsDashboard from '@/components/dashboard/LoadingMetricsDashboard';
-import ContinuousMonitoringDashboard from '@/components/dashboard/ContinuousMonitoringDashboard';
-import AdvancedAIWidget from '@/components/ai/AdvancedAIWidget';
 import IntegratedPatternsDemo from '@/components/examples/IntegratedPatternsDemo';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PatternFeature {
   id: string;

@@ -1,38 +1,25 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
-  Receipt, 
+  AlertTriangle,
   ArrowLeft, 
   Building2, 
   Calendar, 
   DollarSign, 
-  User, 
   FileText, 
-  Save,
   Loader2,
-  AlertTriangle
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+  Receipt, 
+  Save,
+  User} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-// Novos padrões implementados
-import { FormProvider, useFormContext } from '@/contexts/FormContext';
-import { useAsyncOperation } from '@/hooks/useAsyncOperation';
-
-import { Constants } from "@/integrations/supabase/types";
-import { InsumoAnalysisCard } from "@/components/InsumoAnalysisCard";
-import type { DespesaFormValues} from "@/lib/validations/despesa";
-import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
-import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
-import { useAuth } from "@/contexts/auth";
-import { formatDate } from "@/lib/utils";
-import { DatePicker } from "@/components/ui/date-picker";
+import { InsumoAnalysisCard } from "@/components/sinapi/InsumoAnalysisCard";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -42,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -49,7 +37,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/contexts/auth";
+// Novos padrões implementados
+import { FormProvider, useFormContext } from '@/contexts/FormContext';
+import { useAsyncOperation } from '@/hooks/useAsyncOperation';
+import { Constants } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import type { DespesaFormValues} from "@/lib/validations/despesa";
+import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
+import { despesasApi, fornecedoresPFApi,fornecedoresPJApi, obrasApi } from "@/services/api";
 
 // Componente interno que usa FormContext
 const EditarDespesaForm: React.FC = () => {

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Quote, Star, Building, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Building, Quote, Sparkles,Star } from "lucide-react";
 import { useState } from "react";
 
 interface TestimonialCardProps {

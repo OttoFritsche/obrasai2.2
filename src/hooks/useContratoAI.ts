@@ -1,8 +1,9 @@
-import { useReducer, useCallback, useRef } from 'react';
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useCallback, useReducer, useRef } from 'react';
 import { toast } from "sonner";
+
 import { useAuth } from "@/contexts/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 // Tipos para IA de Contratos
 interface ContratoAIRequest {
@@ -284,7 +285,7 @@ export function useContratoAI() {
       if (error) throw error;
 
       toast.success('Avaliação registrada com sucesso!');
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao avaliar resposta:', error);
       toast.error('Erro ao registrar avaliação');
     }

@@ -8,25 +8,26 @@
  * @version 1.0.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { motion } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
   CheckCircle,
-  TrendingUp,
-  TrendingDown,
   Download,
-  Settings,
   Eye,
-  EyeOff
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+  EyeOff,
+  Settings,
+  TrendingDown,
+  TrendingUp} from 'lucide-react';
+import React, { useEffect, useMemo,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLoading } from '@/contexts/LoadingContext';
+
 import LoadingMetricsDashboard from './LoadingMetricsDashboard';
 
 interface PerformanceMetric {

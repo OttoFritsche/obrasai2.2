@@ -98,11 +98,7 @@ export const buscarSinapiUnificado = async (
     const {
       termo,
       codigo_sinapi,
-      incluir_manutencoes = true,
-      tipos_manutencao = [],
       status = ['ativo'],
-      data_inicio,
-      data_fim,
       limit = 20,
       offset = 0
     } = filtros;
@@ -177,7 +173,7 @@ export const buscarSinapiUnificado = async (
 
     return resultado;
 
-  } catch (error) {
+  } catch (_error) {
     secureLogger.error("Erro crítico na busca SINAPI unificada", error, filtros);
     throw error;
   }
@@ -212,7 +208,7 @@ export const buscarHistoricoCodigo = async (codigo: number): Promise<SinapiManut
 
     return data || [];
 
-  } catch (error) {
+  } catch (_error) {
     secureLogger.error("Erro crítico ao buscar histórico", error, { codigo });
     throw error;
   }
@@ -291,7 +287,7 @@ export const validarCodigoSinapi = async (codigo: number): Promise<ValidacaoResu
 
     return resultado;
 
-  } catch (error) {
+  } catch (_error) {
     secureLogger.error("Erro crítico na validação de código", error, { codigo });
     throw error;
   }
@@ -346,7 +342,7 @@ export const obterEstatisticasManutencoes = async () => {
 
     return estatisticas;
 
-  } catch (error) {
+  } catch (_error) {
     secureLogger.error("Erro ao obter estatísticas", error);
     throw error;
   }
@@ -356,20 +352,7 @@ export const obterEstatisticasManutencoes = async () => {
 // 🔧 FUNÇÕES AUXILIARES
 // ====================================
 
-/**
- * Determina o status atual baseado no tipo de manutenção
- */
-const determinarStatusAtual = (tipoManutencao: string): 'ativo' | 'desativado' | 'alterado' => {
-  if (tipoManutencao.includes('DESATIV') || tipoManutencao.includes('COMPOSIÇÃO DESATIVADA')) {
-    return 'desativado';
-  }
-  
-  if (tipoManutencao.includes('CRIAÇÃO')) {
-    return 'ativo';
-  }
-  
-  return 'alterado';
-};
+
 
 // ====================================
 // 📤 EXPORT PRINCIPAL

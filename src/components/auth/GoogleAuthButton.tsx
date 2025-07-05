@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "@/contexts/auth/hooks";
+import { useState } from "react";
 import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/auth/hooks";
 import { t } from "@/lib/i18n";
 
 interface GoogleAuthButtonProps {

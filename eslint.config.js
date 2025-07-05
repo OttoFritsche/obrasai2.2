@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import unusedImports from "eslint-plugin-unused-imports";
 import tseslint from "typescript-eslint";
 
@@ -18,6 +19,7 @@ export default tseslint.config(
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
       "unused-imports": unusedImports,
+      "simple-import-sort": simpleImportSort,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -25,6 +27,10 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      // Regra para ordenação de imports
+      "simple-import-sort/imports": "warn",
+      "simple-import-sort/exports": "warn",
+
       // Regras para detectar código não utilizado
       "@typescript-eslint/no-unused-vars": "off", // Desabilitar em favor do unused-imports
       "unused-imports/no-unused-imports": "warn",

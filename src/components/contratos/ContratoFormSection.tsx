@@ -1,21 +1,23 @@
+import {CreditCard, FileText, User } from 'lucide-react';
 import React from 'react';
-import { FileText, User, CreditCard, Calendar } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 
+import type { Orcamento, Template } from '@/types/api';
+import type { ObraFormData } from '@/types/forms';
+
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-
+import { Textarea } from '@/components/ui/textarea';
 import type { ContratoFormData } from '@/hooks/useContratoForm';
 
 interface ContratoFormSectionProps {
   form: UseFormReturn<ContratoFormData>;
-  obras: any[];
-  templates: any[];
-  orcamentos: any[];
+  obras: ObraFormData[];
+  templates: Template[];
+  orcamentos: Orcamento[];
   isCarregandoOrcamentos: boolean;
   onPreencherDadosOrcamento: (obraId: string) => void;
   onSubmit: (data: ContratoFormData) => void;

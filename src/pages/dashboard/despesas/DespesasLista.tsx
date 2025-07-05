@@ -1,26 +1,18 @@
-import { useState } from "react";
-import { Constants } from "@/integrations/supabase/types";
-import { Link, useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
 import { 
-  Pencil, 
-  Trash2, 
-  Plus, 
+  AlertTriangle,
   Check, 
   Filter,
   Loader2,
-  AlertTriangle,
-  Receipt
-} from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+  Pencil, 
+  Plus, 
+  Receipt,
+  Trash2} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MetricCard } from "@/components/ui/metric-card";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTable } from "@/components/ui/data-table";
+import { MetricCard } from "@/components/ui/metric-card";
 import {
   Select,
   SelectContent,
@@ -38,10 +36,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { useDespesas } from "@/hooks/useDespesas";
 import { useObras } from "@/hooks/useObras";
+import { Constants } from "@/integrations/supabase/types";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { calculateDespesasMetrics, calculatePeriodTrend } from "@/lib/utils/metrics";
 
 interface Despesa {
@@ -95,7 +94,7 @@ const DespesasLista = () => {
     try {
       await deleteDespesa.mutateAsync(despesaToDelete);
       setDespesaToDelete(null);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting despesa:", error);
     }
   };
@@ -110,7 +109,7 @@ const DespesasLista = () => {
       }
       setSelectedDespesas([]);
       setShowBulkDeleteDialog(false);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting despesas:", error);
     }
   };

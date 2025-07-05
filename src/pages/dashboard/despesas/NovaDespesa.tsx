@@ -1,39 +1,27 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
-  Receipt, 
   ArrowLeft, 
   Building2, 
   DollarSign, 
-  User, 
   FileText, 
-  Plus,
   Loader2,
-  Search
-} from "lucide-react";
+  Plus,
+  Receipt, 
+  Search,
+  User} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-import { Constants } from "@/integrations/supabase/types";
-import type { DespesaFormValues} from "@/lib/validations/despesa";
-import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
-import { despesasApi, obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
-import { useAuth } from "@/contexts/auth";
-import type { SinapiItem } from "@/hooks/useSinapiDespesas";
-import { useSinapiDespesas } from "@/hooks/useSinapiDespesas";
-import { SinapiSelectorDespesas } from "@/components/SinapiSelectorDespesas";
-import { VariacaoSinapiIndicator } from "@/components/VariacaoSinapiIndicator";
-import { formatDate } from "@/lib/utils";
-import { DatePicker } from "@/components/ui/date-picker";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { SinapiSelectorDespesas } from "@/components/sinapi/SinapiSelectorDespesas";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -42,6 +30,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -49,7 +38,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { Textarea } from "@/components/ui/textarea";
+import { VariacaoSinapiIndicator } from "@/components/sinapi/VariacaoSinapiIndicator";
+import { useAuth } from "@/contexts/auth";
+import type { SinapiItem } from "@/hooks/useSinapiDespesas";
+import { useSinapiDespesas } from "@/hooks/useSinapiDespesas";
+import { Constants } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import type { DespesaFormValues} from "@/lib/validations/despesa";
+import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
+import { despesasApi, fornecedoresPFApi,fornecedoresPJApi, obrasApi } from "@/services/api";
 
 const NovaDespesa = () => {
   const navigate = useNavigate();

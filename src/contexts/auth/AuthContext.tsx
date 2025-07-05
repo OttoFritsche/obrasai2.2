@@ -1,12 +1,14 @@
-import React, { createContext, useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import React, { createContext, useCallback, useEffect, useRef,useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import type { UserWithProfile, Subscription, AuthContextType } from "./types";
-import { fetchUserProfile, fetchUserSubscription, clearProfileCache } from "./utils";
+
+import { supabase } from "@/integrations/supabase/client";
+import { checkAndCleanRefreshToken, clearCorruptedAuthData, initAuthIntegrityCheck } from "@/lib/auth-utils";
 import { secureLogger } from "@/lib/secure-logger";
-import { clearCorruptedAuthData, checkAndCleanRefreshToken, initAuthIntegrityCheck } from "@/lib/auth-utils";
+
+import type { AuthContextType,Subscription, UserWithProfile } from "./types";
+import { clearProfileCache,fetchUserProfile, fetchUserSubscription } from "./utils";
 
 // Create the context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,7 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // ✅ Definir loading como false após carregar dados com sucesso
       setLoading(false);
       clearTimeout(safetyTimeout);
-    } catch (error) {
+    } catch (_error) {
       console.error('Error loading user profile:', error);
       // ✅ Em caso de erro ao carregar o perfil, defina o usuário como nulo e loading como false.
       // A sessão de autenticação do Supabase permanece válida.
@@ -160,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         isInitialized = true;
-      } catch (error) {
+      } catch (_error) {
         console.error('Error initializing auth:', error);
         await clearCorruptedAuthData();
         setUser(null);
@@ -334,8 +336,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       secureLogger.info("Logout forçado - redirecionando");
       window.location.href = '/login';
       
-    } catch (error) {
-      secureLogger.error("Erro no logout forçado", error);
+    } catch (_error) {
+      secureLogger.error("Erro no logout forçado", _error);
       window.location.href = '/login'; // Fallback
     }
   };
@@ -373,8 +375,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (userSubscription) {
         setSubscription(userSubscription);
       }
-    } catch (error) {
-      secureLogger.error("Failed to check subscription", error, { userId: user?.id });
+    } catch (_error) {
+      secureLogger.error("Failed to check subscription", _error, { userId: user?.id });
     }
   };
 

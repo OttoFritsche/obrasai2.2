@@ -8,28 +8,28 @@
  * @version 1.0.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AnimatePresence,motion } from 'framer-motion';
 import {
   Activity,
-  Clock,
-  TrendingUp,
-  TrendingDown,
   AlertTriangle,
-  CheckCircle,
-  Loader2,
   BarChart3,
+  CheckCircle,
+  Clock,
+  Loader2,
+  RefreshCw,
   Timer,
-  Zap,
-  RefreshCw
-} from 'lucide-react';
-import { useLoadingMetrics, useLoading, LoadingPriority } from '@/contexts/LoadingContext';
-import { motion, AnimatePresence } from 'framer-motion';
+  TrendingDown,
+  TrendingUp,
+  Zap} from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LoadingPriority,useLoading, useLoadingMetrics } from '@/contexts/LoadingContext';
 
 interface LoadingOperation {
   key: string;
@@ -37,7 +37,7 @@ interface LoadingOperation {
   duration?: number;
   priority: LoadingPriority;
   group?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   status: 'active' | 'completed' | 'error';
 }
 

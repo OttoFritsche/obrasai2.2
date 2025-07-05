@@ -1,15 +1,16 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
+
+import { AISection } from "@/components/landing/AISection";
+import { FAQSection } from "@/components/landing/FAQSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { Footer } from "@/components/landing/Footer";
 import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { AISection } from "@/components/landing/AISection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { PricingSection } from "@/components/landing/PricingSection";
-import { FAQSection } from "@/components/landing/FAQSection";
-import { Footer } from "@/components/landing/Footer";
 import LandingChat from "@/components/landing/LandingChat";
+import { PricingSection } from "@/components/landing/PricingSection";
+import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
 
 const Index = () => {
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrencyBR } from "@/lib/i18n";
 import { useObras } from "@/hooks/useObras";
+import { formatCurrencyBR } from "@/lib/i18n";
 
 // Definir tipo para obra
 interface Obra {
@@ -9,8 +9,11 @@ interface Obra {
   nome: string;
   cidade: string;
   estado: string;
-  orcamento: number;
+  orcamento_total: number;
   data_inicio?: string | null;
+  data_fim?: string | null;
+  // Campos antigos para compatibilidade
+  orcamento?: number;
   data_prevista_termino?: string | null;
 }
 

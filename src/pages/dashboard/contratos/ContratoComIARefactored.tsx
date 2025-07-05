@@ -11,16 +11,15 @@
  * @version 2.0.0
  */
 
-import React, { useMemo } from "react";
 import { ArrowLeft } from "lucide-react";
+import React, { useMemo } from "react";
 
-import { Button } from "@/components/ui/button";
+import { ContratoAIChat } from "@/components/contratos/ContratoAIChat";
+import { ContratoFormSection } from "@/components/contratos/ContratoFormSection";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-
+import { Button } from "@/components/ui/button";
 import { useContratoForm } from "@/hooks/useContratoForm";
 import { useObras } from "@/hooks/useObras";
-import { ContratoFormSection } from "@/components/contratos/ContratoFormSection";
-import { ContratoAIChat } from "@/components/contratos/ContratoAIChat";
 
 // ✅ Container Principal - Apenas Orquestração
 const ContratoComIARefactored: React.FC = () => {

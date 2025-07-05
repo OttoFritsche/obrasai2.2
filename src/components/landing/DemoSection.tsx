@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Play, ShieldCheck, Lock, Zap, MonitorPlay, Sparkles, CheckCircle, ArrowRight } from "lucide-react";
+import { ArrowRight,CheckCircle, Lock, MonitorPlay, Play, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { useState } from "react";
 
 export const DemoSection = () => {

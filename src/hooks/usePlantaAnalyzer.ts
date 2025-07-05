@@ -1,6 +1,7 @@
-import { useReducer, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useCallback, useEffect,useReducer } from 'react';
+
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 // Tipos
 interface PlantaAnalysis {
@@ -167,7 +168,7 @@ export function usePlantaAnalyzer() {
 
       if (error) throw error;
       dispatch({ type: 'SET_OBRAS', payload: data || [] });
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao carregar obras:', error);
       toast({
         title: "Erro",
@@ -189,7 +190,7 @@ export function usePlantaAnalyzer() {
 
       if (error) throw error;
       dispatch({ type: 'SET_HISTORY', payload: data || [] });
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro ao carregar histórico:', error);
       dispatch({ 
         type: 'ANALYSIS_ERROR', 

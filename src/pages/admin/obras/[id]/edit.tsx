@@ -1,10 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigate, useParams } from 'react-router-dom';
+
+import { useObras } from '@/hooks/useObras';
 import type { ObraFormValues} from '@/lib/validations/obra';
 import { obraSchema } from '@/lib/validations/obra';
-import { useObras } from '@/hooks/useObras';
-import { useNavigate, useParams } from 'react-router-dom';
 
 /**
  * Página de edição de obra multi-tenant.
@@ -42,7 +43,7 @@ const EditarObraPage: React.FC = () => {
     try {
       await updateObra.mutateAsync({ id: id!, obra: values });
       navigate('/admin/obras');
-    } catch (error) {
+    } catch (_error) {
       alert('Erro ao editar obra.');
     }
   };

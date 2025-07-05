@@ -1,5 +1,6 @@
 import { useContext } from "react"
-import { ThemeProviderContext } from "@/providers/theme-provider"
+
+import { ThemeProviderContext } from "@/contexts/theme-context"
 
 // Hook para usar o tema
 export const useTheme = () => {

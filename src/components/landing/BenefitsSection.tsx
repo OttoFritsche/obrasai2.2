@@ -1,18 +1,18 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  TrendingUp, 
+  BarChart3,
+  CheckCircle, 
   Clock, 
   DollarSign, 
   Shield, 
-  CheckCircle, 
   Target,
-  Zap,
+  TrendingUp, 
   Users,
-  BarChart3
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
+  Zap} from 'lucide-react';
+import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 const BenefitsSection = () => {
   const benefits = [

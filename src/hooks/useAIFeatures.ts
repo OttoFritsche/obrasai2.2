@@ -1,5 +1,5 @@
-import { useSemanticSearch } from './useSemanticSearch';
 import { useAIChat } from './useAIChat';
+import { useSemanticSearch } from './useSemanticSearch';
 
 /**
  * 🤖 Hook: useAIFeatures (Refatorado)

@@ -1,6 +1,7 @@
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Check } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
 
 export const ProblemSolutionSection = () => {
   return (

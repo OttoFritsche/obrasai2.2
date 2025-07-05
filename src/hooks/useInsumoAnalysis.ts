@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+
 import type { SinapiItem} from "./useSinapiDespesas";
 import { useSinapiDespesas } from "./useSinapiDespesas";
 
@@ -70,7 +71,7 @@ export const useInsumoAnalysis = () => {
         error: "Erro ao analisar insumo",
       }));
     }
-  }, []);
+  }, [extrairPalavrasChave, encontrarMelhorCorrespondencia]);
 
   const extrairPalavrasChave = useCallback((texto: string): string[] => {
     // Remover palavras comuns e extrair termos relevantes

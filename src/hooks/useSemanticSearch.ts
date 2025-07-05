@@ -1,6 +1,8 @@
-import { useReducer, useCallback, useRef } from 'react';
-import { useToast } from './use-toast';
+import { useCallback, useReducer, useRef } from 'react';
+
 import { analytics } from '@/services/analyticsApi';
+
+import { useToast } from './use-toast';
 
 // Tipos para busca semântica
 interface SearchRequest {

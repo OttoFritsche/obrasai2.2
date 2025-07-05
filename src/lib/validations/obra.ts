@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { t } from "@/lib/i18n";
 
 // Regex para validar CEP brasileiro (formato: 00000-000 ou 00000000)
@@ -18,10 +19,12 @@ export const obraSchema = z.object({
       // Retorna formatado para exibição
       return cleaned.length === 8 ? cleaned.replace(/(\d{5})(\d{3})/, '$1-$2') : val;
     }),
+  // Mantém nome antigo para compatibilidade com formulários
   orcamento: z.coerce
     .number()
     .min(0, { message: t("messages.invalidNumber") }),
   data_inicio: z.date().nullable().optional(),
+  // Mantém nome antigo para compatibilidade com formulários
   data_prevista_termino: z.date().nullable().optional(),
   construtora_id: z.string().min(1, { message: 'Selecione a construtora/autônomo responsável' }),
 });

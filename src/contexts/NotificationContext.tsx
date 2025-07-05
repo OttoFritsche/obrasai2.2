@@ -1,7 +1,8 @@
 import type { ReactNode} from 'react';
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/auth';
+import { createContext, useCallback,useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
+import { useAuth } from '@/contexts/auth';
 
 interface Notification {
   id: string;

@@ -14,7 +14,6 @@ export {
   ErrorBoundary,
   withErrorBoundary,
 } from '../components/error/ErrorBoundary';
-
 export {
   ErrorFallback,
   SimpleErrorFallback,
@@ -25,8 +24,8 @@ export {
 // ============================================================================
 
 export {
-  useErrorHandler,
   useErrorBoundary,
+  useErrorHandler,
 } from '../hooks/useErrorHandler';
 
 // ============================================================================
@@ -34,47 +33,40 @@ export {
 // ============================================================================
 
 export type {
-  // Tipos básicos
-  ErrorType,
-  LogLevel,
-  HttpStatus,
-  
-  // Interfaces principais
-  ErrorInfo,
-  ErrorHandlerOptions,
   ApiErrorHandlerOptions,
   AsyncWrapperOptions,
   CriticalErrorOptions,
-  
   // Interfaces de componentes
   ErrorBoundaryProps,
   ErrorFallbackProps,
-  SimpleErrorFallbackProps,
-  
-  // Interfaces de hooks
-  UseErrorHandlerReturn,
-  UseErrorBoundaryReturn,
-  
+  ErrorHandlerOptions,
+  // Interfaces principais
+  ErrorInfo,
   // Configurações
   ErrorSystemConfig,
+  // Tipos básicos
+  ErrorType,
+  HttpStatus,
+  LogLevel,
+  SimpleErrorFallbackProps,
+  UseErrorBoundaryReturn,
+  // Interfaces de hooks
+  UseErrorHandlerReturn,
 } from '../types/error';
-
 export {
   // Classes de erro
   ApiError,
-  ValidationError,
   AuthError,
-  NetworkError,
-  
-  // Type guards
-  isApiError,
-  isValidationError,
-  isAuthError,
-  isNetworkError,
-  isError,
-  
   // Configuração padrão
   DEFAULT_ERROR_CONFIG,
+  // Type guards
+  isApiError,
+  isAuthError,
+  isError,
+  isNetworkError,
+  isValidationError,
+  NetworkError,
+  ValidationError,
 } from '../types/error';
 
 // ============================================================================
@@ -84,31 +76,29 @@ export {
 export {
   errorConfig as config,
   ERROR_MESSAGES,
-  RETRY_CONFIG,
-  LOGGING_CONFIG,
-  NOTIFICATION_CONFIG,
-  
+  getCurrentLoggingConfig,
+  getRetryConfigForStatus,
+  isCriticalError,
+  isNonRetryableStatus,
   // Utilitários de configuração
   isRetryableStatus,
-  isNonRetryableStatus,
-  getRetryConfigForStatus,
-  shouldUseDetailedLogging,
   isSensitiveField,
+  LOGGING_CONFIG,
+  NOTIFICATION_CONFIG,
+  RETRY_CONFIG,
   sanitizeData,
-  isCriticalError,
-  getCurrentLoggingConfig,
+  shouldUseDetailedLogging,
 } from '../config/errorConfig';
 
 // ============================================================================
 // UTILITÁRIOS PRINCIPAIS
 // ============================================================================
 
-import { useErrorHandler } from '../hooks/useErrorHandler';
 import { ErrorBoundary } from '../components/error/ErrorBoundary';
 import { ErrorFallback } from '../components/error/ErrorFallback';
-import { errorConfig, ERROR_MESSAGES } from '../config/errorConfig';
-import { ApiError, ValidationError, AuthError, NetworkError } from '../types/error';
-import type { ErrorHandlerOptions, ApiErrorHandlerOptions } from '../types/error';
+import { ERROR_MESSAGES,errorConfig } from '../config/errorConfig';
+import { useErrorHandler } from '../hooks/useErrorHandler';
+import { ApiError, AuthError, NetworkError,ValidationError } from '../types/error';
 
 /**
  * Instância global do error handler para uso direto
@@ -178,7 +168,7 @@ export const errorSystem = {
  * const result = await safeApiCall();
  * ```
  */
-export function createAsyncWrapper<T extends (...args: any[]) => Promise<any>>(
+export function createAsyncWrapper<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   options: {
     context: string;
@@ -191,7 +181,7 @@ export function createAsyncWrapper<T extends (...args: any[]) => Promise<any>>(
   return (async (...args: Parameters<T>) => {
     try {
       return await fn(...args);
-    } catch (error) {
+    } catch (_error) {
       // Em um contexto real, isso seria tratado pelo useErrorHandler
       console.error(`Error in ${options.context}:`, error);
       
@@ -269,14 +259,14 @@ export const createError = {
   /**
    * Cria um erro de API
    */
-  api: (message: string, status: number, code?: string, details?: Record<string, any>) => {
-    return new ApiError(message, status as any, code, details);
+  api: (message: string, status: number, code?: string, details?: Record<string, unknown>) => {
+    return new ApiError(message, status as never, code, details);
   },
   
   /**
    * Cria um erro de validação
    */
-  validation: (message: string, field?: string, value?: any, rule?: string) => {
+  validation: (message: string, field?: string, value?: unknown, rule?: string) => {
     return new ValidationError(message, field, value, rule);
   },
   
@@ -304,7 +294,7 @@ export const createError = {
  * 
  * try {
  *   await apiCall();
- * } catch (error) {
+ * } catch (_error) {
  *   const info = extractErrorInfo(error);
  *   console.log(info.message, info.type, info.status);
  * }

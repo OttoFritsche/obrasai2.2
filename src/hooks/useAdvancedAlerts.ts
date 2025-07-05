@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../integrations/supabase/client";
-import { useToast } from "./use-toast";
+
 import type { SupabaseSubscription } from "@/types/supabase";
 import type { Json } from "@/types/supabase";
+
+import { supabase } from "../integrations/supabase/client";
+import { useToast } from "./use-toast";
 
 export interface ConfiguracaoAlertaAvancada {
   id?: string;
@@ -118,7 +120,7 @@ export const useAdvancedAlerts = () => {
 
       if (error) throw error;
       setConfiguracoes(data || []);
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error
         ? error.message
         : "Erro desconhecido";
@@ -163,7 +165,7 @@ export const useAdvancedAlerts = () => {
       if (error) throw error;
       setNotificacoes((data || []) as NotificacaoAlerta[]);
       calcularResumoNotificacoes((data || []) as NotificacaoAlerta[]);
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error
         ? error.message
         : "Erro desconhecido";
@@ -206,7 +208,7 @@ export const useAdvancedAlerts = () => {
 
         if (error) throw error;
         setHistorico(data || []);
-      } catch (error) {
+      } catch (_error) {
         const errorMessage = error instanceof Error
           ? error.message
           : "Erro desconhecido";
@@ -282,7 +284,7 @@ export const useAdvancedAlerts = () => {
 
       await carregarConfiguracoes();
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao salvar configuração:", error);
       toast({
         title: "Erro",
@@ -314,7 +316,7 @@ export const useAdvancedAlerts = () => {
 
       await carregarConfiguracoes();
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao excluir configuração:", error);
       toast({
         title: "Erro",
@@ -356,7 +358,7 @@ export const useAdvancedAlerts = () => {
       );
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao marcar notificação como lida:", error);
       return false;
     }
@@ -385,7 +387,7 @@ export const useAdvancedAlerts = () => {
       });
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao processar alertas:", error);
       toast({
         title: "Erro",
@@ -424,7 +426,7 @@ export const useAdvancedAlerts = () => {
 
       await carregarNotificacoes();
       return true;
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao enviar notificações:", error);
       toast({
         title: "Erro",
@@ -462,7 +464,7 @@ export const useAdvancedAlerts = () => {
       });
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       const errorMessage = error instanceof Error
         ? error.message
         : "Ocorreu um erro desconhecido.";
@@ -491,7 +493,7 @@ export const useAdvancedAlerts = () => {
 
         if (error && error.code !== "PGRST116") throw error; // PGRST116 = no rows returned
         return data || null;
-      } catch (error) {
+      } catch (_error) {
         console.error("Erro ao buscar configuração:", error);
         return null;
       }
@@ -534,7 +536,7 @@ export const useAdvancedAlerts = () => {
             unsubscribe: () => channel.unsubscribe()
           };
         }
-      } catch (error) {
+      } catch (_error) {
         console.error("Erro ao configurar subscription:", error);
       }
     };

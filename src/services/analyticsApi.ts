@@ -64,7 +64,7 @@ class AnalyticsService {
 
       if (error) throw error
       return data
-    } catch (error) {
+    } catch (_error) {
       console.error('Error tracking event:', error)
     }
   }
@@ -139,7 +139,7 @@ class AnalyticsService {
         .from('leads')
         .select('*')
 
-      const { data: eventsData } = await supabase
+      const { data: _eventsData } = await supabase
         .from('analytics_events')
         .select('*')
         .eq('event_type', 'lead_captured')
@@ -177,7 +177,7 @@ class AnalyticsService {
         leads_this_month,
         top_sources
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting lead metrics:', error)
       return {
         total_leads: 0,
@@ -235,7 +235,7 @@ class AnalyticsService {
         new_registrations_today,
         churn_rate: Math.round(churn_rate * 100) / 100
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting user metrics:', error)
       return {
         total_users: 0,
@@ -294,7 +294,7 @@ class AnalyticsService {
         obras_created: obras?.length || 0,
         total_api_calls: allEvents?.length || 0
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting product metrics:', error)
       return {
         ai_chat_usage: 0,
@@ -345,7 +345,7 @@ class AnalyticsService {
         ltv: Math.round(ltv),
         subscription_breakdown
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error getting business metrics:', error)
       return {
         mrr: 0,

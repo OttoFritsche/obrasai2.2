@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useState } from "react"
-import { encryptData, decryptData } from "@/lib/secure-storage"
+import { useEffect, useState } from "react"
 
-// Tipo para os temas disponíveis
-type Theme = "dark" | "light" | "system"
+import { decryptData, encryptData } from "@/lib/secure-storage"
+import type { Theme } from "@/contexts/theme-context"
+import { ThemeProviderContext } from "@/contexts/theme-context"
 
 // Contexto do tema
 interface ThemeProviderProps {
@@ -10,21 +10,6 @@ interface ThemeProviderProps {
   defaultTheme?: Theme
   storageKey?: string
 }
-
-// Estado do contexto
-interface ThemeProviderState {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-}
-
-// Valor inicial do contexto
-const initialState: ThemeProviderState = {
-  theme: "system",
-  setTheme: () => null,
-}
-
-// Criar o contexto
-export const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 // Provider do tema
 export function ThemeProvider({
@@ -55,7 +40,7 @@ export function ThemeProvider({
                 localStorage.removeItem(storageKey);
                 return defaultTheme;
               }
-            } catch (decryptError) {
+            } catch (_decryptError) {
               // Log silencioso em desenvolvimento, remove dados corrompidos
               if (import.meta.env?.DEV) {
                 console.warn('Failed to decrypt theme preference, removing corrupted data');
@@ -77,7 +62,7 @@ export function ThemeProvider({
           }
         }
         return defaultTheme;
-      } catch (error) {
+      } catch (_error) {
         console.warn('Failed to retrieve theme preference, using default');
         return defaultTheme;
       }
@@ -114,7 +99,7 @@ export function ThemeProvider({
       try {
         const encrypted = 'encrypted:' + encryptData(theme);
         localStorage.setItem(storageKey, encrypted);
-      } catch (error) {
+      } catch (_error) {
         console.warn('Failed to encrypt theme preference, storing as plain text');
         localStorage.setItem(storageKey, theme);
       }
@@ -127,14 +112,4 @@ export function ThemeProvider({
       {children}
     </ThemeProviderContext.Provider>
   )
-}
-
-// Hook para usar o tema
-export const useTheme = () => {
-  const context = useContext(ThemeProviderContext)
-
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider")
-
-  return context
 }

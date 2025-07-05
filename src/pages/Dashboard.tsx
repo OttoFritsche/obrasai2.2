@@ -1,30 +1,29 @@
 import { motion } from "framer-motion";
 import { 
-  Building, 
-  DollarSign, 
-  TrendingUp, 
-  FileText, 
   AlertCircle,
-  Receipt,
-  Users,
-  Sparkles,
-  Building2,
   BarChart3,
-  LayoutDashboard
-} from "lucide-react";
+  Building, 
+  Building2,
+  DollarSign, 
+  FileText, 
+  LayoutDashboard,
+  Receipt,
+  Sparkles,
+  TrendingUp, 
+  Users} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth";
-
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useObras } from "@/hooks/useObras";
-import { useDespesas } from "@/hooks/useDespesas";
-import { useNotasFiscais } from "@/hooks/useNotasFiscais";
-import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 import { Link } from "react-router-dom";
+
 import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 import { RecentProjectsRefactored as RecentProjects } from "@/components/dashboard/RecentProjectsRefactored";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription,CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/auth";
+import { useDespesas } from "@/hooks/useDespesas";
+import { useNotasFiscais } from "@/hooks/useNotasFiscais";
+import { useObras } from "@/hooks/useObras";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
 
 const Dashboard = () => {
   const { obras, isLoading: obrasLoading } = useObras();

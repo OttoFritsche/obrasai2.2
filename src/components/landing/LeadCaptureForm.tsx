@@ -1,37 +1,36 @@
-import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { z } from 'zod';
 import {
-  User,
+  Briefcase,
+  Building,
+  Building2,
+  Calculator,
+  Calendar,
+  Check,
   Mail,
   Phone,
-  Building,
-  Briefcase,
-  Calculator,
-  Target,
-  Check,
   Star,
-  Building2,
-  Users,
-  Calendar
-} from 'lucide-react';
+  Target,
+  User,
+  Users} from 'lucide-react';
+import React, { useState } from 'react';
+import { z } from 'zod';
+
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
 import { 
+  useWizardStepValidation,
   Wizard,
-  WizardHeader,
-  WizardProgress,
-  WizardStepper,
   WizardContent,
+  WizardHeader,
   WizardNavigation,
-  useWizardStepValidation
-} from '@/components/wizard/WizardComposition';
+  WizardProgress,
+  WizardStepper} from '@/components/wizard/WizardComposition';
 import { useFormContext } from '@/contexts/FormContext';
 import { useAsyncOperation } from '@/hooks/useAsyncOperation';
+import { supabase } from '@/integrations/supabase/client';
 
 // ✅ Schema de validação por step
 const step1Schema = z.object({
@@ -148,6 +147,9 @@ const Step2CompanyInfo: React.FC = () => {
   const { setValid } = useWizardStepValidation('step-2', true);
   const { form } = useFormContext<FormData>();
   const { register, formState: { errors }, setValue, watch } = form;
+
+  type TipoEmpresa = z.infer<typeof step2Schema.shape.tipo_empresa>;
+  type PorteEmpresa = z.infer<typeof step2Schema.shape.porte_empresa>;
   
   React.useEffect(() => {
     setValid(true); // Esta etapa é sempre válida (campos opcionais)
@@ -189,7 +191,7 @@ const Step2CompanyInfo: React.FC = () => {
           <Building2 className="h-4 w-4" />
           Tipo de Empresa
         </Label>
-        <Select onValueChange={(value) => setValue('tipo_empresa', value as any)}>
+        <Select onValueChange={(value) => setValue('tipo_empresa', value as TipoEmpresa)}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione o tipo" />
           </SelectTrigger>
@@ -208,7 +210,7 @@ const Step2CompanyInfo: React.FC = () => {
           <Users className="h-4 w-4" />
           Porte da Empresa
         </Label>
-        <Select onValueChange={(value) => setValue('porte_empresa', value as any)}>
+        <Select onValueChange={(value) => setValue('porte_empresa', value as PorteEmpresa)}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione o porte" />
           </SelectTrigger>

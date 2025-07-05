@@ -1,21 +1,19 @@
-import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { useCEP } from '@/hooks/useCEP';
+import { useObras } from '@/hooks/useObras';
 import {
+  type WizardCompleto,
+  WizardCompletoSchema,
   WizardEtapa1Schema,
   WizardEtapa2Schema,
   WizardEtapa3Schema,
-  WizardEtapa4Schema,
-  WizardCompletoSchema,
-  type WizardCompleto
-} from '@/lib/validations/orcamento';
-
-import { orcamentosParametricosApi, calculoOrcamentoApi } from '@/services/orcamentoApi';
-import { useCEP } from '@/hooks/useCEP';
-import { obrasApi } from '@/services/api';
+  WizardEtapa4Schema} from '@/lib/validations/orcamento';
+import { calculoOrcamentoApi,orcamentosParametricosApi } from '@/services/orcamentoApi';
 
 export interface UseWizardOrcamentoProps {
   onOrcamentoCriado?: (orcamento: any) => void;
@@ -71,48 +69,110 @@ export const useWizardOrcamento = ({
   const [calculandoIA, setCalculandoIA] = useState(false);
   const [isSubmitindo, setIsSubmitindo] = useState(false);
 
+  // ✅ Buscar obras para encontrar a obra selecionada
+  const { obras } = useObras();
+
   const form = useForm<WizardCompleto>({
     resolver: zodResolver(WizardCompletoSchema),
     defaultValues: {
       // Etapa 1 - Informações Básicas
-      nome_obra: "",
+      nome_orcamento: "",
       descricao: "",
-      tipo_obra: "casa_popular",
+      tipo_obra: "R1_UNIFAMILIAR",
+      padrao_obra: "POPULAR",
       
       // Etapa 2 - Localização
       cep: "",
       estado: "",
       cidade: "",
-      endereco: "",
       
       // Etapa 3 - Dimensões
-      area_total: 0,
-      quartos: 1,
-      banheiros: 1,
-      pavimentos: 1,
+      area_total: undefined,
+      area_construida: undefined,
+      area_detalhada: undefined,
       
-      // Etapa 4 - Padrão
-      padrao_obra: "popular",
-      incluir_terreno: false,
-      incluir_projeto: true,
-      incluir_fundacao: true,
-      observacoes: ""
-    }
+      // Etapa 4 - Especificações
+      especificacoes: "Piso em porcelanato 60x60cm, paredes em textura acrílica, forro em gesso com sanca, esquadrias em alumínio branco",
+      parametros_entrada: "Obra em condomínio fechado, terreno plano, instalação de ar condicionado split nos quartos"
+    },
+    mode: 'onChange'
   });
+  
+  // ✅ Buscar dados da obra se obraId estiver presente
+  const obraSelecionada = obraId && obras ? obras.find(obra => obra.id === obraId) : null;
+
+  // Log para verificar valores iniciais
+  console.log('🔍 Valores iniciais do formulário:', form.getValues());
+  console.log('🔍 ObraId recebido:', obraId);
+  console.log('🔍 Obra encontrada:', obraSelecionada?.nome || 'Nenhuma');
 
   const cepData = useCEP();
+
+  // ✅ Auto-preencher formulário com dados da obra
+  useEffect(() => {
+    if (obraSelecionada && !form.getValues().nome_orcamento) {
+      // Gerar nome inteligente do orçamento baseado na obra
+      const nomeOrcamento = `Orçamento - ${obraSelecionada.nome}`;
+      
+      form.setValue('nome_orcamento', nomeOrcamento);
+      form.setValue('descricao', `Orçamento paramétrico para a obra: ${obraSelecionada.nome}`);
+      
+      // Se a obra tem localização, preencher também
+      if (obraSelecionada.cidade && obraSelecionada.estado) {
+        form.setValue('cidade', obraSelecionada.cidade);
+        form.setValue('estado', obraSelecionada.estado);
+      }
+      
+      // Se a obra tem CEP, preencher
+      if (obraSelecionada.cep) {
+        form.setValue('cep', obraSelecionada.cep);
+      }
+
+      console.log('🏗️ Dados da obra preenchidos automaticamente:', {
+        obra: obraSelecionada.nome,
+        orcamento: nomeOrcamento,
+        cidade: obraSelecionada.cidade,
+        estado: obraSelecionada.estado
+      });
+    }
+  }, [obraSelecionada, form]);
 
   const validarEtapaAtual = useCallback(async (): Promise<boolean> => {
     const schema = getSchemaByEtapa(etapaAtual);
     const currentValues = form.getValues();
     
+    console.log('🔍 Valores atuais do formulário:', currentValues);
+    console.log('🔍 Tipo de especificacoes:', typeof currentValues.especificacoes, currentValues.especificacoes);
+    console.log('🔍 Tipo de parametros_entrada:', typeof currentValues.parametros_entrada, currentValues.parametros_entrada);
+    
+    // Garantir que especificacoes e parametros_entrada tenham valores padrão
+    const valuesWithDefaults = {
+      ...currentValues,
+      especificacoes: currentValues.especificacoes || {},
+      parametros_entrada: currentValues.parametros_entrada || {}
+    };
+    
+    console.log('🔍 Valores com defaults:', valuesWithDefaults);
+    
     try {
-      schema.parse(currentValues);
+      schema.parse(valuesWithDefaults);
       form.clearErrors();
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error('Erro de validação detalhado:', {
+          errors: error.errors,
+          currentValues: valuesWithDefaults,
+          etapa: etapaAtual
+        });
         error.errors.forEach((err) => {
+          console.error('Campo com erro:', {
+            path: err.path,
+            message: err.message,
+            code: err.code,
+            received: err.received,
+            expected: err.expected
+          });
           const fieldName = err.path[0] as keyof WizardCompleto;
           form.setError(fieldName, {
             type: 'validation',
@@ -149,31 +209,19 @@ export const useWizardOrcamento = ({
     }
   }, []);
 
-  const calcularOrcamentoComIA = async (dadosCompletos: WizardCompleto) => {
+  const calcularOrcamentoComIA = async (orcamentoId: string) => {
     setCalculandoIA(true);
     
     try {
-      const resultado = await calculoOrcamentoApi.calcularComIA({
-        nome_obra: dadosCompletos.nome_obra,
-        tipo_obra: dadosCompletos.tipo_obra,
-        area_total: dadosCompletos.area_total,
-        quartos: dadosCompletos.quartos,
-        banheiros: dadosCompletos.banheiros,
-        pavimentos: dadosCompletos.pavimentos,
-        padrao_obra: dadosCompletos.padrao_obra,
-        estado: dadosCompletos.estado,
-        cidade: dadosCompletos.cidade,
-        incluir_terreno: dadosCompletos.incluir_terreno,
-        incluir_projeto: dadosCompletos.incluir_projeto,
-        incluir_fundacao: dadosCompletos.incluir_fundacao
+      const resultado = await calculoOrcamentoApi.calcular({
+        orcamento_id: orcamentoId,
+        forcar_recalculo: false
       });
 
-      if (resultado?.custo_estimado) {
-        const custoEstimado = typeof resultado.custo_estimado === 'string' 
-          ? parseFloat(resultado.custo_estimado.replace(/[^\d.,]/g, '').replace(',', '.'))
-          : resultado.custo_estimado;
+      if (resultado?.success && resultado?.orcamento?.custo_estimado) {
+        const custoEstimado = resultado.orcamento.custo_estimado;
 
-        if (!isNaN(custoEstimado) && custoEstimado > 0) {
+        if (custoEstimado > 0) {
           toast.success(
             `✨ Orçamento calculado! Valor estimado: ${new Intl.NumberFormat('pt-BR', {
               style: 'currency',
@@ -182,8 +230,10 @@ export const useWizardOrcamento = ({
           );
         } else {
           toast.success("✨ Orçamento calculado com sucesso!");
-          console.warn("Custo estimado não disponível na resposta:", resultado);
         }
+      } else {
+        toast.success("✨ Orçamento calculado com sucesso!");
+        console.warn("Custo estimado não disponível na resposta:", resultado);
       }
 
     } catch (error) {
@@ -199,27 +249,22 @@ export const useWizardOrcamento = ({
 
     try {
       const orcamentoData = {
-        nome: dadosCompletos.nome_obra,
+        nome_orcamento: dadosCompletos.nome_orcamento,
         descricao: dadosCompletos.descricao || "",
         obra_id: obraId || null,
         tipo_obra: dadosCompletos.tipo_obra,
         area_total: dadosCompletos.area_total,
-        quartos: dadosCompletos.quartos,
-        banheiros: dadosCompletos.banheiros,
-        pavimentos: dadosCompletos.pavimentos,
+        area_construida: dadosCompletos.area_construida,
+        area_detalhada: dadosCompletos.area_detalhada,
         padrao_obra: dadosCompletos.padrao_obra,
         cep: dadosCompletos.cep,
         estado: dadosCompletos.estado,
         cidade: dadosCompletos.cidade,
-        endereco: dadosCompletos.endereco || "",
-        incluir_terreno: dadosCompletos.incluir_terreno,
-        incluir_projeto: dadosCompletos.incluir_projeto,
-        incluir_fundacao: dadosCompletos.incluir_fundacao,
-        observacoes: dadosCompletos.observacoes || "",
-        status: 'rascunho' as const
+        especificacoes: dadosCompletos.especificacoes,
+        parametros_entrada: dadosCompletos.parametros_entrada
       };
 
-      const response = await orcamentosParametricosApi.criar(orcamentoData);
+      const response = await orcamentosParametricosApi.create(orcamentoData);
       
       toast.success("🎉 Orçamento criado com sucesso!");
       onOrcamentoCriado?.(response);
@@ -246,18 +291,27 @@ export const useWizardOrcamento = ({
 
       const dadosCompletos = form.getValues();
       
+      // Garantir que especificacoes e parametros_entrada tenham valores padrão
+      const dadosComDefaults = {
+        ...dadosCompletos,
+        especificacoes: dadosCompletos.especificacoes || {},
+        parametros_entrada: dadosCompletos.parametros_entrada || {}
+      };
+      
       // Validação final completa
-      const resultadoValidacao = WizardCompletoSchema.safeParse(dadosCompletos);
+      const resultadoValidacao = WizardCompletoSchema.safeParse(dadosComDefaults);
       if (!resultadoValidacao.success) {
         toast.error("Dados incompletos. Verifique todas as etapas.");
         return;
       }
 
       // Criar orçamento
-      const orcamento = await criarOrcamento(dadosCompletos);
+      const orcamento = await criarOrcamento(dadosComDefaults);
       
       // Calcular com IA em paralelo (não bloqueia)
-      calcularOrcamentoComIA(dadosCompletos);
+      if (orcamento?.id) {
+        calcularOrcamentoComIA(orcamento.id);
+      }
 
     } catch (error) {
       console.error("Erro no submit:", error);

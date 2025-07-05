@@ -1,18 +1,18 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  Wizard,
-  WizardProvider,
-  WizardHeader,
-  WizardProgress,
-  WizardStepper,
-  WizardContent,
-  WizardNavigation,
-  WizardStep,
   useWizard,
-  useWizardStepValidation
-} from '@/components/wizard/WizardComposition';
+  useWizardStepValidation,
+  Wizard,
+  WizardContent,
+  WizardHeader,
+  WizardNavigation,
+  WizardProgress,
+  WizardProvider,
+  WizardStep,
+  WizardStepper} from '@/components/wizard/WizardComposition';
 
 // Re-export para compatibilidade
 export { useWizard, useWizardStepValidation };
@@ -23,7 +23,7 @@ interface WizardOrcamentoProps {
     id: string;
     title: string;
     description?: string;
-    component: React.ComponentType<any>;
+    component: React.ComponentType<Record<string, unknown>>;
     isOptional?: boolean;
   }>;
   onComplete?: () => void;
@@ -175,17 +175,16 @@ WizardOrcamento.Content = WizardContent;
 
 // Exportações principais
 export { 
-  WizardOrcamento, 
-  OrcamentoStep,
   OrcamentoNavigation,
+  OrcamentoStep,
   useOrcamentoStepValidation,
+  WizardContent,
+  WizardHeader,
+  WizardNavigation,
+  WizardOrcamento, 
+  WizardProgress,
   // Re-exports do sistema base
   WizardProvider,
-  WizardHeader,
-  WizardProgress,
-  WizardStepper,
-  WizardContent,
-  WizardNavigation,
-  WizardStep
-};
+  WizardStep,
+  WizardStepper};
 export default WizardOrcamento;

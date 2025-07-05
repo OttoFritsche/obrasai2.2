@@ -1,14 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { ObraFormValues } from "@/lib/validations/obra";
+import { sanitizeFormData } from "@/lib/input-sanitizer";
+import { secureLogger } from "@/lib/secure-logger";
+import { unformat } from "@/lib/utils/formatters";
+import type { DespesaFormValues } from "@/lib/validations/despesa";
 import type {
   FornecedorPFFormValues,
   FornecedorPJFormValues,
 } from "@/lib/validations/fornecedor";
-import type { DespesaFormValues } from "@/lib/validations/despesa";
 import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
-import { sanitizeFormData } from "@/lib/input-sanitizer";
-import { secureLogger } from "@/lib/secure-logger";
-import { unformat } from "@/lib/utils/formatters";
+import type { ObraFormValues } from "@/lib/validations/obra";
 
 // Obras API
 export const obrasApi = {
@@ -25,7 +25,7 @@ export const obrasApi = {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in obrasApi.getAll", error, { tenantId });
       throw error;
     }
@@ -48,7 +48,7 @@ export const obrasApi = {
       }
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       secureLogger.error("Error in obrasApi.getById", error, {
         obraId: id,
         tenantId,
@@ -105,7 +105,7 @@ export const obrasApi = {
             }
           }
           return null;
-        } catch (error) {
+        } catch (_error) {
           console.warn("❌ Erro ao formatar data (create):", error);
           return null;
         }
@@ -149,9 +149,9 @@ export const obrasApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in obrasApi.create", error);
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in obrasApi.create", _error);
+      throw _error;
     }
   },
 
@@ -190,14 +190,21 @@ export const obrasApi = {
           }
 
           return null;
-        } catch (error) {
+        } catch (_error) {
           console.warn("❌ Erro ao formatar data (update):", error);
           return null;
         }
       };
 
+      // Mapear campos do formulário para os campos do banco de dados
       const formattedObra = {
-        ...sanitizedObra,
+        nome: sanitizedObra.nome,
+        endereco: sanitizedObra.endereco,
+        cidade: sanitizedObra.cidade,
+        estado: sanitizedObra.estado,
+        cep: sanitizedObra.cep,
+        orcamento: sanitizedObra.orcamento,
+        construtora_id: sanitizedObra.construtora_id,
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
         data_prevista_termino: formatDateForDB(
           sanitizedObra.data_prevista_termino,
@@ -220,9 +227,9 @@ export const obrasApi = {
       secureLogger.info("Obra updated successfully", { obraId: data.id });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in obrasApi.update", error, { obraId: id });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in obrasApi.update", _error, { obraId: id });
+      throw _error;
     }
   },
 
@@ -242,9 +249,9 @@ export const obrasApi = {
       secureLogger.info("Obra deleted successfully", { obraId: id });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in obrasApi.delete", error, { obraId: id });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in obrasApi.delete", _error, { obraId: id });
+      throw _error;
     }
   },
 };
@@ -267,11 +274,11 @@ export const fornecedoresPJApi = {
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.getAll", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.getAll", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -293,12 +300,12 @@ export const fornecedoresPJApi = {
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.getById", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.getById", _error, {
         fornecedorId: id,
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -357,11 +364,11 @@ export const fornecedoresPJApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.create", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.create", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -407,11 +414,11 @@ export const fornecedoresPJApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.update", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.update", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -435,11 +442,11 @@ export const fornecedoresPJApi = {
       });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPJApi.delete", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPJApi.delete", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 };
@@ -462,11 +469,11 @@ export const fornecedoresPFApi = {
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.getAll", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.getAll", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -488,12 +495,12 @@ export const fornecedoresPFApi = {
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.getById", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.getById", _error, {
         fornecedorId: id,
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -533,8 +540,8 @@ export const fornecedoresPFApi = {
           }
 
           return null;
-        } catch (error) {
-          console.warn("❌ Erro ao formatar data:", date, error);
+        } catch (_error) {
+          console.warn("❌ Erro ao formatar data:", date, _error);
           return null;
         }
       };
@@ -581,11 +588,11 @@ export const fornecedoresPFApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.create", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.create", _error, {
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -613,8 +620,8 @@ export const fornecedoresPFApi = {
           }
 
           return null;
-        } catch (error) {
-          console.warn("❌ Erro ao formatar data:", date, error);
+        } catch (_error) {
+          console.warn("❌ Erro ao formatar data:", date, _error);
           return null;
         }
       };
@@ -657,11 +664,11 @@ export const fornecedoresPFApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.update", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.update", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -685,11 +692,11 @@ export const fornecedoresPFApi = {
       });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in fornecedoresPFApi.delete", error, {
+    } catch (_error) {
+      secureLogger.error("Error in fornecedoresPFApi.delete", _error, {
         fornecedorId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 };
@@ -720,9 +727,9 @@ export const despesasApi = {
       }
 
       return data || [];
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.getAll", error, { tenantId });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.getAll", _error, { tenantId });
+      throw _error;
     }
   },
 
@@ -758,12 +765,12 @@ export const despesasApi = {
       }
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.getById", error, {
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.getById", _error, {
         despesaId: id,
         tenantId,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -856,9 +863,9 @@ export const despesasApi = {
       });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.create", error, { tenantId });
-      throw error;
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.create", _error, { tenantId });
+      throw _error;
     }
   },
 
@@ -918,11 +925,11 @@ export const despesasApi = {
       secureLogger.info("Despesa updated successfully", { despesaId: data.id });
 
       return data;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.update", error, {
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.update", _error, {
         despesaId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 
@@ -949,11 +956,11 @@ export const despesasApi = {
       secureLogger.info("Despesa deleted successfully", { despesaId: id });
 
       return true;
-    } catch (error) {
-      secureLogger.error("Error in despesasApi.delete", error, {
+    } catch (_error) {
+      secureLogger.error("Error in despesasApi.delete", _error, {
         despesaId: id,
       });
-      throw error;
+      throw _error;
     }
   },
 };

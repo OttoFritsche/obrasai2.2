@@ -1,33 +1,25 @@
-import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
-  Building, 
+  AlertTriangle,
   ArrowLeft, 
-  MapPin, 
+  Building, 
   DollarSign,
-  Save,
   Info,
   Loader2,
-  AlertTriangle,
+  MapPin, 
+  Save,
   Search
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
-// Novos padrões implementados
-import { FormProvider, useFormContext } from '@/contexts/FormContext';
-import { useAsyncOperation } from '@/hooks/useAsyncOperation';
-
-import type { ObraFormValues } from "@/lib/validations/obra";
-import { obraSchema } from "@/lib/validations/obra";
-import { obrasApi } from "@/services/api";
-import { brazilianStates } from "@/lib/i18n";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -37,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -44,11 +37,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth";
+// Novos padrões implementados
+import { FormProvider, useFormContext } from '@/contexts/FormContext';
+import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 import { useCEP } from "@/hooks/useCEP";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/auth";
+import { brazilianStates } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+import type { ObraFormValues } from "@/lib/validations/obra";
+import { obraSchema } from "@/lib/validations/obra";
+import { obrasApi } from "@/services/api";
 
 // Componente interno que usa FormContext
 const EditarObraForm: React.FC = () => {
@@ -80,6 +79,7 @@ const EditarObraForm: React.FC = () => {
         estado: obra.estado,
         cep: obra.cep,
         orcamento: obra.orcamento,
+        construtora_id: obra.construtora_id || "",
         data_inicio: obra.data_inicio ? new Date(obra.data_inicio) : null,
         data_prevista_termino: obra.data_prevista_termino ? new Date(obra.data_prevista_termino) : null,
       });
@@ -532,11 +532,11 @@ const EditarObraForm: React.FC = () => {
                     </Button>
                     <Button 
                       type="submit" 
-                      disabled={isPending}
+                      disabled={isFormLoading}
                       className={cn(
                         "min-w-[120px]",
-                                      "bg-gradient-to-r from-blue-500 to-blue-600",
-              "hover:from-blue-600 hover:to-blue-700",
+                        "bg-gradient-to-r from-blue-500 to-blue-600",
+                        "hover:from-blue-600 hover:to-blue-700",
                         "text-white shadow-lg",
                         "transition-all duration-300"
                       )}
@@ -576,6 +576,7 @@ const EditarObra: React.FC = () => {
         estado: "",
         cep: "",
         orcamento: 0,
+        construtora_id: "",
         data_inicio: null,
         data_prevista_termino: null,
       }}

@@ -1,7 +1,12 @@
-import type { Control } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Building2, CheckCircle, XCircle, Search } from 'lucide-react';
-import { formatCNPJ, formatInscricaoEstadual } from '@/lib/utils/formatters';
+import { Building2, CheckCircle, Search,XCircle } from 'lucide-react';
+import type { Control } from 'react-hook-form';
+
+import type { CNPJApiResponse } from '@/types/api';
+import type { FornecedorPJFormData } from '@/types/forms';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   FormControl,
   FormField,
@@ -10,18 +15,16 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { formatCNPJ, formatInscricaoEstadual } from '@/lib/utils/formatters';
 
-
-import { EnderecoFields } from './shared/EnderecoFields';
 import { ContatoFields } from './shared/ContatoFields';
+import { EnderecoFields } from './shared/EnderecoFields';
 import { ResponsavelFields } from './shared/ResponsavelFields';
 
 interface ConstrutoraFormPJProps {
-  control: Control<any>;
+  control: Control<FornecedorPJFormData>;
   isLoading: boolean;
-  cnpjData: any;
+  cnpjData: CNPJApiResponse | null;
   isCNPJLoading: boolean;
   onManualCNPJSearch: () => void;
 }

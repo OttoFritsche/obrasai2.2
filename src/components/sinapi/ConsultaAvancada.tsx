@@ -8,23 +8,28 @@
  * @version 1.0.0
  */
 
-import React, { useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { 
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Database,
+  Download,
+  Eye,
+  FileText,
+  Filter, 
+  RotateCcw,
+  Search, 
+  Settings2,
+  TrendingUp} from "lucide-react";
+import React, { useCallback,useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -33,28 +38,23 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { 
-  Search, 
-  Filter, 
-  RotateCcw,
-  Download,
-  Eye,
-  Database,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  FileText,
-  Settings2
-} from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useSinapiBuscaInteligente, useSinapiEstatisticas } from "@/hooks/useSinapiManutencoes";
-import type { FiltrosBuscaUnificada } from "@/services/sinapiManutencoes";
-import { ManutencaoIndicator, ManutencaoIndicatorCompact } from "./ManutencaoIndicator";
-import { HistoricoModal } from "./HistoricoModal";
 import { cn } from "@/lib/utils";
+import type { FiltrosBuscaUnificada } from "@/services/sinapiManutencoes";
+
+import { HistoricoModal } from "./HistoricoModal";
+import { ManutencaoIndicator, ManutencaoIndicatorCompact } from "./ManutencaoIndicator";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES

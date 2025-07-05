@@ -1,11 +1,12 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { toast } from 'sonner';
+import { afterEach,beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { secureLogger } from '@/lib/logger';
 
 import { ErrorBoundary, useErrorHandler } from '../index';
-import { secureLogger } from '@/lib/logger';
 
 // Mock do logger
 vi.mock('@/lib/logger', () => ({
@@ -31,25 +32,28 @@ const TestComponent = ({ shouldThrow = false, errorType = 'generic' }) => {
 
   const throwError = () => {
     switch (errorType) {
-      case 'api':
+      case 'api': {
         handleApiError(new Error('API Error'), {
           context: 'Test API call',
           fallbackMessage: 'API call failed'
         });
         break;
-      case 'validation':
+      }
+      case 'validation': {
         handleError(new Error('Validation Error'), {
           context: 'Test validation',
           type: 'validation'
         });
         break;
-      case 'auth':
+      }
+      case 'auth': {
         handleError(new Error('Unauthorized'), {
           context: 'Test auth',
           type: 'auth'
         });
         break;
-      case 'async':
+      }
+      case 'async': {
         const asyncFn = wrapAsync(async () => {
           throw new Error('Async Error');
         }, {
@@ -57,10 +61,12 @@ const TestComponent = ({ shouldThrow = false, errorType = 'generic' }) => {
         });
         asyncFn();
         break;
-      default:
+      }
+      default: {
         handleError(new Error('Generic Error'), {
           context: 'Test generic error'
         });
+      }
     }
   };
 
@@ -501,7 +507,7 @@ describe('Integração com Componentes Reais', () => {
     const FormComponent = () => {
       const { handleError, wrapAsync } = useErrorHandler();
       
-      const handleSubmit = wrapAsync(async (data: any) => {
+      const handleSubmit = wrapAsync(async (data: Record<string, unknown>) => {
         if (!data.email) {
           throw new Error('Email é obrigatório');
         }

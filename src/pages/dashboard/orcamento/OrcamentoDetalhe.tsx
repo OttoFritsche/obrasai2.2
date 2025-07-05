@@ -8,41 +8,37 @@
  * @version 2.0.0 - Orçamento Paramétrico
  */
 
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
-  ArrowLeft,
-  Calculator, 
-  MapPin,
-  Building,
-  Ruler,
-  DollarSign,
-  Sparkles,
-  Clock,
-  CheckCircle,
   AlertCircle,
-  Download,
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Building,
+  Building2,
+  Calculator, 
+  CheckCircle,
+  Clock,
   Copy,
-  RefreshCcw,
-  PieChart,
+  DollarSign,
+  Download,
   FileText,
   Layers,
-  ArrowRight,
-  Building2,
-  AlertTriangle
-} from "lucide-react";
+  MapPin,
+  PieChart,
+  RefreshCcw,
+  Ruler,
+  Sparkles} from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate,useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import ItensDetalhados from "@/components/orcamento/ItensDetalhados";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-
-
 import {
   Dialog,
   DialogContent,
@@ -51,6 +47,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -58,20 +55,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import ItensDetalhados from "@/components/orcamento/ItensDetalhados";
-import { orcamentosParametricosApi, itensOrcamentoApi, calculoOrcamentoApi, orcamentoUtils } from "@/services/orcamentoApi";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useObras } from "@/hooks/useObras";
+import { cn } from "@/lib/utils";
 import type { 
-  OrcamentoParametrico,
-  ItemOrcamento} from "@/lib/validations/orcamento";
+  ItemOrcamento,  OrcamentoParametrico} from "@/lib/validations/orcamento";
 import {
-  TIPO_OBRA_LABELS,
   PADRAO_OBRA_LABELS,
+  STATUS_ORCAMENTO_CORES,
   STATUS_ORCAMENTO_LABELS,
-  STATUS_ORCAMENTO_CORES
-} from "@/lib/validations/orcamento";
+  TIPO_OBRA_LABELS} from "@/lib/validations/orcamento";
+import { calculoOrcamentoApi, itensOrcamentoApi, orcamentosParametricosApi, orcamentoUtils } from "@/services/orcamentoApi";
 
 // ====================================
 // 🏗️ COMPONENTE PRINCIPAL
@@ -200,7 +194,7 @@ const OrcamentoDetalhe: React.FC = () => {
       } else {
         toast.error(`❌ Erro na conversão: ${resultado.error}`);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro na conversão:", error);
       toast.error("❌ Erro inesperado na conversão");
     } finally {
@@ -221,7 +215,7 @@ const OrcamentoDetalhe: React.FC = () => {
       );
       toast.success("🎉 Orçamento duplicado com sucesso!");
       navigate(`/dashboard/orcamentos/${duplicado.id}`);
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao duplicar:", error);
       toast.error("❌ Erro ao duplicar orçamento");
     }

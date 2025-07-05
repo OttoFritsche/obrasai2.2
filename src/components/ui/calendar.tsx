@@ -1,11 +1,10 @@
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { CaptionProps} from "react-day-picker";
-import { DayPicker, useDayPicker, useNavigation } from "react-day-picker";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import * as React from "react";
+import type { CaptionProps} from "react-day-picker";
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Select,
@@ -14,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 

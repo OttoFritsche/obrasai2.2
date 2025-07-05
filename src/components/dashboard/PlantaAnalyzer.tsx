@@ -1,12 +1,13 @@
-import React, { useState, useCallback } from 'react'
-import { Upload, FileText, Zap, CheckCircle, Building2, Calculator, Lightbulb } from 'lucide-react'
+import { Building2, Calculator, CheckCircle, FileText, Lightbulb,Upload, Zap } from 'lucide-react'
+import React, { useCallback,useState } from 'react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { supabase } from '@/integrations/supabase/client'
 
 interface PlantaAnalysis {
   area_total: number
@@ -127,7 +128,7 @@ export function PlantaAnalyzer({ obraId, className, onAnalysisComplete }: Planta
       // Callback para atualizar histórico na página pai
       onAnalysisComplete?.()
 
-    } catch (error) {
+    } catch (_error) {
       console.error('Erro na análise:', error)
       toast({
         title: "Erro na análise",

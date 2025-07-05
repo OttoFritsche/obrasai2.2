@@ -1,11 +1,11 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
-import { useContratos, useContrato, useTemplatesContratos } from '@/hooks/useContratos';
+import { useContrato, useContratos, useTemplatesContratos } from '@/hooks/useContratos';
 import { useObras } from '@/hooks/useObras';
 import { orcamentosParametricosApi } from '@/services/orcamentoApi';
 
@@ -115,7 +115,7 @@ export const useContratoForm = (): UseContratoFormReturn => {
     try {
       const response = await orcamentosParametricosApi.listar({ obra_id: obraId });
       setOrcamentos(response || []);
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao carregar orçamentos:", error);
       setOrcamentos([]);
     } finally {
@@ -176,7 +176,7 @@ export const useContratoForm = (): UseContratoFormReturn => {
 
         toast.success("Dados preenchidos automaticamente com base no orçamento!");
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao preencher dados do orçamento:", error);
       toast.error("Erro ao carregar dados do orçamento");
     }
@@ -192,7 +192,7 @@ export const useContratoForm = (): UseContratoFormReturn => {
         toast.success("Contrato criado com sucesso!");
       }
       navigate('/dashboard/contratos');
-    } catch (error) {
+    } catch (_error) {
       console.error("Erro ao salvar contrato:", error);
       toast.error("Erro ao salvar contrato");
     }

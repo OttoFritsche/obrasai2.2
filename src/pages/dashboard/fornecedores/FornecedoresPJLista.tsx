@@ -1,24 +1,18 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
 import { 
-  Pencil, 
-  Trash2, 
-  Users, 
-  Plus, 
-  User,
+  AlertTriangle,
   Building2,
   Loader2,
-  AlertTriangle
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+  Pencil, 
+  Plus, 
+  Trash2, 
+  User,
+  Users} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,8 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTable } from "@/components/ui/data-table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFornecedoresPJ } from "@/hooks/useFornecedoresPJ";
+import { cn } from "@/lib/utils";
 
 interface FornecedorPJ {
   id: string;
@@ -55,7 +54,7 @@ const FornecedoresPJLista = () => {
     try {
       await deleteFornecedorPJ.mutateAsync(fornecedorToDelete);
       setFornecedorToDelete(null);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting fornecedor PJ:", error);
     }
   };
@@ -69,7 +68,7 @@ const FornecedoresPJLista = () => {
       }
       setSelectedFornecedores([]);
       setShowBulkDeleteDialog(false);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting fornecedores:", error);
     }
   };

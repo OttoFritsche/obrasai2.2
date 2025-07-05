@@ -1,5 +1,6 @@
 
-import { ChartBar, Calendar, Shield } from "lucide-react";
+import { Calendar, ChartBar, Shield } from "lucide-react";
+
 import { FeatureCard } from "@/components/construction/FeatureCard";
 
 export const FeaturesSection = () => {

@@ -1,46 +1,24 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
+import { 
+  AlertCircle,
+  Bot,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Download,
+  Edit, 
+  Eye, 
+  FileText, 
+  Filter,
+  MoreHorizontal,
+  Plus, 
+  Send,
+  Trash2} from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ColumnDef } from "@tanstack/react-table";
-import { 
-  FileText, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Send,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Filter,
-  Download,
-  MoreHorizontal,
-  Trash2,
-  Bot,
-  ChevronDown
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MetricCard } from "@/components/ui/metric-card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,10 +29,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MetricCard } from "@/components/ui/metric-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useContratos } from "@/hooks/useContratos";
 import { useObras } from "@/hooks/useObras";
+import { formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 
 interface Contrato {

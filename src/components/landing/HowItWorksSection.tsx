@@ -1,19 +1,20 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  UserPlus, 
+  BarChart3, 
+  Calendar,
+  CheckCircle,
+  FileText,
+  Play,
   Settings, 
   Upload, 
-  BarChart3, 
-  CheckCircle,
-  Play,
-  Calendar,
-  FileText,
+  UserPlus, 
   Users
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const HowItWorksSection = () => {
   const steps = [

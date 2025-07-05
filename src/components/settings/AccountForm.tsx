@@ -1,21 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Lock } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +15,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 import { changePasswordSchema } from "@/lib/validations/auth";
 
 interface PasswordFormValues {
@@ -77,7 +77,7 @@ export function AccountForm() {
         toast.success("Senha alterada com sucesso!");
         form.reset();
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Ocorreu um erro inesperado");
       console.error("Password change error:", error);
     } finally {
@@ -95,7 +95,7 @@ export function AccountForm() {
       
       // Close the dialog
       setIsDeleteDialogOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erro ao apagar conta");
       console.error("Delete account error:", error);
     } finally {

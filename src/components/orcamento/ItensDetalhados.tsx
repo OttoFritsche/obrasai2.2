@@ -8,26 +8,27 @@
  * @version 1.0.0
  */
 
-import React, { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  Search,
-  Filter,
-  Eye,
-  Package,
-  Wrench,
-  Truck,
-  FileText,
-  Settings,
   AlertTriangle,
   ChevronDown,
-  ChevronRight
-} from "lucide-react";
+  ChevronRight,
+  Eye,
+  FileText,
+  Filter,
+  Package,
+  Search,
+  Settings,
+  Truck,
+  Wrench} from "lucide-react";
+import React, { memo,useCallback, useMemo, useState } from "react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { 
   Select, 
   SelectContent, 
@@ -43,12 +44,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-
+import { cn } from "@/lib/utils";
 import type { ItemOrcamento } from "@/lib/validations/orcamento";
 import { orcamentoUtils } from "@/services/orcamentoApi";
-import { cn } from "@/lib/utils";
 
 // ====================================
 // 🎨 TIPOS E INTERFACES
@@ -111,7 +109,7 @@ const CATEGORIA_CORES: Record<string, string> = {
 // 🧩 COMPONENTE PRINCIPAL
 // ====================================
 
-const ItensDetalhados: React.FC<ItensDetalhadosProps> = ({ itens, className }) => {
+const ItensDetalhados = memo<ItensDetalhadosProps>(({ itens, className }) => {
   // Estados locais
   const [filtroTexto, setFiltroTexto] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
@@ -167,7 +165,7 @@ const ItensDetalhados: React.FC<ItensDetalhadosProps> = ({ itens, className }) =
   }, [itens, filtroTexto, filtroCategoria, totalGeral]);
 
   // Handlers
-  const toggleCategoria = (categoria: string) => {
+  const toggleCategoria = useCallback((categoria: string) => {
     const novasExpandidas = new Set(categoriasExpandidas);
     if (novasExpandidas.has(categoria)) {
       novasExpandidas.delete(categoria);
@@ -175,15 +173,15 @@ const ItensDetalhados: React.FC<ItensDetalhadosProps> = ({ itens, className }) =
       novasExpandidas.add(categoria);
     }
     setCategoriasExpandidas(novasExpandidas);
-  };
+  }, [categoriasExpandidas]);
 
-  const expandirTodas = () => {
+  const expandirTodas = useCallback(() => {
     setCategoriasExpandidas(new Set(itensAgrupados.map(grupo => grupo.categoria)));
-  };
+  }, [itensAgrupados]);
 
-  const recolherTodas = () => {
+  const recolherTodas = useCallback(() => {
     setCategoriasExpandidas(new Set());
-  };
+  }, []);
 
   // ====================================
   // 🎨 RENDER
@@ -383,6 +381,8 @@ const ItensDetalhados: React.FC<ItensDetalhadosProps> = ({ itens, className }) =
       </CardContent>
     </Card>
   );
-};
+});
+
+ItensDetalhados.displayName = 'ItensDetalhados';
 
 export default ItensDetalhados;

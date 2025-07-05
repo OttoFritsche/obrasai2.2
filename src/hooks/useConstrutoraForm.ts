@@ -1,7 +1,8 @@
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { ConstrutoraPJFormValues, ConstrutoraPFFormValues } from '@/lib/validations/construtora';
-import { construtoraPJSchema, construtoraPFSchema } from '@/lib/validations/construtora';
+import { useForm } from 'react-hook-form';
+
+import type { ConstrutoraPFFormValues,ConstrutoraPJFormValues } from '@/lib/validations/construtora';
+import { construtoraPFSchema,construtoraPJSchema } from '@/lib/validations/construtora';
 
 // Usar os tipos já definidos no arquivo de validações
 export type FormDataPJ = ConstrutoraPJFormValues;

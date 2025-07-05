@@ -1,20 +1,20 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Brain, 
-  MessageSquare, 
   BarChart3, 
-  Zap, 
+  Brain, 
+  Calculator,
+  CheckCircle,
+  Database,
+  MessageSquare, 
+  Search,
   Target,
   TrendingUp,
-  Calculator,
-  Search,
-  Database,
-  CheckCircle
-} from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+  Zap} from 'lucide-react';
+import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 const AISection = () => {
   const aiFeatures = [

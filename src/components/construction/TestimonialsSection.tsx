@@ -1,6 +1,6 @@
 
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { TestimonialCard } from "@/components/construction/TestimonialCard";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 
 export const TestimonialsSection = () => {
   return (

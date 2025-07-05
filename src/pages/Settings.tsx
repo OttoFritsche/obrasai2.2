@@ -1,20 +1,20 @@
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useState } from "react";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { ProfileForm } from "@/components/settings/ProfileForm";
-import { AccountForm } from "@/components/settings/AccountForm";
 import { motion } from "framer-motion";
 import { 
-  Settings as SettingsIcon, 
-  User, 
-  Shield, 
   Bell, 
-  Palette,
   Globe,
+  Key,
+  Palette,
+  Settings as SettingsIcon, 
+  Shield, 
   Smartphone,
-  Key
-} from "lucide-react";
+  User} from "lucide-react";
+import { useState } from "react";
+
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+import { AccountForm } from "@/components/settings/AccountForm";
+import { ProfileForm } from "@/components/settings/ProfileForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 const Settings = () => {

@@ -1,8 +1,9 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth/hooks";
 import { t } from "@/lib/i18n";
 

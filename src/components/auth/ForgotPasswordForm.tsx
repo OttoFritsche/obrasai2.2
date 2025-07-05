@@ -1,15 +1,16 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/auth";
 import type { ForgotPasswordFormValues } from "@/lib/validations/auth";
 import { forgotPasswordSchema } from "@/lib/validations/auth";
-import { Loader2, ArrowLeft, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export const ForgotPasswordForm = () => {
   const { forgotPassword } = useAuth();
@@ -31,7 +32,7 @@ export const ForgotPasswordForm = () => {
       if (!error) {
         setEmailSent(true);
       }
-    } catch (error) {
+    } catch (_error) {
       console.error("Forgot password error:", error);
     } finally {
       setIsLoading(false);

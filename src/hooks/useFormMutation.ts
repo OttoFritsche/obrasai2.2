@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
+
+import { useAuth } from '@/contexts/auth/hooks';
 import { useTenantValidation } from '@/hooks/useTenantValidation';
 
 /**

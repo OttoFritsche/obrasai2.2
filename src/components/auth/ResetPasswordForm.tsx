@@ -1,15 +1,16 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/auth";
 import type { ResetPasswordFormValues} from "@/lib/validations/auth";
-import { resetPasswordSchema, checkPasswordStrength } from "@/lib/validations/auth";
-import { Loader2, Eye, EyeOff, Lock } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { checkPasswordStrength,resetPasswordSchema } from "@/lib/validations/auth";
 
 export const ResetPasswordForm = () => {
   const { resetPassword } = useAuth();
@@ -32,7 +33,7 @@ export const ResetPasswordForm = () => {
     try {
       setIsLoading(true);
       await resetPassword(data.password);
-    } catch (error) {
+    } catch (_error) {
       console.error("Reset password error:", error);
     } finally {
       setIsLoading(false);

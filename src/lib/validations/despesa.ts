@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { t } from "@/lib/i18n";
+
 import { Constants } from "@/integrations/supabase/types";
+import { t } from "@/lib/i18n";
 
 // Define as opções válidas para forma de pagamento
 export const formasPagamento = [

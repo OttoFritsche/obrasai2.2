@@ -1,40 +1,38 @@
-import type { DragEvent } from "react";
-import { useState, useRef, useCallback } from "react";
-import { useForm } from "react-hook-form";
+// Bibliotecas externas
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { 
-  FileText, 
-  ArrowLeft, 
-  Upload, 
-  UploadCloud,
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertTriangle,
+  ArrowLeft,
   Building2,
-  Receipt,
-  Users,
+  CheckCircle,
   DollarSign,
+  FileText,
   Hash,
   Key,
-  MessageSquare,
-  Trash2,
-  CheckCircle,
   Loader2,
-  AlertTriangle
+  MessageSquare,
+  Receipt,
+  Trash2,
+  Upload,
+  UploadCloud,
+  Users,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import type { DragEvent } from "react";
+import { useCallback, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
-import { notaFiscalSchema } from "@/lib/validations/nota-fiscal";
-import { obrasApi, fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
-import { useNotasFiscais } from "@/hooks/useNotasFiscais";
-import { useDespesas } from "@/hooks/useDespesas";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+// Componentes de layout
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+
+// Componentes UI
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -44,6 +42,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -51,9 +50,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+
+// Contextos
 import { useAuth } from "@/contexts/auth";
+
+// Hooks
+import { useDespesas } from "@/hooks/useDespesas";
+import { useNotasFiscais } from "@/hooks/useNotasFiscais";
+
+// Utilitários e validações
+import { cn } from "@/lib/utils";
+import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
+import { notaFiscalSchema } from "@/lib/validations/nota-fiscal";
+
+// Serviços
+import { fornecedoresPFApi, fornecedoresPJApi, obrasApi } from "@/services/api";
 
 const EnviarNota = () => {
   const navigate = useNavigate();

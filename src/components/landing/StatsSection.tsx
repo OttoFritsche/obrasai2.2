@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Clock, Shield, Award } from "lucide-react";
+import { Award,Clock, Shield, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface StatItemProps {
   value: number;

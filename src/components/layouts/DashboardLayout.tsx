@@ -1,18 +1,19 @@
+import { motion } from "framer-motion";
+import { Banknote, Building, Building2, Calculator, FileSignature, FileText, LayoutDashboard, LogOut, PieChart, Settings, Sparkles, Users } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { Settings, Building, Banknote, Users, FileText, Sparkles, LogOut, LayoutDashboard, Calculator, Building2, FileSignature, BarChart3 } from "lucide-react";
-import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/providers/theme-provider";
+
 import obrasAIDark from "@/assets/logo/logo_dark_horizon.png";
-import obrasAILight from "@/assets/logo/logo_light_horizon.png";
 import logoImageDark from "@/assets/logo/logo_image_dark.png";
 import logoImageLight from "@/assets/logo/logo_image_light.png";
+import obrasAILight from "@/assets/logo/logo_light_horizon.png";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/auth";
+import { useTheme } from "@/hooks/useTheme";
+import { t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 
 interface DashboardLayoutProps {
@@ -102,12 +103,12 @@ const menuItems = [
     hoverBg: "hover:bg-purple-600/20 dark:hover:bg-purple-400/20"
   },
   {
-    icon: BarChart3,
-    label: "Análise Integrada",
-    path: "/dashboard/analise",
-    color: "text-rose-600 dark:text-rose-400",
-    bgColor: "bg-rose-600/10 dark:bg-rose-400/10",
-    hoverBg: "hover:bg-rose-600/20 dark:hover:bg-rose-400/20"
+    icon: PieChart,
+    label: "Controle Orçamentário",
+    path: "/dashboard/controle-orcamentario",
+    color: "text-violet-600 dark:text-violet-400",
+    bgColor: "bg-violet-600/10 dark:bg-violet-400/10",
+    hoverBg: "hover:bg-violet-600/20 dark:hover:bg-violet-400/20"
   },
 
 ];
@@ -132,7 +133,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       await logout();
       clearTimeout(emergencyExit);
       
-    } catch (error) {
+    } catch (_error) {
       console.error("Error signing out:", error);
       toast.error(t("messages.error"));
       

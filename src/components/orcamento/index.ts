@@ -8,5 +8,5 @@
  * @version 1.0.0
  */
 
-export { WizardOrcamento } from './WizardOrcamento';
 export { SinapiSelector } from './SinapiSelector'; 
+export { WizardOrcamento } from './WizardOrcamento';

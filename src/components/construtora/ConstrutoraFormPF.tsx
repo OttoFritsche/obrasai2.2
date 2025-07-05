@@ -1,7 +1,9 @@
-import type { Control } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
-import { formatCPF } from '@/lib/utils/formatters';
+import type { Control } from 'react-hook-form';
+
+import { FornecedorPFFormData } from '@/types/forms';
+
 import {
   FormControl,
   FormField,
@@ -10,12 +12,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { EnderecoFields } from './shared/EnderecoFields';
+import { formatCPF } from '@/lib/utils/formatters';
+
 import { ContatoFields } from './shared/ContatoFields';
+import { EnderecoFields } from './shared/EnderecoFields';
 import { ResponsavelFields } from './shared/ResponsavelFields';
 
 interface ConstrutoraFormPFProps {
-  control: Control<any>;
+  control: Control<FornecedorPFFormData>;
   isLoading: boolean;
 }
 

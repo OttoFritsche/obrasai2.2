@@ -1,13 +1,14 @@
 import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/auth";
-import { profileSchema } from "@/lib/validations";
-import { formatCPF, formatPhone } from "@/lib/formatters";
+import { FormProvider, useAutoFill,useFormField, useValidatedFormContext } from "@/contexts/FormContext";
 import { supabase } from "@/integrations/supabase/client";
-import { FormProvider, useValidatedFormContext, useFormField, useAutoFill } from "@/contexts/FormContext";
+import { formatCPF, formatPhone } from "@/lib/formatters";
+import { profileSchema } from "@/lib/validations";
 
 interface ProfileData {
   firstName: string;

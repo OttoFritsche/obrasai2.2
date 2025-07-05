@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { ArrowDown, ArrowUp, Minus, AlertTriangle, Search } from "lucide-react";
-import type { SinapiItem } from "@/hooks/useSinapiDespesas";
+import { AlertTriangle, ArrowDown, ArrowUp, Minus, Search } from "lucide-react";
+import { useCallback,useEffect, useState } from "react";
+
 import useInsumoAnalysis from "@/hooks/useInsumoAnalysis";
+import type { SinapiItem } from "@/hooks/useSinapiDespesas";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface InsumoAnalysisCardProps {
   insumoCustomizado: string;

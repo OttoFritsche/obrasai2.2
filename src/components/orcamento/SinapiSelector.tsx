@@ -9,12 +9,24 @@
  * @version 1.0.0
  */
 
-import React, { useState, useCallback, useMemo } from "react";
+import { 
+  AlertTriangle,
+  Database,
+  Eye,
+  Plus,
+  RotateCcw,
+  Search, 
+  Trash2} from "lucide-react";
+import React, { useCallback, useMemo,useState } from "react";
+import { toast } from "sonner";
+
+import { HistoricoModal } from "@/components/sinapi/HistoricoModal";
+import { ManutencaoIndicatorCompact } from "@/components/sinapi/ManutencaoIndicator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -23,20 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Search, 
-  Plus,
-  AlertTriangle,
-  Database,
-  Eye,
-  Trash2,
-  RotateCcw
-} from "lucide-react";
-import { toast } from "sonner";
-
 import { useSinapiBuscaInteligente, useSinapiValidacao } from "@/hooks/useSinapiManutencoes";
-import { ManutencaoIndicatorCompact } from "@/components/sinapi/ManutencaoIndicator";
-import { HistoricoModal } from "@/components/sinapi/HistoricoModal";
 import { cn } from "@/lib/utils";
 
 // ====================================
@@ -153,7 +152,7 @@ export const SinapiSelector: React.FC<SinapiSelectorProps> = ({
         } else if (validacao[0]?.alteracoes_recentes) {
           toast.info(`ℹ️ Código ${item.codigo_sinapi}: Teve alterações recentes`);
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Erro na validação:', error);
       }
     }
@@ -181,7 +180,7 @@ export const SinapiSelector: React.FC<SinapiSelectorProps> = ({
       // Buscar o código específico
       await buscarInteligente(codigo.toString());
       setCodigoInputManual("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Erro ao buscar código");
     }
   }, [codigoInputManual, buscarInteligente]);

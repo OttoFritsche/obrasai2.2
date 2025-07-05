@@ -1,30 +1,37 @@
-import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence,motion } from "framer-motion";
 import {
   Loader2, 
   Send, 
-  User as UserIcon, 
-  Trash2
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+  Trash2,
+  User as UserIcon} from "lucide-react";
+import { useEffect, useRef,useState } from "react";
+import { toast } from "sonner";
+
+import LogoImageDark from "@/assets/logo/logo_image_dark.png";
+import LogoImageLight from "@/assets/logo/logo_image_light.png";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/contexts/auth";
+import { useTheme } from "@/hooks/useTheme";
 import type { ChatMessage } from "@/services/aiApi";
 import { aiApi } from "@/services/aiApi";
 import { obrasApi } from "@/services/api";
-import { useAuth } from "@/contexts/auth";
-import { useTheme } from "@/hooks/use-theme";
-import { toast } from "sonner";
-import LogoImageDark from "@/assets/logo/logo_image_dark.png";
-import LogoImageLight from "@/assets/logo/logo_image_light.png";
 
 interface InterfaceChatProps {
   obraId?: string;
   mode?: 'chat' | 'training';
   topic?: string;
+}
+
+interface SendMessageSuccessResponse {
+  resposta_bot?: string;
+  result?: {
+    resposta_bot?: string;
+  };
 }
 
 const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceChatProps) => {
@@ -87,7 +94,7 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
   // Enviar mensagem
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: () => aiApi.sendMessage(message, selectedObraId, mode, topic),
-    onSuccess: (data) => {
+    onSuccess: (data: SendMessageSuccessResponse) => {
       const userMessage = message; // salvar conteúdo antes de limpar
       setMessage("");
 
@@ -98,7 +105,7 @@ const InterfaceChat = ({ obraId: propObraId, mode = 'chat', topic }: InterfaceCh
           usuario_id: user?.id || 'anon',
           obra_id: selectedObraId || null,
           mensagem: userMessage,
-          resposta_bot: (data as any)?.resposta_bot || (data as any)?.result?.resposta_bot || '—',
+          resposta_bot: data?.resposta_bot || data?.result?.resposta_bot || '—',
           created_at: new Date().toISOString(),
         } as ChatMessage;
 

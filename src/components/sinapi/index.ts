@@ -25,12 +25,11 @@ export type { default as ConsultaAvancadaProps } from "./ConsultaAvancada";
 
 // Re-exportar hooks para conveniência
 export {
+  useSinapiBuscaInteligente,
   useSinapiBuscaUnificada,
-  useSinapiHistorico,
-  useSinapiValidacao,
   useSinapiEstatisticas,
-  useSinapiBuscaInteligente
-} from "@/hooks/useSinapiManutencoes";
+  useSinapiHistorico,
+  useSinapiValidacao} from "@/hooks/useSinapiManutencoes";
 
 // Re-exportar hooks da Fase 2 - Edge Functions
 export {
@@ -39,25 +38,22 @@ export {
 
 // Re-exportar serviços para conveniência
 export { 
-  default as sinapiManutencoes,
-  buscarSinapiUnificado,
   buscarHistoricoCodigo,
-  validarCodigoSinapi,
-  obterEstatisticasManutencoes
-} from "@/services/sinapiManutencoes";
+  buscarSinapiUnificado,
+  obterEstatisticasManutencoes,
+  default as sinapiManutencoes,
+  validarCodigoSinapi} from "@/services/sinapiManutencoes";
 
 // Re-exportar tipos principais
 export type {
+  FiltrosBuscaUnificada,
+  RespostaPaginada,
   SinapiItem,
   SinapiManutencao,
-  FiltrosBuscaUnificada,
-  ValidacaoResult,
-  RespostaPaginada
-} from "@/services/sinapiManutencoes";
+  ValidacaoResult} from "@/services/sinapiManutencoes";
 
 // Re-exportar tipos da Fase 2
 export type {
   CodigoValidacao,
-  ValidacaoBatchResponse,
-  ImpactoOrcamento
-} from "@/hooks/useSinapiEdgeFunctions"; 
+  ImpactoOrcamento,
+  ValidacaoBatchResponse} from "@/hooks/useSinapiEdgeFunctions"; 

@@ -1,14 +1,14 @@
+// Bibliotecas externas
+import type { ColumnDef } from "@tanstack/react-table";
+import { motion } from "framer-motion";
+import { Building, Calculator, Calendar, DollarSign, Eye, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Eye, Pencil, Trash2, Building, Plus, MapPin, Calendar, DollarSign, Calculator } from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+// Componentes de layout
+import DashboardLayout from "@/components/layouts/DashboardLayout";
+
+// Componentes UI
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,31 +19,46 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
+import { GradientCard } from "@/components/ui/GradientCard";
+import { PageHeader } from "@/components/ui/PageHeader";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { t, formatCurrencyBR, formatDateBR } from "@/lib/i18n";
+
+// Hooks
 import { useObras } from "@/hooks/useObras";
 
-// Importando os novos componentes refatorados
-import { PageHeader } from "@/components/ui/PageHeader";
-import { GradientCard } from "@/components/ui/GradientCard";
+// Utilitários
+import { formatCurrencyBR, formatDateBR, t } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 interface Obra {
   id: string;
   nome: string;
   endereco: string;
+  bairro?: string;
   cidade: string;
   estado: string;
   cep: string;
-  orcamento: number;
+  orcamento_total: number;
+  descricao?: string;
+  status?: string;
   data_inicio: string | null;
-  data_prevista_termino: string | null;
+  data_fim: string | null;
+  tenant_id?: string;
+  construtora_id?: string;
   created_at: string;
+  updated_at?: string;
+  // Campos antigos para compatibilidade
+  orcamento?: number;
+  data_prevista_termino?: string | null;
 }
 
 const ObrasListaRefactored = () => {
@@ -58,7 +73,7 @@ const ObrasListaRefactored = () => {
     try {
       await deleteObra.mutateAsync(obraToDelete);
       setObraToDelete(null);
-    } catch (error) {
+    } catch (_error) {
       console.error("Error deleting obra:", error);
     }
   };
@@ -67,7 +82,8 @@ const ObrasListaRefactored = () => {
   const getObraStatus = (obra: Obra) => {
     const hoje = new Date();
     const dataInicio = obra.data_inicio ? new Date(obra.data_inicio) : null;
-    const dataFim = obra.data_prevista_termino ? new Date(obra.data_prevista_termino) : null;
+    const dataFim = obra.data_fim ? new Date(obra.data_fim) : 
+                   (obra.data_prevista_termino ? new Date(obra.data_prevista_termino) : null);
 
     if (!dataInicio) return { label: "Não iniciada", color: "default" };
     if (dataInicio > hoje) return { label: "Planejada", color: "warning" };

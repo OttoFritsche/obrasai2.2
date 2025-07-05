@@ -1,6 +1,6 @@
-import type { Control } from 'react-hook-form';
 import { Mail, Phone } from 'lucide-react';
-import { formatPhone } from '@/lib/utils/formatters';
+import type { Control, FieldValues } from 'react-hook-form';
+
 import {
   FormControl,
   FormField,
@@ -9,15 +9,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { formatPhone } from '@/lib/utils/formatters';
 
-interface ContatoFieldsProps {
-  // Control genérico para funcionar com PJ e PF
-  control: Control<any>;
-  // Estados opcionais para feedback visual
+// Definindo uma constraint para o tipo genérico T
+// Garante que qualquer formulário que use este componente
+// tenha os campos 'email' e 'telefone' como strings opcionais.
+interface ContactFormValues extends FieldValues {
+  email?: string;
+  telefone?: string;
+}
+
+interface ContatoFieldsProps<T extends ContactFormValues> {
+  control: Control<T>;
   isLoading?: boolean;
-  // Prefixo para os nomes dos campos (para flexibilidade futura)
   fieldPrefix?: string;
-  // Placeholders customizáveis
   emailPlaceholder?: string;
   phonePlaceholder?: string;
 }
@@ -37,13 +42,13 @@ interface ContatoFieldsProps {
  * - Facilita manutenção dos campos de contato
  * - Permite reutilização em outros formulários
  */
-export const ContatoFields = ({ 
-  control, 
-  isLoading = false, 
+export const ContatoFields = <T extends ContactFormValues>({
+  control,
+  isLoading = false,
   fieldPrefix = '',
   emailPlaceholder = 'email@dominio.com',
   phonePlaceholder = '(00) 00000-0000'
-}: ContatoFieldsProps) => {
+}: ContatoFieldsProps<T>) => {
   const getFieldName = (field: string) => fieldPrefix ? `${fieldPrefix}.${field}` : field;
 
   return (

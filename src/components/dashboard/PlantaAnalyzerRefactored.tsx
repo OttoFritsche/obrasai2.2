@@ -1,11 +1,11 @@
+import { Building2, Calculator, CheckCircle, FileText, Lightbulb,Upload, Zap } from 'lucide-react';
 import React from 'react';
-import { Upload, FileText, Zap, CheckCircle, Building2, Calculator, Lightbulb } from 'lucide-react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { usePlantaAnalyzer } from '@/hooks/usePlantaAnalyzer';
 
 // ✅ Tipos movidos para interface separada
 interface PlantaAnalysis {

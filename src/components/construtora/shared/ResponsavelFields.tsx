@@ -1,5 +1,6 @@
-import type { Control } from 'react-hook-form';
 import { User } from 'lucide-react';
+import type { Control, FieldValues } from 'react-hook-form';
+
 import {
   FormControl,
   FormField,
@@ -9,12 +10,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-interface ResponsavelFieldsProps {
-  // Control genérico para funcionar com PJ e PF
-  control: Control<any>;
-  // Estados opcionais para feedback visual
+// Constraint para garantir que o formulário tenha os campos de responsável
+interface ResponsavelFormValues extends FieldValues {
+  responsavel_tecnico?: string;
+  documento_responsavel?: string;
+}
+
+interface ResponsavelFieldsProps<T extends ResponsavelFormValues> {
+  control: Control<T>;
   isLoading?: boolean;
-  // Prefixo para os nomes dos campos (para flexibilidade futura)
   fieldPrefix?: string;
 }
 
@@ -32,11 +36,11 @@ interface ResponsavelFieldsProps {
  * - Facilita manutenção dos campos de responsável
  * - Permite reutilização em outros formulários
  */
-export const ResponsavelFields = ({ 
-  control, 
-  isLoading = false, 
-  fieldPrefix = '' 
-}: ResponsavelFieldsProps) => {
+export const ResponsavelFields = <T extends ResponsavelFormValues>({
+  control,
+  isLoading = false,
+  fieldPrefix = ''
+}: ResponsavelFieldsProps<T>) => {
   const getFieldName = (field: string) => fieldPrefix ? `${fieldPrefix}.${field}` : field;
 
   return (

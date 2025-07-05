@@ -1,37 +1,25 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { 
-  User, 
+  AlertTriangle,
   ArrowLeft, 
-  Save, 
   Building2, 
-  Mail, 
-  Phone,
   FileText,
   Loader2,
-  AlertTriangle
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+  Mail, 
+  Phone,
+  Save, 
+  User} from "lucide-react";
+import { useEffect,useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
-import type {
-  FornecedorPJFormValues,
-  FornecedorPFFormValues,
-  FornecedorType
-} from "@/lib/validations/fornecedor";
-import { 
-  fornecedorPJSchema, 
-  fornecedorPFSchema
-} from "@/lib/validations/fornecedor";
-import { fornecedoresPJApi, fornecedoresPFApi } from "@/services/api";
-import { useAuth } from "@/contexts/auth";
-import { DatePicker } from "@/components/ui/date-picker";
+import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -41,10 +29,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-
-import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth";
+import { cn } from "@/lib/utils";
+import type {
+  FornecedorPFFormValues,
+  FornecedorPJFormValues,
+  FornecedorType
+} from "@/lib/validations/fornecedor";
+import { 
+  fornecedorPFSchema,
+  fornecedorPJSchema} from "@/lib/validations/fornecedor";
+import { fornecedoresPFApi,fornecedoresPJApi } from "@/services/api";
 
 const EditarFornecedor = () => {
   const navigate = useNavigate();
