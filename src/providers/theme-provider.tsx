@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 
-import { decryptData, encryptData } from "@/lib/secure-storage"
 import type { Theme } from "@/contexts/theme-context"
 import { ThemeProviderContext } from "@/contexts/theme-context"
+import { decryptData, encryptData } from "@/lib/secure-storage"
 
 // Contexto do tema
 interface ThemeProviderProps {

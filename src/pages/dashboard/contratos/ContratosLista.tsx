@@ -6,6 +6,7 @@ import {
   CheckCircle,
   ChevronDown,
   Clock,
+  Crown,
   Download,
   Edit, 
   Eye, 
@@ -383,30 +384,12 @@ const ContratosLista = () => {
                 "transition-all duration-300"
               )}
             >
-              <Link to="/dashboard/contratos/novo">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Contrato
+              <Link to="/dashboard/contratos/novo" className="flex items-center">
+                <Bot className="h-4 w-4 mr-2" />
+                Contrato com IA Premium
+                <Crown className="h-4 w-4 ml-2 text-amber-300" />
               </Link>
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Bot className="h-4 w-4" />
-                  Assistente IA
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Criar com IA</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard/contratos/novo-ia">
-                    <Bot className="mr-2 h-4 w-4" />
-                    Novo Contrato com IA
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </motion.div>
         </div>
 

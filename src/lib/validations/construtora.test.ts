@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { construtoraPFSchema, construtoraPJSchema } from "./construtora";
 
 describe("Construtora Validation Schemas", () => {

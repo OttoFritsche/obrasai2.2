@@ -27,7 +27,6 @@ import { toast } from "sonner";
 
 // Componentes de layout
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-
 // Componentes UI
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -51,19 +50,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
 // Contextos
 import { useAuth } from "@/contexts/auth";
-
 // Hooks
 import { useDespesas } from "@/hooks/useDespesas";
 import { useNotasFiscais } from "@/hooks/useNotasFiscais";
-
 // Utilitários e validações
 import { cn } from "@/lib/utils";
 import type { NotaFiscalFormValues } from "@/lib/validations/nota-fiscal";
 import { notaFiscalSchema } from "@/lib/validations/nota-fiscal";
-
 // Serviços
 import { fornecedoresPFApi, fornecedoresPJApi, obrasApi } from "@/services/api";
 

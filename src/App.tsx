@@ -13,33 +13,33 @@ import { LoadingProvider } from "@/contexts/LoadingContext";
 // Admin - Dashboard de Métricas (apenas para administradores do sistema)
 // SINAPI
 import Dashboard from "@/pages/Dashboard";
-// IA
-import AlertasAvancados from "@/pages/dashboard/AlertasAvancados";
 // Chat AI
 import ChatAIPage from "@/pages/dashboard/ai/Chat";
-// Controle Orçamentário
-import ControleOrcamentario from "@/pages/dashboard/ControleOrcamentario";
-// Plantas IA
-import { PlantasIA } from "@/pages/dashboard/PlantasIA";
-// Notas Fiscais
-import EditarNota from "@/pages/dashboard/notas/EditarNota";
-import EnviarNota from "@/pages/dashboard/notas/EnviarNota";
-import NotasLista from "@/pages/dashboard/notas/NotasLista";
-// Settings
-import Settings from "@/pages/Settings";
+// IA
+import AlertasAvancados from "@/pages/dashboard/AlertasAvancados";
 // Construtoras/Autônomos
 import ConstrutorasLista from "@/pages/dashboard/construtoras/ConstrutorasLista";
 import EditarConstrutora from "@/pages/dashboard/construtoras/EditarConstrutora";
 import NovaConstrutora from "@/pages/dashboard/construtoras/NovaConstrutora";
-import ContratoComIARefactored from "@/pages/dashboard/contratos/ContratoComIARefactored";
+import ContratoComIAPremium from "@/pages/dashboard/contratos/ContratoComIAPremium";
 import ContratoDetalhe from "@/pages/dashboard/contratos/ContratoDetalhe";
 // Contratos
 import ContratosLista from "@/pages/dashboard/contratos/ContratosLista";
+// Controle Orçamentário
+import ControleOrcamentario from "@/pages/dashboard/ControleOrcamentario";
 // Despesas
 import DespesasLista from "@/pages/dashboard/despesas/DespesasLista";
 import EditarDespesa from "@/pages/dashboard/despesas/EditarDespesa";
 import NovaDespesa from "@/pages/dashboard/despesas/NovaDespesa";
+import EditarFornecedor from "@/pages/dashboard/fornecedores/EditarFornecedor";
 // Fornecedores
+import FornecedoresPFLista from "@/pages/dashboard/fornecedores/FornecedoresPFLista";
+import FornecedoresPJLista from "@/pages/dashboard/fornecedores/FornecedoresPJLista";
+import NovoFornecedor from "@/pages/dashboard/fornecedores/NovoFornecedor";
+// Notas Fiscais
+import EditarNota from "@/pages/dashboard/notas/EditarNota";
+import EnviarNota from "@/pages/dashboard/notas/EnviarNota";
+import NotasLista from "@/pages/dashboard/notas/NotasLista";
 // Notas Fiscais
 import EditarObra from "@/pages/dashboard/obras/EditarObra";
 import NovaObraRefactored from "@/pages/dashboard/obras/NovaObraRefactored";
@@ -50,11 +50,15 @@ import ObrasLista from "@/pages/dashboard/obras/ObrasLista";
 import { NovoOrcamento } from "@/pages/dashboard/orcamento/NovoOrcamento";
 import OrcamentoDetalhe from "@/pages/dashboard/orcamento/OrcamentoDetalhe";
 import OrcamentosLista from "@/pages/dashboard/orcamento/OrcamentosLista";
+// Plantas IA
+import { PlantasIA } from "@/pages/dashboard/PlantasIA";
 import ForgotPassword from "@/pages/ForgotPassword";
 import Index from "@/pages/Index";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
 import Register from "@/pages/Register";
+// Settings
+import Settings from "@/pages/Settings";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 const queryClient = new QueryClient({
@@ -121,12 +125,18 @@ const App = () => {
                   <Route path="/dashboard/construtoras/nova" element={<ProtectedRoute><NovaConstrutora /></ProtectedRoute>} />
                   <Route path="/dashboard/construtoras/:id/editar" element={<ProtectedRoute><EditarConstrutora /></ProtectedRoute>} />
                   
+                  <Route path="/dashboard/fornecedores/pf" element={<ProtectedRoute><FornecedoresPFLista /></ProtectedRoute>} />
+                  <Route path="/dashboard/fornecedores/pj" element={<ProtectedRoute><FornecedoresPJLista /></ProtectedRoute>} />
+                  <Route path="/dashboard/fornecedores/novo" element={<ProtectedRoute><NovoFornecedor /></ProtectedRoute>} />
+                  <Route path="/dashboard/fornecedores/pf/:id/editar" element={<ProtectedRoute><EditarFornecedor /></ProtectedRoute>} />
+                  <Route path="/dashboard/fornecedores/pj/:id/editar" element={<ProtectedRoute><EditarFornecedor /></ProtectedRoute>} />
+                  
                   <Route path="/dashboard/orcamentos" element={<ProtectedRoute><OrcamentosLista /></ProtectedRoute>} />
                   <Route path="/dashboard/orcamentos/novo" element={<ProtectedRoute><NovoOrcamento /></ProtectedRoute>} />
                   <Route path="/dashboard/orcamentos/:id" element={<ProtectedRoute><OrcamentoDetalhe /></ProtectedRoute>} />
 
                   <Route path="/dashboard/contratos" element={<ProtectedRoute><ContratosLista/></ProtectedRoute>} />
-                  <Route path="/dashboard/contratos/novo" element={<ProtectedRoute><ContratoComIARefactored/></ProtectedRoute>} />
+                  <Route path="/dashboard/contratos/novo" element={<ProtectedRoute><ContratoComIAPremium/></ProtectedRoute>} />
                   <Route path="/dashboard/contratos/:id" element={<ProtectedRoute><ContratoDetalhe/></ProtectedRoute>} />
 
                   <Route path="/dashboard/alertas" element={<ProtectedRoute><AlertasAvancados/></ProtectedRoute>} />

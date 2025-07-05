@@ -14,25 +14,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
-    AlertTriangle,
-    BarChart3,
-    Calculator,
-    CheckCircle,
-    Eye,
-    PiggyBank,
-    Target,
-    TrendingUp,
-    Wallet,
-    Zap
+  AlertTriangle,
+  BarChart3,
+  Calculator,
+  CheckCircle,
+  DollarSign,
+  Eye,
+  Info,
+  PiggyBank,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+  Zap
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
-import SelecionarObraModal from "@/components/orcamento/SelecionarObraModal";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import SelecionarObraModal from "@/components/orcamento/SelecionarObraModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
@@ -43,7 +46,6 @@ import { useObras } from "@/hooks/useObras";
 import { formatCurrencyBR } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { orcamentosParametricosApi } from "@/services/orcamentoApi";
-import { ComparativoEstimativas } from "./ComparativoEstimativas";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES
@@ -151,11 +153,6 @@ export const AnaliseOrcamentariaInteligente: React.FC<AnaliseOrcamentariaIntelig
       const despesasPagas = despesasObra.filter(d => d.pago).reduce((sum, d) => sum + d.custo, 0);
       const despesasPendentes = totalGasto - despesasPagas;
       
-      // Custo operacional para projeção (ignora custos pontuais como aquisição)
-      const totalGastoOperacional = despesasObra
-        .filter(d => d.categoria !== 'AQUISICAO_TERRENO_AREA')
-        .reduce((sum, d) => sum + d.custo, 0);
-      
       // ===== ANÁLISE DO ORÇAMENTO DISPONÍVEL (Dinheiro Investido) =====
       const saldoDisponivel = obra.orcamento - totalGasto;
       const percentualConsumido = obra.orcamento > 0 ? (totalGasto / obra.orcamento) * 100 : 0;
@@ -163,7 +160,7 @@ export const AnaliseOrcamentariaInteligente: React.FC<AnaliseOrcamentariaIntelig
       
       // ===== ANÁLISE DO ORÇAMENTO PARAMÉTRICO (Estimativa de Gastos) =====
       const desvioEstimativa = orcamentoParametrico?.custo_estimado ? 
-        ((totalGastoOperacional - orcamentoParametrico.custo_estimado) / orcamentoParametrico.custo_estimado) * 100 : 0;
+        ((totalGasto - orcamentoParametrico.custo_estimado) / orcamentoParametrico.custo_estimado) * 100 : 0;
       
       const precisaoEstimativa = orcamentoParametrico?.custo_estimado ? 
         Math.max(0, 100 - Math.abs(desvioEstimativa)) : 0;
@@ -178,7 +175,7 @@ export const AnaliseOrcamentariaInteligente: React.FC<AnaliseOrcamentariaIntelig
         Math.max(1, Math.floor((new Date(obra.data_prevista_termino).getTime() - new Date(obra.data_inicio).getTime()) / (1000 * 60 * 60 * 24))) : 365;
       
       const progressoTemporal = Math.min(100, (diasDecorridos / diasTotais) * 100);
-      const velocidadeGasto = diasDecorridos > 0 ? totalGastoOperacional / diasDecorridos : 0;
+      const velocidadeGasto = diasDecorridos > 0 ? totalGasto / diasDecorridos : 0;
       const projecaoGastoFinal = velocidadeGasto * diasTotais;
       
       // Determinar risco e status
@@ -227,9 +224,7 @@ export const AnaliseOrcamentariaInteligente: React.FC<AnaliseOrcamentariaIntelig
         alertas.push("📊 Obra sem orçamento paramétrico para comparação");
         recomendacoes.push("Criar orçamento paramétrico para melhor controle");
       } else {
-        // Apenas mostra alerta de desvio se um mínimo de gastos operacionais já ocorreu
-        const limiteMinimoGasto = orcamentoParametrico.custo_estimado * 0.05; // 5%
-        if (Math.abs(desvioEstimativa) > 20 && totalGastoOperacional > limiteMinimoGasto) {
+        if (Math.abs(desvioEstimativa) > 20) {
           alertas.push(`📊 Grande desvio da estimativa: ${desvioEstimativa > 0 ? '+' : ''}${desvioEstimativa.toFixed(1)}%`);
           recomendacoes.push("Revisar metodologia de estimativa para próximas obras");
         }
@@ -387,8 +382,6 @@ export const AnaliseOrcamentariaInteligente: React.FC<AnaliseOrcamentariaIntelig
 
   // Estados de loading
   const isLoading = obrasLoading || despesasLoading || orcamentosLoading;
-
-  const obraAnalisada = analiseOrcamentaria[0];
 
   if (isLoading) {
     return (
@@ -860,7 +853,9 @@ export const AnaliseOrcamentariaInteligente: React.FC<AnaliseOrcamentariaIntelig
 
             {/* Outras tabs serão implementadas em seguida... */}
             <TabsContent value="comparativo-estimativas" className="space-y-4">
-              <ComparativoEstimativas orcamentoId={obraAnalisada?.orcamentoParametrico?.id} />
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Comparativo de estimativas em desenvolvimento...</p>
+              </div>
             </TabsContent>
 
             <TabsContent value="projecoes" className="space-y-4">

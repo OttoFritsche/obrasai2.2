@@ -1,9 +1,119 @@
-GET http://localhost:8080/src/components/dashboard/ComparativoEstimativas.tsx net::ERR_ABORTED 500 (Internal Server Error)Understand this error
-2client:176 [hmr] Failed to reload /src/components/dashboard/AnaliseOrcamentariaInteligente.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
-warnFailedUpdate @ client:176
-fetchUpdate @ client:213
-await in fetchUpdate
-queueUpdate @ client:186
-(anonymous) @ client:642
-handleMessage @ client:640
-(anonymous) @ client:550Understand this error
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+secure-logger.ts:122 [DEBUG] onAuthStateChange {event: 'SIGNED_IN', hasSession: '[REDACTED]'}
+secure-logger.ts:122 [DEBUG] onAuthStateChange {event: 'INITIAL_SESSION', hasSession: '[REDACTED]'}
+@supabase_supabase-js.js?v=cbc97bb6:3922 
+            
+            
+           GET https://anrphijuostbgbscxmzx.supabase.co/rest/v1/contratos?select=*%2Cobras%28id%2Cnome%2Cendereco%2Ccidade%2Cestado%29%2Ctemplates_contratos%28id%2Cnome%2Ctemplate_html%2Cclausulas_obrigatorias%29%2Cassinaturas_contratos%28*%29&id=eq.novo-ia 400 (Bad Request)
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3922
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3943
+fulfilled @ @supabase_supabase-js.js?v=cbc97bb6:3895
+Promise.then
+step @ @supabase_supabase-js.js?v=cbc97bb6:3908
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3910
+__awaiter6 @ @supabase_supabase-js.js?v=cbc97bb6:3892
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3933
+then @ @supabase_supabase-js.js?v=cbc97bb6:89Understand this error
+useContratos.ts:199 Erro ao buscar contrato: {code: '22P02', details: null, hint: null, message: 'invalid input syntax for type uuid: "novo-ia"'}
+queryFn @ useContratos.ts:199
+await in queryFn
+fetchFn @ chunk-75EHZKVZ.js?v=cbc97bb6:881
+run @ chunk-75EHZKVZ.js?v=cbc97bb6:513
+start @ chunk-75EHZKVZ.js?v=cbc97bb6:555
+fetch @ chunk-75EHZKVZ.js?v=cbc97bb6:969
+executeFetch_fn @ chunk-75EHZKVZ.js?v=cbc97bb6:2279
+onSubscribe @ chunk-75EHZKVZ.js?v=cbc97bb6:1983
+subscribe @ chunk-75EHZKVZ.js?v=cbc97bb6:24
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:3146
+subscribeToStore @ chunk-NFC5BX5N.js?v=cbc97bb6:11984
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=cbc97bb6:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=cbc97bb6:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=cbc97bb6:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=cbc97bb6:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=cbc97bb6:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=cbc97bb6:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=cbc97bb6:19447
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:18868
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=cbc97bb6:9119
+commitRootImpl @ chunk-NFC5BX5N.js?v=cbc97bb6:19432
+commitRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:19277
+finishConcurrentRender @ chunk-NFC5BX5N.js?v=cbc97bb6:18805
+performConcurrentWorkOnRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:18718
+workLoop @ chunk-NFC5BX5N.js?v=cbc97bb6:197
+flushWork @ chunk-NFC5BX5N.js?v=cbc97bb6:176
+performWorkUntilDeadline @ chunk-NFC5BX5N.js?v=cbc97bb6:384Understand this error
+@supabase_supabase-js.js?v=cbc97bb6:3922 
+            
+            
+           GET https://anrphijuostbgbscxmzx.supabase.co/rest/v1/contratos?select=*%2Cobras%28id%2Cnome%2Cendereco%2Ccidade%2Cestado%29%2Ctemplates_contratos%28id%2Cnome%2Ctemplate_html%2Cclausulas_obrigatorias%29%2Cassinaturas_contratos%28*%29&id=eq.novo-ia 400 (Bad Request)
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3922
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3943
+fulfilled @ @supabase_supabase-js.js?v=cbc97bb6:3895
+Promise.then
+step @ @supabase_supabase-js.js?v=cbc97bb6:3908
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3910
+__awaiter6 @ @supabase_supabase-js.js?v=cbc97bb6:3892
+(anonymous) @ @supabase_supabase-js.js?v=cbc97bb6:3933
+then @ @supabase_supabase-js.js?v=cbc97bb6:89
+setTimeout
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:211
+sleep @ chunk-75EHZKVZ.js?v=cbc97bb6:210
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:532
+Promise.catch
+run @ chunk-75EHZKVZ.js?v=cbc97bb6:517
+start @ chunk-75EHZKVZ.js?v=cbc97bb6:555
+fetch @ chunk-75EHZKVZ.js?v=cbc97bb6:969
+executeFetch_fn @ chunk-75EHZKVZ.js?v=cbc97bb6:2279
+onSubscribe @ chunk-75EHZKVZ.js?v=cbc97bb6:1983
+subscribe @ chunk-75EHZKVZ.js?v=cbc97bb6:24
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:3146
+subscribeToStore @ chunk-NFC5BX5N.js?v=cbc97bb6:11984
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=cbc97bb6:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=cbc97bb6:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=cbc97bb6:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=cbc97bb6:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=cbc97bb6:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=cbc97bb6:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=cbc97bb6:19447
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:18868
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=cbc97bb6:9119
+commitRootImpl @ chunk-NFC5BX5N.js?v=cbc97bb6:19432
+commitRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:19277
+finishConcurrentRender @ chunk-NFC5BX5N.js?v=cbc97bb6:18805
+performConcurrentWorkOnRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:18718
+workLoop @ chunk-NFC5BX5N.js?v=cbc97bb6:197
+flushWork @ chunk-NFC5BX5N.js?v=cbc97bb6:176
+performWorkUntilDeadline @ chunk-NFC5BX5N.js?v=cbc97bb6:384Understand this error
+useContratos.ts:199 Erro ao buscar contrato: {code: '22P02', details: null, hint: null, message: 'invalid input syntax for type uuid: "novo-ia"'}
+queryFn @ useContratos.ts:199
+await in queryFn
+fetchFn @ chunk-75EHZKVZ.js?v=cbc97bb6:881
+run @ chunk-75EHZKVZ.js?v=cbc97bb6:513
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:538
+Promise.then
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:534
+Promise.catch
+run @ chunk-75EHZKVZ.js?v=cbc97bb6:517
+start @ chunk-75EHZKVZ.js?v=cbc97bb6:555
+fetch @ chunk-75EHZKVZ.js?v=cbc97bb6:969
+executeFetch_fn @ chunk-75EHZKVZ.js?v=cbc97bb6:2279
+onSubscribe @ chunk-75EHZKVZ.js?v=cbc97bb6:1983
+subscribe @ chunk-75EHZKVZ.js?v=cbc97bb6:24
+(anonymous) @ chunk-75EHZKVZ.js?v=cbc97bb6:3146
+subscribeToStore @ chunk-NFC5BX5N.js?v=cbc97bb6:11984
+commitHookEffectListMount @ chunk-NFC5BX5N.js?v=cbc97bb6:16915
+commitPassiveMountOnFiber @ chunk-NFC5BX5N.js?v=cbc97bb6:18156
+commitPassiveMountEffects_complete @ chunk-NFC5BX5N.js?v=cbc97bb6:18129
+commitPassiveMountEffects_begin @ chunk-NFC5BX5N.js?v=cbc97bb6:18119
+commitPassiveMountEffects @ chunk-NFC5BX5N.js?v=cbc97bb6:18109
+flushPassiveEffectsImpl @ chunk-NFC5BX5N.js?v=cbc97bb6:19490
+flushPassiveEffects @ chunk-NFC5BX5N.js?v=cbc97bb6:19447
+performSyncWorkOnRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:18868
+flushSyncCallbacks @ chunk-NFC5BX5N.js?v=cbc97bb6:9119
+commitRootImpl @ chunk-NFC5BX5N.js?v=cbc97bb6:19432
+commitRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:19277
+finishConcurrentRender @ chunk-NFC5BX5N.js?v=cbc97bb6:18805
+performConcurrentWorkOnRoot @ chunk-NFC5BX5N.js?v=cbc97bb6:18718
+workLoop @ chunk-NFC5BX5N.js?v=cbc97bb6:197
+flushWork @ chunk-NFC5BX5N.js?v=cbc97bb6:176
+performWorkUntilDeadline @ chunk-NFC5BX5N.js?v=cbc97bb6:384Understand this error

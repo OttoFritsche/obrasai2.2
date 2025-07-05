@@ -409,14 +409,34 @@ export const orcamentosParametricosApi = {
     const { data, error } = await supabase.rpc("comparar_custo_m2_sinapi", {
       p_orcamento_id: orcamentoId,
     });
-  
+
     if (error) {
       console.error("Erro ao buscar comparativo de Custo/m²:", error);
-      secureLogger.error("Failed to fetch comparativo Custo/m²", error, { orcamentoId });
+      secureLogger.error("Failed to fetch comparativo Custo/m²", error, {
+        orcamentoId,
+      });
       throw new Error("Não foi possível carregar o comparativo de Custo/m².");
     }
     // A RPC retorna um array, mas esperamos apenas um resultado
     return data && data.length > 0 ? data[0] : null;
+  },
+
+  /**
+   * Busca o histórico de gastos operacionais de uma obra para o gráfico de projeção
+   */
+  getGastoHistorico: async (obraId: string) => {
+    const { data, error } = await supabase.rpc("get_gasto_historico_obra", {
+      p_obra_id: obraId,
+    });
+
+    if (error) {
+      console.error("Erro ao buscar histórico de gastos:", error);
+      secureLogger.error("Failed to fetch gasto histórico", error, { obraId });
+      throw new Error(
+        "Não foi possível carregar o histórico de gastos para a projeção.",
+      );
+    }
+    return data;
   },
 };
 

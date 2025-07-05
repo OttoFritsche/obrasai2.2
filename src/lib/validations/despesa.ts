@@ -25,155 +25,8 @@ const EtapaEnum = z.enum([...Constants.public.Enums.etapa_enum] as [
   ...typeof Constants.public.Enums.etapa_enum,
 ]);
 
-const InsumoEnum = z.enum([
-  "CONCRETO_USINADO",
-  "ACO_CA50",
-  "FORMA_MADEIRA",
-  "ESCAVACAO",
-  "IMPERMEABILIZACAO_FUND",
-  "IMPERMEABILIZANTE_ASFALTICO",
-  "LASTRO_BRITA",
-  "CONCRETO_MAGRO",
-  "ACO_CA60",
-  "TELA_SOLDADA",
-  "ESPAÇADOR_ACO",
-  "LAJE_PRE_MOLDADA",
-  "VIGA_CONCRETO",
-  "PILAR_CONCRETO",
-  "TIJOLO_CERAMICO",
-  "BLOCO_CONCRETO",
-  "TIJOLO_ECOLOGICO",
-  "BLOCO_CELULAR",
-  "ARGAMASSA_ASSENTAMENTO",
-  "CIMENTO_CP2",
-  "CIMENTO_CP5",
-  "CAL_HIDRATADA",
-  "AREIA_MEDIA_LAVADA",
-  "BRITA_0",
-  "VERGA_CONTRAVERGA",
-  "TELHA_CERAMICA",
-  "TELHA_FIBROCIMENTO",
-  "TELHA_CONCRETO",
-  "TELHA_METALICA",
-  "MADEIRAMENTO_TELHADO",
-  "MANTA_SUBCOBERTURA",
-  "RUFO_CALHA",
-  "IMPERMEABILIZACAO_LAJE",
-  "FIO_CABO_ELETRICO",
-  "ELETRODUTO",
-  "QUADRO_DISTRIBUICAO",
-  "DISJUNTOR",
-  "TOMADA_INTERRUPTOR",
-  "LUMINARIA",
-  "CABO_REDE_CAT6",
-  "CABO_COAXIAL",
-  "INTERFONE",
-  "SENSOR_PRESENCA",
-  "TUBO_PVC_ESGOTO",
-  "TUBO_PVC_AGUA_FRIA",
-  "TUBO_CPVC_AGUA_QUENTE",
-  "TUBO_PEX_AGUA_QUENTE",
-  "CONEXOES_HIDRAULICAS",
-  "CAIXA_DAGUA",
-  "CAIXA_GORDURA",
-  "CAIXA_INSPECAO",
-  "LOUCAS_METAIS",
-  "AQUECEDOR_AGUA",
-  "REGISTRO_GAVETA",
-  "REGISTRO_PRESSAO",
-  "FILTRO_AGUA",
-  "CHAPISCO",
-  "EMBOCO",
-  "REBOCO",
-  "GESSO_LISO",
-  "AZULEJO",
-  "PISO_CERAMICO",
-  "PORCELANATO",
-  "PISO_LAMINADO",
-  "PISO_VINILICO",
-  "RODAPE",
-  "REJUNTE_EPOXI",
-  "REJUNTE_ACRILICO",
-  "FORRO_PVC",
-  "FORRO_GESSO_ACARTONADO",
-  "REVESTIMENTO_FACHADA",
-  "TEXTURA_GRAFIATO",
-  "PISO_EXTERNO",
-  "IMPERMEABILIZANTE_PAREDE",
-  "MASSA_CORRIDA_PVA",
-  "MASSA_ACRILICA",
-  "SELADOR_ACRILICO",
-  "TINTA_LATEX_PVA",
-  "TINTA_ACRILICA",
-  "VERNIZ",
-  "LIXA",
-  "FITA_CREPE",
-  "ROLO_PINTURA",
-  "TRINCHA_PINCEL",
-  "SOLVENTE_THINNER",
-  "PORTA_MADEIRA",
-  "PORTA_ALUMINIO",
-  "JANELA_MADEIRA",
-  "JANELA_ALUMINIO",
-  "JANELA_VIDRO",
-  "BANCADA_GRANITO",
-  "SOLEIRA_PEITORIL",
-  "VIDRO_COMUM",
-  "ESPELHO",
-  "BOX_BANHEIRO",
-  "FECHADURA_DOBRADICA",
-  "GUARDA_CORPO",
-  "TERRA_ADUBADA",
-  "GRAMA",
-  "MUDA_PLANTA",
-  "PEDRA_DECORATIVA",
-  "LIMITADOR_GRAMA",
-  "SISTEMA_IRRIGACAO",
-  "ILUMINACAO_JARDIM",
-  "PROJETO_ARQUITETONICO",
-  "PROJETO_ESTRUTURAL",
-  "PROJETO_ELETRICO",
-  "PROJETO_HIDRAULICO",
-  "ART_RRT",
-  "TAXA_PREFEITURA",
-  "TAXA_CARTORIO",
-  "ISS",
-  "SEGURO_OBRA",
-  "CONSULTORIA_ESPECIALIZADA",
-  "PEDREIRO",
-  "SERVENTE",
-  "ELETRICISTA",
-  "ENCANADOR",
-  "PINTOR",
-  "GESSEIRO",
-  "CARPINTEIRO",
-  "MARMORISTA",
-  "VIDRACEIRO",
-  "SERRALHEIRO",
-  "JARDINEIRO",
-  "MESTRE_OBRAS",
-  "ENGENHEIRO_ARQUITETO",
-  "AJUDANTE_GERAL",
-  "BETONEIRA",
-  "ANDAIME",
-  "MARTELETE",
-  "ESCORA",
-  "COMPACTADOR_SOLO",
-  "ESMERILHADEIRA",
-  "GERADOR_ENERGIA",
-  "BOMBA_SUBMERSA",
-  "EPI",
-  "FERRAMENTA",
-  "PLACAS_SINALIZACAO",
-  "AGUA_OBRA",
-  "LUZ_OBRA",
-  "LIMPEZA_OBRA",
-  "CONTAINER_ENTULHO",
-  "CONSUMIVEIS_ESCRITORIO",
-  "ALIMENTACAO_EQUIPE",
-  "TRANSPORTE_EQUIPE",
-  "TAXAS_BANCARIAS",
-  "OUTROS",
+const InsumoEnum = z.enum([...Constants.public.Enums.insumo_enum] as [
+  ...typeof Constants.public.Enums.insumo_enum,
 ]);
 
 // Define o schema Zod para o formulário de despesa
@@ -225,26 +78,43 @@ export const despesaSchema = z.object({
 })
   // Aplica validação refinada para campos condicionais de pagamento
   .superRefine((data, ctx) => {
+    console.log('🔍 Validação superRefine - dados:', { 
+      pago: data.pago, 
+      data_pagamento: data.data_pagamento,
+      forma_pagamento: data.forma_pagamento 
+    });
+    
     // Se a despesa está marcada como paga
     if (data.pago) {
+      console.log('✅ Despesa marcada como paga, validando campos obrigatórios...');
+      
       // Verifica se a data de pagamento foi fornecida
       if (!data.data_pagamento) {
+        console.log('❌ Data de pagamento ausente');
         // Adiciona um erro ao campo data_pagamento
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("messages.requiredField"),
           path: ["data_pagamento"], // Campo que gerou o erro
         });
+      } else {
+        console.log('✅ Data de pagamento presente:', data.data_pagamento);
       }
+      
       // Verifica se a forma de pagamento foi fornecida
       if (!data.forma_pagamento) {
+        console.log('❌ Forma de pagamento ausente');
         // Adiciona um erro ao campo forma_pagamento
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: t("messages.requiredField"),
           path: ["forma_pagamento"], // Campo que gerou o erro
         });
+      } else {
+        console.log('✅ Forma de pagamento presente:', data.forma_pagamento);
       }
+    } else {
+      console.log('ℹ️ Despesa não marcada como paga, campos de pagamento opcionais');
     }
   });
 

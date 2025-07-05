@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { obraSchema } from "./obra";
 
 // Mock da função de internacionalização (i18n)

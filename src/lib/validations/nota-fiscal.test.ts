@@ -1,4 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
 import { notaFiscalSchema } from './nota-fiscal';
 
 // Mock da função de internacionalização (i18n)

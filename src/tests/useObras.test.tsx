@@ -1,10 +1,9 @@
 import { QueryClient } from '@tanstack/react-query';
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { toast } from 'sonner';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderWithProviders, mockFactories, apiMockHelpers } from '@/tests/test-utils';
 import { obrasApi } from '@/services/api';
+import {mockFactories, renderWithProviders } from '@/tests/test-utils';
 
 import { useObras } from '../hooks/useObras';
 

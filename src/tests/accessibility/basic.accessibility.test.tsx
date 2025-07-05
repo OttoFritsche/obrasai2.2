@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
+import { describe, expect,it } from 'vitest';
 
 // Extend expect with jest-axe matchers
 expect.extend(toHaveNoViolations);

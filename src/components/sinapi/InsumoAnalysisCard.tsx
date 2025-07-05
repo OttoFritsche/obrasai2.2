@@ -1,12 +1,11 @@
 import { AlertTriangle, ArrowDown, ArrowUp, Minus, Search } from "lucide-react";
 import { useCallback,useEffect, useState } from "react";
 
-import useInsumoAnalysis from "@/hooks/useInsumoAnalysis";
-import type { SinapiItem } from "@/hooks/useSinapiDespesas";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import useInsumoAnalysis from "@/hooks/useInsumoAnalysis";
+import type { SinapiItem } from "@/hooks/useSinapiDespesas";
 
 interface InsumoAnalysisCardProps {
   insumoCustomizado: string;

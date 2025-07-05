@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Bell, LogOut, Search } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -16,10 +17,16 @@ import { cn } from "@/lib/utils";
 export const DashboardHeader = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
   
   const handleLogout = async () => {
     // ✅ Apenas chamar logout - o AuthContext vai gerenciar o redirecionamento
     await logout();
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+    // TODO: Implementar lógica de pesquisa
   };
 
   const getInitials = () => {
@@ -69,6 +76,8 @@ export const DashboardHeader = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Pesquisar..."
+                value={searchValue}
+                onChange={handleSearchChange}
                 className="pl-10 bg-muted/50 border-border/50 focus:bg-background transition-colors"
               />
             </div>

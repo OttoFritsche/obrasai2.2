@@ -118,9 +118,9 @@ export const obrasApi = {
         cidade: sanitizedObra.cidade,
         estado: sanitizedObra.estado,
         cep: sanitizedObra.cep,
-        orcamento: sanitizedObra.orcamento,
+        orcamento_total: sanitizedObra.orcamento,
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
-        data_prevista_termino: formatDateForDB(
+        data_fim: formatDateForDB(
           sanitizedObra.data_prevista_termino,
         ),
         usuario_id: user.id,
@@ -203,10 +203,10 @@ export const obrasApi = {
         cidade: sanitizedObra.cidade,
         estado: sanitizedObra.estado,
         cep: sanitizedObra.cep,
-        orcamento: sanitizedObra.orcamento,
+        orcamento_total: sanitizedObra.orcamento,
         construtora_id: sanitizedObra.construtora_id,
         data_inicio: formatDateForDB(sanitizedObra.data_inicio),
-        data_prevista_termino: formatDateForDB(
+        data_fim: formatDateForDB(
           sanitizedObra.data_prevista_termino,
         ),
       };
@@ -830,14 +830,25 @@ export const despesasApi = {
       const custoTotal = sanitizedDespesa.quantidade *
         sanitizedDespesa.valor_unitario;
 
-      // ✅ Formatar as datas para o formato do banco de dados
+      // ✅ Função auxiliar para converter data para string ISO ou null
+      const formatDateToISO = (date: Date | string | null): string | null => {
+        if (!date) return null;
+        if (date instanceof Date) {
+          return date.toISOString().split("T")[0];
+        }
+        // Se for string, tentar converter para Date primeiro
+        const dateObj = new Date(date);
+        return isNaN(dateObj.getTime())
+          ? null
+          : dateObj.toISOString().split("T")[0];
+      };
+
+      // ✅ Formatar as datas para o formato do banco de dados com tratamento seguro
       const formattedDespesa = {
         ...sanitizedDespesa,
         custo: custoTotal, // Adicionar o campo custo calculado
-        data_despesa: sanitizedDespesa.data_despesa.toISOString().split("T")[0],
-        data_pagamento: sanitizedDespesa.data_pagamento
-          ? sanitizedDespesa.data_pagamento.toISOString().split("T")[0]
-          : null,
+        data_despesa: formatDateToISO(sanitizedDespesa.data_despesa),
+        data_pagamento: formatDateToISO(sanitizedDespesa.data_pagamento),
         usuario_id: user.id,
         tenant_id: tenantId.trim(),
       };
@@ -876,8 +887,49 @@ export const despesasApi = {
         throw new Error("ID da despesa inválido ou ausente");
       }
 
+      // 🔒 Forçar datas para Date após sanitização
+      if (despesa.data_despesa && !(despesa.data_despesa instanceof Date)) {
+        despesa.data_despesa = new Date(despesa.data_despesa as string);
+      }
+      if (
+        despesa.data_pagamento && !(despesa.data_pagamento instanceof Date)
+      ) {
+        despesa.data_pagamento = new Date(despesa.data_pagamento as string);
+      }
+      console.log(
+        "Tipo de data_despesa antes do sanitize:",
+        typeof despesa.data_despesa,
+        despesa.data_despesa,
+      );
+      console.log("É Date?", despesa.data_despesa instanceof Date);
+
       // ✅ Sanitizar dados de entrada
       const sanitizedDespesa = sanitizeFormData(despesa);
+
+      // 🔧 DEBUG: Log dos dados recebidos
+      console.log("🔧 API - Dados recebidos:", sanitizedDespesa);
+      console.log(
+        "🔧 API - Tipo data_despesa antes sanitização:",
+        typeof sanitizedDespesa.data_despesa,
+        sanitizedDespesa.data_despesa,
+      );
+      console.log(
+        "🔧 API - É Date antes sanitização?:",
+        sanitizedDespesa.data_despesa instanceof Date,
+      );
+
+      // ✅ Função auxiliar para converter data para string ISO ou null
+      const formatDateToISO = (date: Date | string | null): string | null => {
+        if (!date) return null;
+        if (date instanceof Date) {
+          return date.toISOString().split("T")[0];
+        }
+        // Se for string, tentar converter para Date primeiro
+        const dateObj = new Date(date);
+        return isNaN(dateObj.getTime())
+          ? null
+          : dateObj.toISOString().split("T")[0];
+      };
 
       // Calculate the total cost if we have both quantidade and valor_unitario
       const updates: Record<string, unknown> = { ...sanitizedDespesa };
@@ -890,15 +942,21 @@ export const despesasApi = {
           sanitizedDespesa.valor_unitario;
       }
 
-      // Format the dates
+      // ✅ Formatação segura das datas
       if (sanitizedDespesa.data_despesa) {
-        updates.data_despesa =
-          sanitizedDespesa.data_despesa.toISOString().split("T")[0];
+        let dataDespesa = sanitizedDespesa.data_despesa;
+        if (!(dataDespesa instanceof Date)) {
+          dataDespesa = new Date(dataDespesa);
+        }
+        updates.data_despesa = formatDateToISO(dataDespesa);
       }
 
       if (sanitizedDespesa.data_pagamento) {
-        updates.data_pagamento =
-          sanitizedDespesa.data_pagamento.toISOString().split("T")[0];
+        let dataPagamento = sanitizedDespesa.data_pagamento;
+        if (!(dataPagamento instanceof Date)) {
+          dataPagamento = new Date(dataPagamento);
+        }
+        updates.data_pagamento = formatDateToISO(dataPagamento);
       } else if (sanitizedDespesa.data_pagamento === null) {
         updates.data_pagamento = null;
       }

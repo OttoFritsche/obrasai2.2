@@ -249,7 +249,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         
         <div className="flex flex-col flex-grow">
           <DashboardHeader />
-          <main className="flex-grow p-4 lg:p-6 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-auto">
+          <main className="flex-grow p-4 lg:p-6 bg-gradient-to-br from-background via-background to-muted/20 overflow-x-auto overflow-y-visible">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

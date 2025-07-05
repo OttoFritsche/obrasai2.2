@@ -1,8 +1,6 @@
 import { MapPin } from 'lucide-react';
 import type { Control, FieldValues } from 'react-hook-form';
 
-import type { CNPJApiResponse } from '@/types/api';
-
 import {
   FormControl,
   FormField,
@@ -21,6 +19,7 @@ import {
 import { brazilianStates } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { formatCEP } from '@/lib/utils/formatters';
+import type { CNPJApiResponse } from '@/types/api';
 
 // Constraint para garantir que o formulário tenha os campos de endereço
 interface AddressFormValues extends FieldValues {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDateBR, formatDateTimeBR, isValidDate, daysDifference } from "@/lib/utils/dateUtils";
+import { daysDifference,formatDateBR, formatDateTimeBR, isValidDate } from "@/lib/utils/dateUtils";
 
 describe("formatDateBR", () => {
     it("should format a valid date string correctly", () => {

@@ -173,7 +173,7 @@ const ContratoComIA = () => {
         toast.success("Contrato criado com sucesso!");
       }
       navigate("/dashboard/contratos");
-    } catch (_error) {
+    } catch (error) {
       console.error("Erro ao salvar contrato:", error);
       toast.error("Erro ao salvar contrato");
     }

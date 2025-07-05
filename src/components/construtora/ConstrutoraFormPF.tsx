@@ -2,8 +2,6 @@ import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
 import type { Control } from 'react-hook-form';
 
-import { FornecedorPFFormData } from '@/types/forms';
-
 import {
   FormControl,
   FormField,
@@ -13,6 +11,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { formatCPF } from '@/lib/utils/formatters';
+import type { FornecedorPFFormData } from '@/types/forms';
 
 import { ContatoFields } from './shared/ContatoFields';
 import { EnderecoFields } from './shared/EnderecoFields';

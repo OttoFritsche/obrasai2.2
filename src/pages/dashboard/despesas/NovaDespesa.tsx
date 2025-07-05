@@ -1,54 +1,58 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { 
-  ArrowLeft, 
-  Building2, 
-  DollarSign, 
-  FileText, 
-  Loader2,
-  Plus,
-  Receipt, 
-  Search,
-  User} from "lucide-react";
+import {
+    ArrowLeft,
+    Building2,
+    DollarSign,
+    FileText,
+    Loader2,
+    Plus,
+    Receipt,
+    User
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { SinapiSelectorDespesas } from "@/components/sinapi/SinapiSelectorDespesas";
+import { SinapiModalSearch } from "@/components/sinapi/SinapiModalSearch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogTitle
+} from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { VariacaoSinapiIndicator } from "@/components/sinapi/VariacaoSinapiIndicator";
 import { useAuth } from "@/contexts/auth";
 import type { SinapiItem } from "@/hooks/useSinapiDespesas";
 import { useSinapiDespesas } from "@/hooks/useSinapiDespesas";
 import { Constants } from "@/integrations/supabase/types";
-import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/utils";
-import type { DespesaFormValues} from "@/lib/validations/despesa";
+import { cn, formatDate } from "@/lib/utils";
+import type { DespesaFormValues } from "@/lib/validations/despesa";
 import { despesaSchema, formasPagamento } from "@/lib/validations/despesa";
-import { despesasApi, fornecedoresPFApi,fornecedoresPJApi, obrasApi } from "@/services/api";
+import { despesasApi, fornecedoresPFApi, fornecedoresPJApi, obrasApi } from "@/services/api";
 
 const NovaDespesa = () => {
   const navigate = useNavigate();
@@ -273,6 +277,8 @@ const NovaDespesa = () => {
     return labels[etapa] || etapa.replace(/_/g, ' ');
   };
 
+  const [openSinapiModal, setOpenSinapiModal] = useState(false);
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -492,7 +498,7 @@ const NovaDespesa = () => {
                         )}
                       />
 
-                      {/* Botão opcional para buscar referência SINAPI */}
+                      {/* Botão para abrir o modal de busca SINAPI */}
                       {form.watch('insumo_customizado') && form.watch('insumo_customizado')!.length > 3 && (
                         <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                           <div className="flex items-start justify-between">
@@ -508,65 +514,12 @@ const NovaDespesa = () => {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => setTipoInsumo(tipoInsumo === 'sinapi' ? 'manual' : 'sinapi')}
+                              onClick={() => setOpenSinapiModal(true)}
                               className="ml-3 text-blue-700 border-blue-300 hover:bg-blue-100 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/30"
                             >
-                              {tipoInsumo === 'sinapi' ? 'Não comparar' : 'Buscar SINAPI'}
+                              Buscar SINAPI
                             </Button>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Área de busca SINAPI (apenas quando solicitado) */}
-                      {tipoInsumo === 'sinapi' && form.watch('insumo_customizado') && (
-                        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-3">
-                          <h4 className="text-sm font-medium text-green-900 dark:text-green-100 flex items-center gap-2">
-                            <Search className="h-4 w-4" />
-                            Buscar referência SINAPI
-                          </h4>
-                          <SinapiSelectorDespesas
-                            onSelect={(item) => {
-                              setSinapiSelecionado(item);
-                              // Opcional: sugerir ajustar o valor para o SINAPI
-                              if (item.preco_unitario > 0 && !form.getValues('valor_unitario')) {
-                                form.setValue('valor_unitario', item.preco_unitario);
-                              }
-                              if (item.unidade && !form.getValues('unidade')) {
-                                form.setValue('unidade', item.unidade);
-                              }
-                            }}
-                            placeholder={`Buscar "${form.watch('insumo_customizado')}" no SINAPI...`}
-                            className="w-full"
-                          />
-                          
-                          {sinapiSelecionado && (
-                            <div className="bg-white dark:bg-gray-800 p-3 rounded border">
-                              <div className="flex justify-between items-start mb-2">
-                                <span className="text-xs font-medium text-green-700 dark:text-green-300">
-                                  ✓ Referência encontrada
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => setSinapiSelecionado(null)}
-                                  className="text-xs text-muted-foreground hover:text-foreground"
-                                >
-                                  Remover
-                                </button>
-                              </div>
-                              <p className="text-sm font-medium">{sinapiSelecionado.descricao}</p>
-                              <p className="text-xs text-muted-foreground">
-                                <strong>Código:</strong> {sinapiSelecionado.codigo} | 
-                                <strong> Preço ref.:</strong> R$ {sinapiSelecionado.preco_unitario.toFixed(2)}/{sinapiSelecionado.unidade}
-                              </p>
-                              
-                              {form.watch('valor_unitario') > 0 && (
-                                <VariacaoSinapiIndicator
-                                  valorReal={form.watch('valor_unitario')}
-                                  valorSinapi={sinapiSelecionado.preco_unitario}
-                                />
-                              )}
-                            </div>
-                          )}
                         </div>
                       )}
 
@@ -1010,6 +963,34 @@ const NovaDespesa = () => {
           </Card>
         </motion.div>
       </motion.div>
+      {/* Modal moderno para busca SINAPI */}
+      <Dialog open={openSinapiModal} onOpenChange={setOpenSinapiModal}>
+        <DialogContent className="max-w-4xl w-full h-[80vh] p-0 overflow-hidden">
+          <DialogTitle className="sr-only">
+            Buscar Referência SINAPI - Pesquise materiais e insumos
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Modal para buscar e selecionar itens da tabela SINAPI para comparar preços e preencher automaticamente os campos do formulário de despesa
+          </DialogDescription>
+          <SinapiModalSearch
+            searchTerm={form.watch('insumo_customizado') || ''}
+            onSelect={(item) => {
+              setSinapiSelecionado(item);
+              setOpenSinapiModal(false);
+              // Preencher campos do formulário
+              form.setValue('descricao', item.descricao);
+              form.setValue('unidade', item.unidade);
+              if (item.preco_unitario > 0 && !form.getValues('valor_unitario')) {
+                form.setValue('valor_unitario', item.preco_unitario);
+              }
+              // Mostrar toast de sucesso
+              toast.success(`✅ Referência SINAPI selecionada: ${item.codigo}`);
+            }}
+            onClose={() => setOpenSinapiModal(false)}
+            className="h-full"
+          />
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };

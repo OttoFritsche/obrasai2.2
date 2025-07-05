@@ -1,7 +1,9 @@
 // Arquivo de setup para o Vitest.
 // Configurações globais para testes
 import "@testing-library/jest-dom";
+
 import { toHaveNoViolations } from "jest-axe";
+
 import { setupTestHelpers } from "./test-utils";
 
 // Adiciona os matchers do jest-axe ao expect

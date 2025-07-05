@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { 
   AlertCircle,
@@ -14,6 +15,7 @@ import {
   Search,
   User} from "lucide-react";
 import { memo,useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -41,8 +43,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth";
-import { FormProvider, useFormContext } from "@/contexts/FormContext";
-import { useLoading } from "@/contexts/LoadingContext";
 import { useAsyncOperation } from "@/hooks/useAsyncOperation";
 import { useCNPJLookup } from "@/hooks/useCNPJLookup";
 import { brazilianStates } from "@/lib/i18n";
@@ -58,11 +58,10 @@ import {
   fornecedorPJSchema} from "@/lib/validations/fornecedor";
 import { fornecedoresPFApi,fornecedoresPJApi } from "@/services/api";
 
-// Componente interno que usa o FormContext
-const NovoFornecedorForm = memo(() => {
+// Componente principal do formulário
+const NovoFornecedor = memo(() => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { setLoading, isLoading } = useLoading();
   const [fornecedorType, setFornecedorType] = useState<FornecedorType>("pj");
   const { lookupCNPJ, isLoading: isLoadingCNPJ, data: cnpjData, reset: resetCNPJ } = useCNPJLookup();
   
@@ -73,9 +72,9 @@ const NovoFornecedorForm = memo(() => {
   const tenantId = user?.profile?.tenant_id;
   const validTenantId = tenantId && typeof tenantId === 'string' ? tenantId : null;
   
-  // Form para PJ usando FormContext
-  const pjFormContext = useFormContext<FornecedorPJFormValues>({
-    schema: fornecedorPJSchema,
+  // Form para PJ usando React Hook Form diretamente
+  const pjForm = useForm<FornecedorPJFormValues>({
+    resolver: zodResolver(fornecedorPJSchema),
     defaultValues: {
       cnpj: "",
       razao_social: "",
@@ -92,9 +91,9 @@ const NovoFornecedorForm = memo(() => {
     },
   });
 
-  // Form para PF usando FormContext
-  const pfFormContext = useFormContext<FornecedorPFFormValues>({
-    schema: fornecedorPFSchema,
+  // Form para PF usando React Hook Form diretamente
+  const pfForm = useForm<FornecedorPFFormValues>({
+    resolver: zodResolver(fornecedorPFSchema),
     defaultValues: {
       cpf: "",
       nome: "",
@@ -103,9 +102,6 @@ const NovoFornecedorForm = memo(() => {
       data_nascimento: null,
     },
   });
-
-  const { form: pjForm } = pjFormContext;
-  const { form: pfForm } = pfFormContext;
 
   // Watch do campo CNPJ para busca automática
   const cnpjValue = pjForm.watch("cnpj");
@@ -196,12 +192,6 @@ const NovoFornecedorForm = memo(() => {
 
   // Operações assíncronas usando useAsyncOperation
   const { execute: createPJFornecedor, isLoading: isCreatingPJ } = useAsyncOperation({
-    operation: async (values: FornecedorPJFormValues) => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado');
-      }
-      return fornecedoresPJApi.create(values, validTenantId);
-    },
     onSuccess: () => {
       toast.success("Fornecedor PJ criado com sucesso!");
       navigate("/dashboard/fornecedores/pj");
@@ -213,12 +203,6 @@ const NovoFornecedorForm = memo(() => {
   });
 
   const { execute: createPFFornecedor, isLoading: isCreatingPF } = useAsyncOperation({
-    operation: async (values: FornecedorPFFormValues) => {
-      if (!validTenantId) {
-        throw new Error('Tenant ID não encontrado');
-      }
-      return fornecedoresPFApi.create(values, validTenantId);
-    },
     onSuccess: () => {
       toast.success("Fornecedor PF criado com sucesso!");
       navigate("/dashboard/fornecedores/pf");
@@ -230,12 +214,22 @@ const NovoFornecedorForm = memo(() => {
   });
 
   const onSubmitPJ = useCallback(async (values: FornecedorPJFormValues) => {
-    await createPJFornecedor(values);
-  }, [createPJFornecedor]);
+    await createPJFornecedor(async () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPJApi.create(values, validTenantId);
+    });
+  }, [createPJFornecedor, validTenantId]);
 
   const onSubmitPF = useCallback(async (values: FornecedorPFFormValues) => {
-    await createPFFornecedor(values);
-  }, [createPFFornecedor]);
+    await createPFFornecedor(async () => {
+      if (!validTenantId) {
+        throw new Error('Tenant ID não encontrado');
+      }
+      return fornecedoresPFApi.create(values, validTenantId);
+    });
+  }, [createPFFornecedor, validTenantId]);
 
   // Função para buscar CNPJ manualmente
   const handleManualCNPJLookup = useCallback(async () => {
@@ -1062,15 +1056,6 @@ const NovoFornecedorForm = memo(() => {
   );
 });
 
-NovoFornecedorForm.displayName = 'NovoFornecedorForm';
-
-// Componente principal com providers
-const NovoFornecedor: React.FC = () => {
-  return (
-    <FormProvider>
-      <NovoFornecedorForm />
-    </FormProvider>
-  );
-};
+NovoFornecedor.displayName = 'NovoFornecedor';
 
 export default NovoFornecedor;

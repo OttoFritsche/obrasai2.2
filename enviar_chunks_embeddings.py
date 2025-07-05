@@ -22,6 +22,11 @@ documentos = [
         "path": "docs/obras/documentacao_obras.md",
         "tipo": "obras",
         "nome": "documentacao_obras.md"
+    },
+    {
+        "path": "docs/controle_orcamentario/documentacao_controle_orcamentario.md",
+        "tipo": "controle_orcamentario",
+        "nome": "documentacao_controle_orcamentario.md"
     }
 ]
 

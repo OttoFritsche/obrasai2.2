@@ -10,7 +10,6 @@ import { toast } from "sonner";
 
 // Componentes de layout
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-
 // Componentes UI
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -32,21 +31,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-
 // Contextos
 import { useAuth } from "@/contexts/auth";
-
 // Hooks
 import { useCEP } from "@/hooks/useCEP";
-
 // Integrações
 import { supabase } from "@/integrations/supabase/client";
-
 // Utilitários e validações
 import { brazilianStates } from "@/lib/i18n";
 import type { ObraFormValues } from "@/lib/validations/obra";
 import { obraSchema } from "@/lib/validations/obra";
-
 // Serviços
 import { obrasApi } from "@/services/api";
 

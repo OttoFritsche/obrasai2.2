@@ -2,9 +2,6 @@ import {CreditCard, FileText, User } from 'lucide-react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
-import type { Orcamento, Template } from '@/types/api';
-import type { ObraFormData } from '@/types/forms';
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -12,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { ContratoFormData } from '@/hooks/useContratoForm';
+import type { Orcamento, Template } from '@/types/api';
+import type { ObraFormData } from '@/types/forms';
 
 interface ContratoFormSectionProps {
   form: UseFormReturn<ContratoFormData>;

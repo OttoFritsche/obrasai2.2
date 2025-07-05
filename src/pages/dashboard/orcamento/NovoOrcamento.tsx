@@ -15,11 +15,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { WizardOrcamentoRefactored as WizardOrcamento } from "@/components/orcamento/WizardOrcamentoRefactored";
-import { useObras } from "@/hooks/useObras";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useObras } from "@/hooks/useObras";
 
 // ====================================
 // 🎯 TIPOS E INTERFACES

@@ -2,9 +2,6 @@ import { motion } from 'framer-motion';
 import { Building2, CheckCircle, Search,XCircle } from 'lucide-react';
 import type { Control } from 'react-hook-form';
 
-import type { CNPJApiResponse } from '@/types/api';
-import type { FornecedorPJFormData } from '@/types/forms';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +13,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { formatCNPJ, formatInscricaoEstadual } from '@/lib/utils/formatters';
+import type { CNPJApiResponse } from '@/types/api';
+import type { FornecedorPJFormData } from '@/types/forms';
 
 import { ContatoFields } from './shared/ContatoFields';
 import { EnderecoFields } from './shared/EnderecoFields';

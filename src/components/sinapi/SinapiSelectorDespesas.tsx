@@ -1,5 +1,6 @@
 import { AlertCircle,Loader2, Package, Search } from 'lucide-react';
-import React, { useEffect,useState } from 'react';
+import React, { useEffect,useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,26 +25,62 @@ export const SinapiSelectorDespesas: React.FC<SinapiSelectorDespesasProps> = ({
 }) => {
   const [termoBusca, setTermoBusca] = useState('');
   const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const inputRef = useRef<HTMLInputElement>(null);
   const { useBuscarSinapi } = useSinapiDespesas();
   
   const { data: resultados, isLoading, error } = useBuscarSinapi(termoBusca);
 
-  // Fechar resultados quando clicar fora
+  // Fechar resultados quando clicar fora e atualizar posição do dropdown
   useEffect(() => {
+    const handleScroll = () => {
+      if (mostrarResultados) {
+        updateDropdownPosition();
+      }
+    };
+
+    const handleResize = () => {
+      if (mostrarResultados) {
+        updateDropdownPosition();
+      }
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.sinapi-selector')) {
+      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
         setMostrarResultados(false);
       }
     };
 
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mostrarResultados]);
+
+  const updateDropdownPosition = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4, // Adiciona 4px de margem
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  };
 
   const handleInputChange = (value: string) => {
     setTermoBusca(value);
-    setMostrarResultados(value.length >= 3);
+    if (value.length >= 3) {
+      updateDropdownPosition();
+      setMostrarResultados(true);
+    } else {
+      setMostrarResultados(false);
+    }
   };
 
   const handleSelectItem = (item: SinapiItem) => {
@@ -90,11 +127,17 @@ export const SinapiSelectorDespesas: React.FC<SinapiSelectorDespesasProps> = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          ref={inputRef}
           type="text"
           placeholder={placeholder}
           value={termoBusca}
           onChange={(e) => handleInputChange(e.target.value)}
-          onFocus={() => termoBusca.length >= 3 && setMostrarResultados(true)}
+          onFocus={() => {
+            if (termoBusca.length >= 3) {
+              updateDropdownPosition();
+              setMostrarResultados(true);
+            }
+          }}
           className="pl-10 bg-background/50"
         />
         {isLoading && (
@@ -102,9 +145,18 @@ export const SinapiSelectorDespesas: React.FC<SinapiSelectorDespesasProps> = ({
         )}
       </div>
 
-      {/* Resultados da busca */}
-      {mostrarResultados && (
-        <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-80 overflow-y-auto border-border/50 bg-card/95 backdrop-blur-sm">
+      {/* Resultados da busca usando Portal */}
+      {mostrarResultados && createPortal(
+        <Card 
+          className="z-[99999] max-h-80 overflow-y-auto border-border/50 bg-card/95 backdrop-blur-sm shadow-2xl" 
+          style={{
+            position: 'fixed',
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+            zIndex: 99999
+          }}
+        >
           <CardContent className="p-2">
             {error && (
               <div className="flex items-center gap-2 p-3 text-sm text-destructive">
@@ -174,7 +226,8 @@ export const SinapiSelectorDespesas: React.FC<SinapiSelectorDespesasProps> = ({
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card>,
+        document.body
       )}
     </div>
   );

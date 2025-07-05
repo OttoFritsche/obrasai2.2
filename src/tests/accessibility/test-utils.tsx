@@ -1,8 +1,10 @@
-import React from 'react';
-import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { RenderOptions } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { axe, axeStrict, axeDev } from './axe-config';
+
+import { axe, axeDev,axeStrict } from './axe-config';
 
 // Wrapper para testes que inclui todos os providers necessários
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {

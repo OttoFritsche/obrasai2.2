@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthProvider } from '@/contexts/auth/AuthContext';
+
 import { RegisterForm } from '../RegisterForm';
 
 // Mocks para dependências que não queremos testar aqui

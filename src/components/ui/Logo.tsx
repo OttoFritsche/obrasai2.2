@@ -1,4 +1,3 @@
-import { useTheme } from "@/hooks/useTheme";
 import React, { memo, useCallback } from "react";
 
 import logoDark from "@/assets/logo/logo_dark.png";
@@ -6,6 +5,7 @@ import logoDarkHorizon from "@/assets/logo/logo_dark_horizon.png";
 // Importação das logos
 import logoLight from "@/assets/logo/logo_light.png";
 import logoLightHorizon from "@/assets/logo/logo_light_horizon.png";
+import { useTheme } from "@/hooks/useTheme";
 
 interface LogoProps {
   /**

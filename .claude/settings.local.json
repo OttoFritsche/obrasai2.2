@@ -22,7 +22,11 @@
       "Bash(npm test:*)",
       "Bash(supabase db diff:*)",
       "Bash(npx eslint:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(cp:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(supabase db pull:*)"
     ],
     "deny": []
   }
